@@ -27,14 +27,10 @@ public class ParserService {
     ParserService(PaginationService paginationService, WebDriverPool driverPool) {
         this.paginationService = paginationService;
         this.driverPool = driverPool;
-
-        driverPool.addToPool();
         System.setProperty("webdriver.chrome.driver", "chromedriver-mac-arm64/chromedriver");
         ChromeOptions options = new ChromeOptions();
         options.addArguments("user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36");
-        WebDriver webDriver= new ChromeDriver(options);
-        webDriver.manage().window().setSize(new Dimension(100, 100));
-        driver = driverPool.getDriverPool();
+        driver = new ChromeDriver(options);
     }
 
     public String getInitialHtmlFromUrl(String url) throws MalformedURLException {
@@ -48,7 +44,6 @@ public class ParserService {
             htmlContent = driver.getPageSource();
             htmlContent = htmlContent.replaceAll("(?s)<header[^>]*>.*?</header>", "");
         }
-        driverPool.releaseDriver(driver);
         return htmlContent;
     }
 
@@ -63,7 +58,6 @@ public class ParserService {
                 System.out.println(url);
                 new WebDriverWait(driver, Duration.ofSeconds(40)).until(driver -> ((JavascriptExecutor) driver).executeScript("return document.readyState").equals("complete"));
                 htmlsList.add(driver.getPageSource());
-                driverPool.releaseDriver(driver);
             }
         }
         return htmlsList;
@@ -92,6 +86,7 @@ public class ParserService {
     }
 
     public List<String> getHtmlOfAllPagesBasedOnLastPage(String lastPage) throws ExecutionException, InterruptedException {
+        driverPool.addToPool();
         AtomicInteger successfulCount = new AtomicInteger(0);
         ArrayList<String> allPageUrls = UrlUtil.predictAllUrls(getLastPageWithHost(lastPage));
         List<CompletableFuture<Void>> futures = new ArrayList<>();
@@ -131,8 +126,6 @@ public class ParserService {
     private void addPageToList(String url, WebDriver driver, List<String> htmlsList) {
         driver.get(url);
         System.out.println(url);
-        //    new WebDriverWait(driverMulti, Duration.ofSeconds(40)).until(driver -> ((JavascriptExecutor) driver).executeScript("return document.readyState").equals("complete"));
         htmlsList.add(driver.getPageSource());
-        driverPool.releaseDriver(driver);
     }
 }

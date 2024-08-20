@@ -61,7 +61,16 @@ export class ParserComponent {
 
   InsertUrlOfLastPageOnClick(): void {
     if(this.sendLastPageUrl!=null){
-      
+      this.parserService.sendPaginationTag(this.sendLastPageUrl).subscribe({
+        next: (data: string[]) => {
+          console.log(data)
+          data.forEach(item => this.AllPagesHtml.push(item));
+        },
+        error: (error) => {
+  
+          console.error('There was an error!', error);
+        },
+      });
     }
   }
 
@@ -111,11 +120,6 @@ export class ParserComponent {
         // Remove background color from each child element
         this.renderer.removeStyle(child, 'background-color');
       });
-      // this.renderer.removeStyle(target, 'background-color');
-   
-
-      // let similarEl = this.getAllSimilarElements(target);
-      // this.renderer.removeStyle(similarEl[0], 'background-color');
     }
   }
 

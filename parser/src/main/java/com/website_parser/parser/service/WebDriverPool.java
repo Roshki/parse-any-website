@@ -1,5 +1,6 @@
 package com.website_parser.parser.service;
 
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -17,6 +18,9 @@ public class WebDriverPool {
     public void addToPool()  {
         ChromeOptions options = new ChromeOptions();
        // options.addArguments("--headless");
+        options.addArguments("user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36");
+        WebDriver webDriver= new ChromeDriver(options);
+        webDriver.manage().window().setSize(new Dimension(100, 100));
         for (int i = 0; i < MAX_WEBDRIVERS; i++) {
             driverPool.add(new ChromeDriver(options));
         }

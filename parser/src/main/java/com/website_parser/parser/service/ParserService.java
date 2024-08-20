@@ -2,10 +2,10 @@ package com.website_parser.parser.service;
 
 import com.website_parser.parser.util.UrlUtil;
 import org.openqa.selenium.*;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Service;
-import org.openqa.selenium.chrome.ChromeDriver;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 public class ParserService {
 
-    private static WebDriver driver;
+    private final WebDriver driver;
     private final PaginationService paginationService;
     private final WebDriverPool driverPool;
     private static URL websiteUrl;
@@ -27,12 +27,14 @@ public class ParserService {
     ParserService(PaginationService paginationService, WebDriverPool driverPool) {
         this.paginationService = paginationService;
         this.driverPool = driverPool;
+
         driverPool.addToPool();
         System.setProperty("webdriver.chrome.driver", "chromedriver-mac-arm64/chromedriver");
         ChromeOptions options = new ChromeOptions();
-        //options.addArguments("--headless");
-        //options.addArguments("user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36");
-        driver = new ChromeDriver(options);
+        options.addArguments("user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36");
+        WebDriver webDriver= new ChromeDriver(options);
+        webDriver.manage().window().setSize(new Dimension(100, 100));
+        driver = driverPool.getDriverPool();
     }
 
     public String getInitialHtmlFromUrl(String url) throws MalformedURLException {
@@ -46,6 +48,7 @@ public class ParserService {
             htmlContent = driver.getPageSource();
             htmlContent = htmlContent.replaceAll("(?s)<header[^>]*>.*?</header>", "");
         }
+        driverPool.releaseDriver(driver);
         return htmlContent;
     }
 
@@ -60,6 +63,7 @@ public class ParserService {
                 System.out.println(url);
                 new WebDriverWait(driver, Duration.ofSeconds(40)).until(driver -> ((JavascriptExecutor) driver).executeScript("return document.readyState").equals("complete"));
                 htmlsList.add(driver.getPageSource());
+                driverPool.releaseDriver(driver);
             }
         }
         return htmlsList;
@@ -91,27 +95,22 @@ public class ParserService {
         AtomicInteger successfulCount = new AtomicInteger(0);
         ArrayList<String> allPageUrls = UrlUtil.predictAllUrls(getLastPageWithHost(lastPage));
         List<CompletableFuture<Void>> futures = new ArrayList<>();
-        CompletableFuture<List<String>> resultFuture =null;
+        CompletableFuture<List<String>> resultFuture = null;
         List<String> htmlsList = new ArrayList<>();
         if (allPageUrls != null) {
             for (String url : allPageUrls) {
+                WebDriver driverMulti = driverPool.getDriverPool();
                 CompletableFuture<Void> completableFuture = CompletableFuture.supplyAsync(() -> {
-                    driver = driverPool.getDriverPool();
-                    driver.get(url);
-                    System.out.println(url);
-                    System.out.println("threads::: " + Thread.getAllStackTraces().keySet().size());
-                    new WebDriverWait(driver, Duration.ofSeconds(40)).until(driver -> ((JavascriptExecutor) driver).executeScript("return document.readyState").equals("complete"));
-                    htmlsList.add(driver.getPageSource());
+                    addPageToList(url, driverMulti, htmlsList);
                     return null;
                 }).thenAccept(result -> {
                     int count = successfulCount.incrementAndGet();
-                    System.out.println("success");
-                    driverPool.releaseDriver(driver);
+                    System.out.println("success -- " + url);
+                    driverPool.releaseDriver(driverMulti);
                     //emit sse
                 }).exceptionally(ex -> {
-                    if (driver != null) {
-                        // Release the WebDriver back into the pool
-                        driverPool.releaseDriver(driver);
+                    if (driverMulti != null) {
+                        driverPool.releaseDriver(driverMulti);
                     }
                     System.out.println("error!");
                     return null;
@@ -120,7 +119,6 @@ public class ParserService {
                 //  driver.get(url);
             }
             CompletableFuture<Void> allOf = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
-
             resultFuture = allOf.thenApply(v -> {
                 System.out.println("All tasks completed. Total successful: " + successfulCount.get());
                 System.out.println("HTML list size: " + htmlsList.size());
@@ -128,5 +126,13 @@ public class ParserService {
             });
         }
         return resultFuture.get();
+    }
+
+    private void addPageToList(String url, WebDriver driver, List<String> htmlsList) {
+        driver.get(url);
+        System.out.println(url);
+        //    new WebDriverWait(driverMulti, Duration.ofSeconds(40)).until(driver -> ((JavascriptExecutor) driver).executeScript("return document.readyState").equals("complete"));
+        htmlsList.add(driver.getPageSource());
+        driverPool.releaseDriver(driver);
     }
 }

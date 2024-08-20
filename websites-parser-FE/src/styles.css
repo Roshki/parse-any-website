@@ -1,0 +1,47 @@
+/* You can add global styles to this file, and also import other style files */
+body {
+  font-family: 'Be Vietnam Pro', sans-serif;
+}
+
+.top-content {
+  position: fixed;
+  /* Fixed positioning keeps it in place */
+  top: 0;
+  /* Aligns it to the top */
+  left: 0;
+  width: 100%;
+  background-color: #007bff;
+  color: white;
+  padding-top: 10px;
+  /* padding-bottom: 10px; */
+  text-align: center;
+  z-index: 9999; 
+  /* High z-index to ensure it appears above other elements */
+}
+
+.content {
+  margin-top: 60px;
+  /* Adjust this margin to accommodate the header's height */
+}
+
+.overlay {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 200px;
+  height: 200px;
+  background-color: rgba(0, 0, 0, 0.5);
+  /* Semi-transparent overlay */
+  z-index: 500;
+  /* Lower than the header to appear beneath it */
+}
+
+.item {
+  padding: 2px;
+  margin-bottom: 2px;
+}
+
+#pagesId {
+  background-color: #568e46;
+  padding-top: 10px;
+}

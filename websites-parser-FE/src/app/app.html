@@ -1,0 +1,17 @@
+<header class="top-content">
+<form (ngSubmit)="htmlOnClick()" >
+  <label class="item" for="fname">URL: </label>
+  <input class="item" [(ngModel)]="sendUrl" type="text" id="fname" name="fname" style="width: 300px"/><br/>
+  <input class="item"  type="submit" value="Submit"/>
+</form>
+<div *ngIf="display" class="item" id="pagesId">
+  <input class="item" (click)="paginationModeOnClick()" id="paginationBtn" type="button" value="Choose Last page"/><br/>
+  <label class="item">OR insert link of the last page: </label><br/>
+  <input class="item" [(ngModel)]="sendLastPageUrl"  placeholder="ExampleDomain" type="text" id="fname" name="fname" style="width: 300px"/><br/>
+  <button class="item">Test</button></div>
+</header>
+<div crossorigin="anonymous" class="content" (click)="elementsOnClick($event)" (mouseover)= "onMouseOverHighliteElement($event)" (mouseout)= "onMouseOut($event)" [innerHTML]="display"></div>
+<!-- <iframe [src]="srcUrl|safe: 'resourceUrl'" height="400" width="400"></iframe> -->
+<!-- <iframe height="1000" width="1000"><div [innerHTML]="display"></div></iframe> -->
+<!-- app.component.html -->
+<!-- <iframe #myIframe width="600" height="400"></iframe> -->

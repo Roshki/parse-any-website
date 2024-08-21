@@ -9,11 +9,9 @@ export class ParserService {
   displayHTML = 'test';
   private sendHtmlUrl = 'http://localhost:8080/send-html';
 
-  // private sendPaginationTagUrl = 'http://localhost:8080/pagination-tag';
-
-
   private lastPage = 'http://localhost:8080/last-page';
 
+  private getInfoUrl = 'http://localhost:8080/get-info-url'
   constructor(private http: HttpClient) { }
 
 
@@ -34,8 +32,23 @@ export class ParserService {
     return this.http.post<string[]>(this.lastPage, paginationTagString);
   }
 
-  sendInfo(arr: string[]) {
-    console.log('info is sent', arr)
+  sendInfo(map: Map<string, string[]>): void  {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Accept': 'text/plain', // Accept plain text responses
+        'Content-Type': 'application/json' // Set content type
+      }),
+      responseType: 'text' as 'json' // Specify response type as text
+    };
+     this.http.post<string>(this.getInfoUrl, Object.fromEntries(map), httpOptions).subscribe({
+      next: (data: string) => {
+        console.log("success");
+        
+      },
+      error: (error) => {
+        console.error('There was an error!!', error);
+      },
+    });
   }
 
   getIt(): string {

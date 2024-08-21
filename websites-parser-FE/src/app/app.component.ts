@@ -1,8 +1,9 @@
-import { Component, inject, Renderer2, NgModule } from '@angular/core';
+import { Component, inject, Renderer2, HostListener } from '@angular/core';
 import { ParserService } from './parser.service';
+import { VerifierService } from './verifier.service';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common'; 
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-parser',
@@ -13,6 +14,7 @@ import { CommonModule } from '@angular/common';
 })
 export class ParserComponent {
   parserService = inject(ParserService);
+  verifierService = inject(VerifierService);
   display: SafeHtml | undefined;
   sendUrl: string = '';
   sendLastPageUrl: string = '';
@@ -21,11 +23,34 @@ export class ParserComponent {
   private information: Map<string, string[]> = new Map<string, string[]>();
   private columnOrder: number = 1;
 
-  
+
   constructor(private sanitizer: DomSanitizer, private renderer: Renderer2) { }
 
   ngOnInit(): void {
     //   this.addToIFrame();
+  }
+
+  @HostListener('document:click', ['$event'])
+  preventLinkNavigation(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+
+    if (target.className != 'item') {
+      event.preventDefault();
+      event.stopPropagation();
+
+      window.addEventListener('beforeunload', function (event) {
+        event.preventDefault();  // Block the navigation
+        event.returnValue = '';  // Some browsers require this to trigger the confirmation dialog
+        console.log('Page navigation prevented via beforeunload');
+      });
+      window.history.pushState = function () {
+        console.log('Navigation using pushState prevented');
+      };
+      window.history.replaceState = function () {
+        console.log('Navigation using replaceState prevented');
+      };
+      console.log('Navigation prevented for:', target.getAttribute('href'));
+    }
   }
 
   htmlOnClick(): void {
@@ -42,10 +67,11 @@ export class ParserComponent {
   }
 
   paginationOnClick(event: MouseEvent): void {
+    event.preventDefault();
     const target = event.target as HTMLElement;
     const htmlContent = target.outerHTML;
     console.log(target);
-    let hrefAttr=target.getAttribute("href");
+    let hrefAttr = target.getAttribute("href");
     console.log(hrefAttr);
     this.parserService.sendPaginationTag(hrefAttr).subscribe({
       next: (data: string[]) => {
@@ -60,14 +86,14 @@ export class ParserComponent {
   }
 
   InsertUrlOfLastPageOnClick(): void {
-    if(this.sendLastPageUrl!=null){
+    if (this.sendLastPageUrl != null) {
       this.parserService.sendPaginationTag(this.sendLastPageUrl).subscribe({
         next: (data: string[]) => {
           console.log(data)
           data.forEach(item => this.AllPagesHtml.push(item));
         },
         error: (error) => {
-  
+
           console.error('There was an error!', error);
         },
       });
@@ -97,6 +123,7 @@ export class ParserComponent {
 
 
   onMouseOverHighliteElement(event: MouseEvent) {
+    event.preventDefault();
     const target = event.target as HTMLElement;
     const src = target.getAttribute('src');
     if (target) {
@@ -112,6 +139,7 @@ export class ParserComponent {
   }
 
   onMouseOut(event: MouseEvent) {
+    event.preventDefault();
     const target = event.target as HTMLElement;
     const children = document.querySelectorAll('*');
 
@@ -140,20 +168,22 @@ export class ParserComponent {
         items.forEach((nodeList, index) => {
           console.log(`Processing NodeList ${index + 1}:`);
           nodeList.forEach((item: Element) => {
-            arr.push(
-              `${item.getAttribute('src') != null
-                ? item.getAttribute('src')?.trim()
-                : item?.textContent?.trim()
-              }`
-            );
+            arr.push(this.verifierService.fetchInfoFromChosenItem(item));
+            // arr.push(
+            //   `${item.getAttribute('src') != null
+            //     ? item.getAttribute('src')?.trim()
+            //     : item?.textContent?.trim()
+            //   }`
+            // );
             (item as HTMLElement).style.color = 'red';
           });
         });
       }
+
       this.information.set(this.columnOrder.toString(), arr);
       this.columnOrder++;
+      this.parserService.sendInfo(this.information);
       console.log(this.information);
-      // this.parserService.sendInfo(arr);
     }
   }
 

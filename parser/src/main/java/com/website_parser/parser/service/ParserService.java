@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 public class ParserService {
 
-    private final WebDriver driver;
+    private WebDriver driver;
     private final PaginationService paginationService;
     private final WebDriverPool driverPool;
     private static URL websiteUrl;
@@ -30,13 +30,35 @@ public class ParserService {
         System.setProperty("webdriver.chrome.driver", "chromedriver-mac-arm64/chromedriver");
         ChromeOptions options = new ChromeOptions();
         options.addArguments("user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36");
+        options.addArguments("--start-maximized");
+        options.addArguments("--disable-web-security");
+        options.addArguments("--allow-running-insecure-content");
+        options.addArguments("--disable-blink-features=AutomationControlled");
+        //options.setExperimentalOption("excludeSwitches",Collections.singletonList("enable-automation"));
+//        options.addArguments("--no-sandbox");
+//        options.addArguments("--disable-dev-shm-usage");
+//        options.addArguments("--disable-infobars");
+//        options.setExperimentalOption("useAutomationExtension", false);
+//        options.setExperimentalOption("excludeSwitches", new String[]{"enable-automation"});
+//        options.addArguments("--enable-automation");
+//        options.addArguments("--disable-extensions");
+//        options.addArguments("--disable-popup-blocking");
+//        options.addArguments("--profile-directory=Default");
+//        options.addArguments("--ignore-certificate-errors");
+//        options.addArguments("--disable-plugins-discovery");
+//        options.addArguments("--incognito");
+//        options.addArguments("user_agent=DN");
         driver = new ChromeDriver(options);
     }
 
     public String getInitialHtmlFromUrl(String url) throws MalformedURLException {
         websiteUrl = new URL(url);
         String htmlContent = null;
-        driver.get(url);
+        try {
+            driver.get(url);
+        } catch (WebDriverException e) {
+            driver = driverPool.reconnectToBrowser(driver);
+        }
         System.out.println("Browser is opened. Please perform the required actions manually and press any button when finished..");
         Scanner scanner = new Scanner(System.in); //TODO change it to FE pressing of enter
         String userInput = scanner.nextLine();

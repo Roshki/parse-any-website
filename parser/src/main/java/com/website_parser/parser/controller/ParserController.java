@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.*;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
 
 
 @RestController
@@ -30,13 +33,16 @@ public class ParserController {
 
     @PostMapping("/last-page")
     @CrossOrigin(origins = "http://localhost:4200")
-    public List<String> getAllPagesBasedOnLastPage(@RequestBody String lastPage){
+    public List<String> getAllPagesBasedOnLastPage(@RequestBody String lastPage) throws ExecutionException, InterruptedException {
         return parserService.getHtmlOfAllPagesBasedOnLastPage(lastPage);
     }
 
-    @GetMapping("test")
-    public ArrayList<String> diffTest(){
-      //  return StringUtil.getUrlDifference("https://www.goodreads.com/list/show/3810.Best_Cozy_Mystery_Series?page=1", "https://www.goodreads.com/list/show/3810.Best_Cozy_Mystery_Series?page=10");
-        return UrlUtil.predictAllUrls("https://example.com/list?category=books&page=20&sort=asc");
+    @PostMapping("/get-info-url")
+    @CrossOrigin(origins = "http://localhost:4200")
+    public String getAllPagesBasedOnLastPage(@RequestBody Map<String, List<String>> map)  {
+        System.out.println(map.size());
+        // Print the map
+        map.forEach((key, value) -> System.out.println(key + " -> " + value));
+        return "success";
     }
 }

@@ -1,6 +1,9 @@
 import { Component, inject, Renderer2, HostListener } from '@angular/core';
+import { DevModeComponent } from './dev-mode/dev-mode.component';
 import { ParserService } from './parser.service';
 import { VerifierService } from './verifier.service';
+import { PaginationService } from './pagination.service';
+import { Website } from './models/website.model';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -8,23 +11,28 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-parser',
   templateUrl: './app.html',
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, DevModeComponent],
   standalone: true,
+  providers:[Website]
   //encapsulation: ViewEncapsulation.None
 })
 export class ParserComponent {
   parserService = inject(ParserService);
   verifierService = inject(VerifierService);
+  paginationService = inject(PaginationService);
   display: SafeHtml | undefined;
   sendUrl: string = '';
   sendLastPageUrl: string = '';
+  ifDevMode: boolean = true;
+
   private ifPaginationMode: boolean = false;
-  private AllPagesHtml: string[] = [];
-  private information: Map<string, string[]> = new Map<string, string[]>();
+  // allPagesHtml: string[] = [];
+  // private information: Map<string, string[]> = new Map<string, string[]>();
   private columnOrder: number = 1;
 
 
-  constructor(private sanitizer: DomSanitizer, private renderer: Renderer2) { }
+  constructor(private sanitizer: DomSanitizer, private renderer: Renderer2, private website: Website) { }
+
 
   ngOnInit(): void {
     //   this.addToIFrame();
@@ -73,30 +81,14 @@ export class ParserComponent {
     console.log(target);
     let hrefAttr = target.getAttribute("href");
     console.log(hrefAttr);
-    this.parserService.sendPaginationTag(hrefAttr).subscribe({
-      next: (data: string[]) => {
-        console.log(data)
-        data.forEach(item => this.AllPagesHtml.push(item));
-      },
-      error: (error) => {
-
-        console.error('There was an error!', error);
-      },
-    });
+    this.website.setAllPagesHtml(this.parserService.retrieveAllPages(hrefAttr));
+    //this.allPagesHtml = this.parserService.retrieveAllPages(hrefAttr);
   }
 
   InsertUrlOfLastPageOnClick(): void {
     if (this.sendLastPageUrl != null) {
-      this.parserService.sendPaginationTag(this.sendLastPageUrl).subscribe({
-        next: (data: string[]) => {
-          console.log(data)
-          data.forEach(item => this.AllPagesHtml.push(item));
-        },
-        error: (error) => {
-
-          console.error('There was an error!', error);
-        },
-      });
+      this.website.setAllPagesHtml(this.parserService.retrieveAllPages(this.sendLastPageUrl));
+      //this.allPagesHtml = this.parserService.retrieveAllPages(this.sendLastPageUrl);
     }
   }
 
@@ -162,9 +154,10 @@ export class ParserComponent {
       const target = event.target as HTMLElement;
       const arr: string[] = [];
       if (target) {
-        const items = this.getAllSimilarToTargetElements(target);
+        //const items = this.getAllSimilarToTargetElements(target);
 
-
+        //   const items = this.paginationService.getAllSimilarElements(target, null, this.allPagesHtml);
+        const items = this.paginationService.targetFlow(target, this.website.getAllPagesHtml());
         items.forEach((nodeList, index) => {
           console.log(`Processing NodeList ${index + 1}:`);
           nodeList.forEach((item: Element) => {
@@ -180,49 +173,17 @@ export class ParserComponent {
         });
       }
 
-      this.information.set(this.columnOrder.toString(), arr);
+      this.website.setInformation(this.columnOrder.toString(), arr);
       this.columnOrder++;
-      this.parserService.sendInfo(this.information);
-      console.log(this.information);
+      this.parserService.sendInfo(this.website.getInformation());
+      console.log(this.website.getInformation());
+      // this.information.set(this.columnOrder.toString(), arr);
+      // this.columnOrder++;
+      // this.parserService.sendInfo(this.information);
+      // console.log(this.information);
     }
   }
 
-  getAllSimilarToTargetElements(target: HTMLElement): NodeListOf<Element>[] {
-
-    const elements: NodeListOf<Element>[] = [];
-    let items;
-    let classSelector = target.className.split(' ').join('.');
-
-    if (this.AllPagesHtml.length > 0) {
-      this.AllPagesHtml.forEach(page => {
-        let tempDiv = document.createElement('div');
-        tempDiv.innerHTML = page;
-        try {
-          items = tempDiv.querySelectorAll(`.${classSelector}`);
-
-          elements.push(items);
-        }
-        catch (error) {
-          let classSelector1 = target.parentElement?.className.split(' ').join('.');
-          items = tempDiv.querySelectorAll(`.${classSelector1}`);
-          elements.push(items);
-        }
-      }
-      );
-      return elements;
-    }
-    try {
-      items = document.querySelectorAll(`.${classSelector}`);
-      elements.push(items);
-    }
-    catch (error) {
-      const classSelector1 = target.parentElement?.className.split(' ').join('.');
-      items = document.querySelectorAll(`.${classSelector1}`);
-      elements.push(items);
-    }
-
-    return elements;
-  }
 
 }
 

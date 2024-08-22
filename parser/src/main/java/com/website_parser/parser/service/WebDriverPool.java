@@ -18,6 +18,11 @@ public class WebDriverPool {
 
     public void addToPool() {
         ChromeOptions options = new ChromeOptions();
+        options.addArguments("user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36");
+        options.addArguments("--start-maximized");
+        options.addArguments("--disable-web-security");
+        options.addArguments("--allow-running-insecure-content");
+        options.addArguments("--disable-blink-features=AutomationControlled");
         // options.addArguments("--headless");
         options.addArguments(userAgent);
         for (int i = 0; i < MAX_WEBDRIVERS; i++) {

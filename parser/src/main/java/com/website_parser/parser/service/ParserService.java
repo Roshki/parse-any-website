@@ -5,8 +5,8 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
@@ -51,6 +51,7 @@ public class ParserService {
         driver = new ChromeDriver(options);
     }
 
+    @Cacheable("initialHtml")
     public String getInitialHtmlFromUrl(String url) throws MalformedURLException {
         websiteUrl = new URL(url);
         String htmlContent = null;
@@ -107,6 +108,7 @@ public class ParserService {
         return lastPage;
     }
 
+    @Cacheable("pages")
     public List<String> getHtmlOfAllPagesBasedOnLastPage(String lastPage) throws ExecutionException, InterruptedException {
         driverPool.addToPool();
         AtomicInteger successfulCount = new AtomicInteger(0);
@@ -150,4 +152,10 @@ public class ParserService {
         System.out.println(url);
         htmlsList.add(driver.getPageSource());
     }
+//    private void identMe(WebDriver driver) {
+//        driver.get("http://ident.me/");
+//        String ipAddress = driver.findElement(By.tagName("body")).getText();
+//        System.out.println("Your IP address: " + ipAddress);
+//        driverPool.releaseDriver(driver);
+//    }
 }

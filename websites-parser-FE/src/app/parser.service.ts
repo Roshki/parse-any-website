@@ -7,11 +7,15 @@ import { Observable } from 'rxjs';
 })
 export class ParserService {
   displayHTML = 'test';
+  allPagesHtml: string[] = [];
+
+
   private sendHtmlUrl = 'http://localhost:8080/send-html';
 
   private lastPage = 'http://localhost:8080/last-page';
 
   private getInfoUrl = 'http://localhost:8080/get-info-url'
+
   constructor(private http: HttpClient) { }
 
 
@@ -27,12 +31,22 @@ export class ParserService {
     return this.http.post<string>(this.sendHtmlUrl, webUrl, httpOptions);
   }
 
-  sendPaginationTag(paginationTagString: string | null): Observable<string[]> {
+  retrieveAllPages(paginationTagString: string | null): string[] {
     console.log(paginationTagString)
-    return this.http.post<string[]>(this.lastPage, paginationTagString);
+    this.http.post<string[]>(this.lastPage, paginationTagString).subscribe({
+      next: (data: string[]) => {
+        console.log(data)
+        data.forEach(item => this.allPagesHtml.push(item));
+      },
+      error: (error) => {
+
+        console.error('There was an error!', error);
+      },
+    });;
+    return this.allPagesHtml;
   }
 
-  sendInfo(map: Map<string, string[]>): void  {
+  sendInfo(map: Map<string, string[]>): void {
     const httpOptions = {
       headers: new HttpHeaders({
         'Accept': 'text/plain', // Accept plain text responses
@@ -40,10 +54,10 @@ export class ParserService {
       }),
       responseType: 'text' as 'json' // Specify response type as text
     };
-     this.http.post<string>(this.getInfoUrl, Object.fromEntries(map), httpOptions).subscribe({
+    this.http.post<string>(this.getInfoUrl, Object.fromEntries(map), httpOptions).subscribe({
       next: (data: string) => {
         console.log("success");
-        
+
       },
       error: (error) => {
         console.error('There was an error!!', error);

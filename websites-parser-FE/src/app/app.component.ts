@@ -1,7 +1,7 @@
 import { Component, inject, Renderer2, HostListener } from '@angular/core';
 import { DevModeComponent } from './dev-mode/dev-mode.component';
 import { ParserService } from './parser.service';
-import { VerifierService } from './verifier.service';
+import { TergetedItemService } from './targeted-item.service';
 import { PaginationService } from './pagination.service';
 import { Website } from './models/website.model';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -13,12 +13,12 @@ import { CommonModule } from '@angular/common';
   templateUrl: './app.html',
   imports: [FormsModule, CommonModule, DevModeComponent],
   standalone: true,
-  providers:[Website]
+  providers: [Website]
   //encapsulation: ViewEncapsulation.None
 })
 export class ParserComponent {
   parserService = inject(ParserService);
-  verifierService = inject(VerifierService);
+  tergetedItemService = inject(TergetedItemService);
   paginationService = inject(PaginationService);
   display: SafeHtml | undefined;
   sendUrl: string = '';
@@ -28,7 +28,7 @@ export class ParserComponent {
   private ifPaginationMode: boolean = false;
   // allPagesHtml: string[] = [];
   // private information: Map<string, string[]> = new Map<string, string[]>();
-  private columnOrder: number = 1;
+  //private columnOrder: number = 1;
 
 
   constructor(private sanitizer: DomSanitizer, private renderer: Renderer2, private website: Website) { }
@@ -157,31 +157,32 @@ export class ParserComponent {
         //const items = this.getAllSimilarToTargetElements(target);
 
         //   const items = this.paginationService.getAllSimilarElements(target, null, this.allPagesHtml);
-        const items = this.paginationService.targetFlow(target, this.website.getAllPagesHtml());
+        const items = this.paginationService.getFromAllPagesTargetFlow(target, this.website.getAllPagesHtml());
         items.forEach((nodeList, index) => {
-          console.log(`Processing NodeList ${index + 1}:`);
+          // console.log(`Processing NodeList ${index + 1}:`);
           nodeList.forEach((item: Element) => {
-            arr.push(this.verifierService.fetchInfoFromChosenItem(item));
-            // arr.push(
-            //   `${item.getAttribute('src') != null
-            //     ? item.getAttribute('src')?.trim()
-            //     : item?.textContent?.trim()
-            //   }`
-            // );
+            arr.push(this.tergetedItemService.fetchInfoFromChosenItem(item));
             (item as HTMLElement).style.color = 'red';
           });
         });
       }
 
-      this.website.setInformation(this.columnOrder.toString(), arr);
-      this.columnOrder++;
-      this.parserService.sendInfo(this.website.getInformation());
-      console.log(this.website.getInformation());
+
+      this.website.setInformation(this.website.getColumIndex().toString(), arr);
+      let columnIndex = this.website.getColumIndex();
+      this.website.setColumIndex(columnIndex + 1);
+      console.log("added new ", this.website.getInformation());
+
       // this.information.set(this.columnOrder.toString(), arr);
       // this.columnOrder++;
       // this.parserService.sendInfo(this.information);
       // console.log(this.information);
     }
+  }
+
+  exportBtnOnClick(): void {
+    this.parserService.sendInfo(this.website.getInformation());
+    console.log("exported:  ", this.website.getInformation());
   }
 
 

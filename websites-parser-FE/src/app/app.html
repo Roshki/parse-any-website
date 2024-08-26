@@ -15,7 +15,8 @@
     <label class="item">OR insert link of the last page: </label><br />
     <input class="item" [(ngModel)]="sendLastPageUrl" placeholder="ExampleDomain" type="text" id="fname" name="fname"
       style="width: 300px" /><br />
-    <button class="item btn btn-secondary" (click)="InsertUrlOfLastPageOnClick()">Upload All pages</button>
+    <button class="item btn btn-secondary" (click)="InsertUrlOfLastPageOnClick()">Upload All pages</button><br />
+    <button class="item btn btn-primary" (click)="exportBtnOnClick()">Export</button>
   </div>
 </header>
 <div crossorigin="anonymous" class="content" (click)="elementsOnClick($event)"

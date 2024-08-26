@@ -54,6 +54,7 @@ export class ParserService {
       }),
       responseType: 'text' as 'json' // Specify response type as text
     };
+    console.log("sending this: ", map);
     this.http.post<string>(this.getInfoUrl, Object.fromEntries(map), httpOptions).subscribe({
       next: (data: string) => {
         console.log("success");

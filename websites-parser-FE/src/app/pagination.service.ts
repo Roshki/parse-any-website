@@ -8,7 +8,7 @@ export class PaginationService {
   constructor() { }
 
 
-  devModeFlow(tagId: string, AllPagesHtml: string[]): NodeListOf<Element>[] {
+  getFromAllPagesDevMode(tagId: string, AllPagesHtml: string[]): NodeListOf<Element>[] {
     let elements: NodeListOf<Element>[] = [];
     if (AllPagesHtml.length > 0) {
       AllPagesHtml.forEach(page => {
@@ -25,7 +25,7 @@ export class PaginationService {
     return elements;
   }
 
-  targetFlow(target: HTMLElement, AllPagesHtml: string[]): NodeListOf<Element>[] {
+  getFromAllPagesTargetFlow(target: HTMLElement, AllPagesHtml: string[]): NodeListOf<Element>[] {
     let elements: NodeListOf<Element>[] = [];
     let classSelector = target?.className.split(' ').join('.');
     let parentClassSelector = target?.parentElement?.className.split(' ').join('.');

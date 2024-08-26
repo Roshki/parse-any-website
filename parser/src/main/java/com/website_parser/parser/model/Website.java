@@ -1,18 +1,22 @@
 package com.website_parser.parser.model;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.stereotype.Component;
 
+import java.io.Serializable;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 
 @Component
 @Getter
 @Setter
-public class Website {
+@Builder
+@AllArgsConstructor
+public class Website implements Serializable {
+
     private URL websiteUrl;
     private String initialHtml;
-    private List<String> pages;
+    private Map<String, String> pages;
+
+    public Website(){}
 }

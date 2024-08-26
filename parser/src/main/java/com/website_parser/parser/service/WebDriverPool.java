@@ -1,6 +1,7 @@
 package com.website_parser.parser.service;
 
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.stereotype.Service;
@@ -18,11 +19,11 @@ public class WebDriverPool {
 
     public void addToPool() {
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36");
         options.addArguments("--start-maximized");
         options.addArguments("--disable-web-security");
         options.addArguments("--allow-running-insecure-content");
         options.addArguments("--disable-blink-features=AutomationControlled");
+        options.addArguments("--disable-search-engine-choice-screen");
         // options.addArguments("--headless");
         options.addArguments(userAgent);
         for (int i = 0; i < MAX_WEBDRIVERS; i++) {
@@ -56,6 +57,7 @@ public class WebDriverPool {
     }
 
     public WebDriver reconnectToBrowser(WebDriver driver) {
+        System.out.println("reconnectToBrowser reconnecting....");
         if (driver != null) {
             driver.quit();
         }

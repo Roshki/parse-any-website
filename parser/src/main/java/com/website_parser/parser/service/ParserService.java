@@ -4,7 +4,6 @@ import com.website_parser.parser.model.Website;
 import com.website_parser.parser.util.UrlUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.*;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.net.MalformedURLException;
@@ -20,35 +19,35 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ParserService {
 
     private final WebDriverPool driverPool;
-    private final Website website;
+    private final CacheService cacheService;
+    private Website website;
 
-    ParserService(WebDriverPool driverPool, Website website) {
+    ParserService(WebDriverPool driverPool, Website website, CacheService cacheService) {
 
         this.driverPool = driverPool;
         this.website = website;
+        this.cacheService = cacheService;
         driverPool.addToPool();
 
     }
 
-    @Cacheable("initialHtml")
     public String getInitialHtmlFromUrl(String url) throws MalformedURLException {
-        website.setWebsiteUrl(new URL(url));
-        WebDriver driver = driverPool.getDriverPool();
-        //websiteUrl = new URL(url);
-        String htmlContent = null;
-        try {
-            driver.get(url);
-        } catch (WebDriverException e) {
-            driver = driverPool.reconnectToBrowser(driver);
+        Website websiteCache = cacheService.getWebsiteCache(url);
+        if (websiteCache != null) {
+            website = websiteCache;
+            return websiteCache.getInitialHtml();
+        } else {
+            WebDriver driver = driverPool.getDriverPool();
+            String htmlContent = queryPageByUrl(url, driver);
+            String manualInput = getManualInput();
+            if (!manualInput.isEmpty()) {
+                htmlContent = htmlContent.replaceAll("(?s)<header[^>]*>.*?</header>", "");
+                website = Website.builder().websiteUrl(new URL(url)).initialHtml(htmlContent).build();
+                cacheService.setWebsiteCache(url, website);
+            }
+            return website.getInitialHtml();
         }
-        System.out.println("Browser is opened. Please perform the required actions manually and press any button when finished..");
-        Scanner scanner = new Scanner(System.in); //TODO change it to FE pressing of enter
-        String userInput = scanner.nextLine();
-        if (!userInput.isEmpty()) {
-            htmlContent = driver.getPageSource();
-            htmlContent = htmlContent.replaceAll("(?s)<header[^>]*>.*?</header>", "");
-        }
-        return htmlContent;
+
     }
 
 
@@ -59,18 +58,23 @@ public class ParserService {
         return lastPage;
     }
 
-    @Cacheable("pages")
     public List<String> getHtmlOfAllPagesBasedOnLastPage(String lastPage) throws ExecutionException, InterruptedException {
         AtomicInteger successfulCount = new AtomicInteger(0);
         ArrayList<String> allPageUrls = UrlUtil.predictAllUrls(getLastPageWithHost(lastPage));
         List<CompletableFuture<Void>> futures = new ArrayList<>();
         CompletableFuture<List<String>> resultFuture = null;
-        List<String> htmlsList = new ArrayList<>();
+        Map<String, String> htmlPagesMap = new HashMap<>();
         if (allPageUrls != null) {
             for (String url : allPageUrls) {
                 WebDriver driverMulti = driverPool.getDriverPool();
+
                 CompletableFuture<Void> completableFuture = CompletableFuture.supplyAsync(() -> {
-                    addPageToList(url, driverMulti, htmlsList);
+                    if (!isPageCached(url)) {
+                        // Page is not in the cache, so we retrieve it via WebDriver
+                        String htmlPage = queryPageByUrl(url, driverMulti);
+                        htmlPagesMap.put(url, htmlPage);
+                        cacheService.setWebsiteCache(website.getWebsiteUrl().toString(), website);
+                    }
                     return null;
                 }).thenAccept(result -> {
                     int count = successfulCount.incrementAndGet();
@@ -81,25 +85,44 @@ public class ParserService {
                     if (driverMulti != null) {
                         driverPool.releaseDriver(driverMulti);
                     }
-                    log.error("error! -- {}", url);
+                    log.error("error! -- {}", url, ex.getCause());
                     return null;
                 });
                 futures.add(completableFuture);
             }
             CompletableFuture<Void> allOf = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
             resultFuture = allOf.thenApply(v -> {
-                website.setPages(htmlsList);
+                website.setPages(htmlPagesMap);
                 log.info("All tasks completed. Total successful: {}", successfulCount.get());
-                log.info("HTML list size: {}", htmlsList.size());
-                return htmlsList;
+                log.info("HTML list size: {}", website.getPages().entrySet().size());
+                return website.getPages().values().stream().toList();
             });
         }
         return resultFuture.get();
     }
 
-    private void addPageToList(String url, WebDriver driver, List<String> htmlsList) {
-        driver.get(url);
-        System.out.println(url);
-        htmlsList.add(driver.getPageSource());
+    private boolean isPageCached(String url) {
+        return Optional.ofNullable(website)
+                .map(Website::getPages)
+                .map(pages -> pages.containsKey(url))
+                .orElse(false);
     }
+
+    private String queryPageByUrl(String url, WebDriver driver) {
+        try {
+            driver.get(url);
+        } catch (WebDriverException e) {
+            driver = driverPool.reconnectToBrowser(driver);
+        }
+        System.out.println(url);
+        return driver.getPageSource();
+
+    }
+
+    private static String getManualInput() {
+        System.out.println("Browser is opened. Please perform the required actions manually and press any button when finished..");
+        Scanner scanner = new Scanner(System.in); //TODO change it to FE pressing of enter
+        return scanner.nextLine();
+    }
+
 }

@@ -23,11 +23,6 @@ public class ParserController {
         return parserService.getInitialHtmlFromUrl(url);
     }
 
-    @PostMapping("/pagination-tag")
-    public List<String> getAllPages(@RequestBody String paginationTag){
-        return parserService.getHtmlOfAllPages(paginationTag);
-    }
-
     @PostMapping("/last-page")
     public List<String> getAllPagesBasedOnLastPage(@RequestBody String lastPage) throws ExecutionException, InterruptedException {
         return parserService.getHtmlOfAllPagesBasedOnLastPage(lastPage);

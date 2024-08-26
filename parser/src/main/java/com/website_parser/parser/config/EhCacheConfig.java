@@ -25,7 +25,7 @@ public class EhCacheConfig {
         return CacheManagerBuilder.newCacheManagerBuilder()
                 .with(CacheManagerBuilder.persistence(new File("parserCache/", "data")))
                 .withCache("website", CacheConfigurationBuilder.newCacheConfigurationBuilder(String.class, Website.class,
-                                ResourcePoolsBuilder.newResourcePoolsBuilder().disk(10, MemoryUnit.MB, true))
+                                ResourcePoolsBuilder.newResourcePoolsBuilder().disk(100, MemoryUnit.MB, true))
                         .withExpiry(ExpiryPolicyBuilder.timeToLiveExpiration(Duration.ofDays(7))).build())
                 .build(true);
     }

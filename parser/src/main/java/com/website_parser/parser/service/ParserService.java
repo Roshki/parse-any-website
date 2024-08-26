@@ -92,7 +92,7 @@ public class ParserService {
             }
             CompletableFuture<Void> allOf = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
             resultFuture = allOf.thenApply(v -> {
-                website.setPages(htmlPagesMap);
+                website.getPages().putAll(htmlPagesMap);
                 log.info("All tasks completed. Total successful: {}", successfulCount.get());
                 log.info("HTML list size: {}", website.getPages().entrySet().size());
                 return website.getPages().values().stream().toList();
@@ -102,10 +102,11 @@ public class ParserService {
     }
 
     private boolean isPageCached(String url) {
-        return Optional.ofNullable(website)
-                .map(Website::getPages)
-                .map(pages -> pages.containsKey(url))
-                .orElse(false);
+        return website != null && website.getPages()!=null && website.getPages().containsKey(url);
+//        return Optional.ofNullable(website)
+//                .map(Website::getPages)
+//                .map(pages -> pages.containsKey(url))
+//                .orElse(false);
     }
 
     private String queryPageByUrl(String url, WebDriver driver) {

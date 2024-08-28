@@ -23,15 +23,16 @@ export class DevModeComponent {
   sendTagIdOnClick() {
     let items =  this.paginationService.getFromAllPagesDevMode(this.tagId, this.website.getAllPagesHtml());
     const arr: string[] = [];
-    items.forEach((nodeList, index) => {
-      console.log(`Processing NodeList ${index + 1}:`);
+    items.forEach((nodeList) => {
       nodeList.forEach((item: Element) => {
         arr.push(this.verifierService.fetchInfoFromChosenItem(item));
         (item as HTMLElement).style.color = 'red';
       });
-    });let columnIndex = this.website.getColumIndex();
-    this.website.setInformation(columnIndex.toString(), arr);
-    this.website.setColumIndex(columnIndex++);
+    });
+    let columnIndex = this.website.getColumIndex();
+    this.website.getInformation().set(columnIndex.toString(), arr);
+   
+   this.website.setColumIndex(columnIndex + 1);
     this.paginationService.getFromAllPagesDevMode(this.tagId, this.website.getAllPagesHtml())
     console.log(this.website.getInformation(), "FROM DEV COMPONENT");
 

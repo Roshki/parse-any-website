@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { saveAs } from 'file-saver';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ParserService {
   displayHTML = 'test';
-  allPagesHtml: string[] = [];
 
 
   private sendHtmlUrl = 'http://localhost:8080/send-html';
@@ -32,18 +32,20 @@ export class ParserService {
   }
 
   retrieveAllPages(paginationTagString: string | null): string[] {
-    console.log(paginationTagString)
+    let allPagesHtml: string[] = [];
+    //console.log(paginationTagString)
     this.http.post<string[]>(this.lastPage, paginationTagString).subscribe({
       next: (data: string[]) => {
-        console.log(data)
-        data.forEach(item => this.allPagesHtml.push(item));
+        //console.log(data)
+        data.forEach(item => allPagesHtml.push(item));
+        alert("done");
       },
       error: (error) => {
 
         console.error('There was an error!', error);
       },
     });;
-    return this.allPagesHtml;
+    return allPagesHtml;
   }
 
   sendInfo(map: Map<string, string[]>): void {
@@ -53,11 +55,16 @@ export class ParserService {
         'Content-Type': 'application/json' // Set content type
       }),
       responseType: 'text' as 'json' // Specify response type as text
+     // params: new HttpParams().set('param1', 'value1')
+
     };
+    alert(map);
     console.log("sending this: ", map);
     this.http.post<string>(this.getInfoUrl, Object.fromEntries(map), httpOptions).subscribe({
       next: (data: string) => {
+        //this.chooseFolder(data);
         console.log("success");
+        alert("file is saved!")
 
       },
       error: (error) => {
@@ -65,6 +72,22 @@ export class ParserService {
       },
     });
   }
+
+  // async chooseFolder(data: string) {
+  //   try {
+  //     // The directory picker is available in Chrome and Edge browsers
+  //     const handle = await (window as any).showDirectoryPicker();
+  //     console.log('Directory picked:', handle);
+
+  //     // Example: Creating a file inside the picked directory
+  //     const fileHandle = await handle.getFileHandle('example.xlsx', { create: true });
+  //     const writable = await fileHandle.createWritable();
+  //     await writable.write(data);
+  //     await writable.close();
+  //   } catch (error) {
+  //     console.error('Folder selection failed:', error);
+  //   }
+  // }
 
   getIt(): string {
     return this.displayHTML;

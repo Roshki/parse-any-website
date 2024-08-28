@@ -1,4 +1,4 @@
-import { Component, inject, Renderer2, HostListener } from '@angular/core';
+import { Component, inject, Renderer2, RendererStyleFlags2, HostListener, ChangeDetectorRef } from '@angular/core';
 import { DevModeComponent } from './dev-mode/dev-mode.component';
 import { ParserService } from './parser.service';
 import { TergetedItemService } from './targeted-item.service';
@@ -8,13 +8,14 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
+
 @Component({
   selector: 'app-parser',
   templateUrl: './app.html',
   imports: [FormsModule, CommonModule, DevModeComponent],
   standalone: true,
   providers: [Website]
-  //encapsulation: ViewEncapsulation.None
+
 })
 export class ParserComponent {
   parserService = inject(ParserService);
@@ -23,19 +24,20 @@ export class ParserComponent {
   display: SafeHtml | undefined;
   sendUrl: string = '';
   sendLastPageUrl: string = '';
-  ifDevMode: boolean = true;
+  isOpen = true;  // The visibility of the sliding section
 
   private ifPaginationMode: boolean = false;
-  // allPagesHtml: string[] = [];
-  // private information: Map<string, string[]> = new Map<string, string[]>();
-  //private columnOrder: number = 1;
 
 
-  constructor(private sanitizer: DomSanitizer, private renderer: Renderer2, private website: Website) { }
+  constructor(private sanitizer: DomSanitizer, private renderer: Renderer2, private website: Website, private cd: ChangeDetectorRef) { }
 
 
   ngOnInit(): void {
-    //   this.addToIFrame();
+  }
+
+
+  toggleSlide() {
+    this.isOpen = !this.isOpen;
   }
 
   @HostListener('document:click', ['$event'])
@@ -47,8 +49,7 @@ export class ParserComponent {
       event.stopPropagation();
 
       window.addEventListener('beforeunload', function (event) {
-        event.preventDefault();  // Block the navigation
-        event.returnValue = '';  // Some browsers require this to trigger the confirmation dialog
+        event.preventDefault();
         console.log('Page navigation prevented via beforeunload');
       });
       window.history.pushState = function () {
@@ -57,7 +58,7 @@ export class ParserComponent {
       window.history.replaceState = function () {
         console.log('Navigation using replaceState prevented');
       };
-      console.log('Navigation prevented for:', target.getAttribute('href'));
+      //console.log('Navigation prevented for:', target.getAttribute('href'));
     }
   }
 
@@ -78,17 +79,14 @@ export class ParserComponent {
     event.preventDefault();
     const target = event.target as HTMLElement;
     const htmlContent = target.outerHTML;
-    console.log(target);
     let hrefAttr = target.getAttribute("href");
-    console.log(hrefAttr);
     this.website.setAllPagesHtml(this.parserService.retrieveAllPages(hrefAttr));
-    //this.allPagesHtml = this.parserService.retrieveAllPages(hrefAttr);
   }
 
   InsertUrlOfLastPageOnClick(): void {
     if (this.sendLastPageUrl != null) {
       this.website.setAllPagesHtml(this.parserService.retrieveAllPages(this.sendLastPageUrl));
-      //this.allPagesHtml = this.parserService.retrieveAllPages(this.sendLastPageUrl);
+
     }
   }
 
@@ -118,10 +116,10 @@ export class ParserComponent {
     event.preventDefault();
     const target = event.target as HTMLElement;
     const src = target.getAttribute('src');
-    if (target) {
-      // let similarElNum = this.getAllSimilarToTargetElements(target).length;
-      if (target.className.length > 0) {
-        this.renderer.setStyle(target, 'background-color', 'yellow');
+    const parentTarget = target?.parentElement?.className;
+    if (target || parentTarget) {
+      if (target.className.length > 0 || parentTarget) {
+        this.renderer.setStyle(target, 'background-color', 'rgba(255, 255, 0, 0.5)');
         ;
       }
     }
@@ -137,7 +135,7 @@ export class ParserComponent {
 
     if (target) {
       children.forEach(child => {
-        // Remove background color from each child element
+
         this.renderer.removeStyle(child, 'background-color');
       });
     }
@@ -154,29 +152,31 @@ export class ParserComponent {
       const target = event.target as HTMLElement;
       const arr: string[] = [];
       if (target) {
-        //const items = this.getAllSimilarToTargetElements(target);
 
-        //   const items = this.paginationService.getAllSimilarElements(target, null, this.allPagesHtml);
         const items = this.paginationService.getFromAllPagesTargetFlow(target, this.website.getAllPagesHtml());
         items.forEach((nodeList, index) => {
-          // console.log(`Processing NodeList ${index + 1}:`);
           nodeList.forEach((item: Element) => {
-            arr.push(this.tergetedItemService.fetchInfoFromChosenItem(item));
+            this.renderer.setStyle(item, 'color', 'red', RendererStyleFlags2.Important);
             (item as HTMLElement).style.color = 'red';
+            this.renderer.setStyle(item, 'color', 'red', RendererStyleFlags2.Important);
+            arr.push(this.tergetedItemService.fetchInfoFromChosenItem(item));
+            this.renderer.setStyle(item, 'color', 'red', RendererStyleFlags2.Important);
+           // (item as HTMLElement).style.color = 'red';
+            console.log("added as red")
+            this.renderer.setStyle(item, 'color', 'red', RendererStyleFlags2.Important);
+            this.renderer.setStyle(item, 'color', 'red', RendererStyleFlags2.Important);
+            this.renderer.setStyle(item, 'color', 'red', RendererStyleFlags2.Important);
           });
         });
+        this.cd.detectChanges();
       }
 
 
-      this.website.setInformation(this.website.getColumIndex().toString(), arr);
+      this.website.getInformation().set(this.website.getColumIndex().toString(), arr);
       let columnIndex = this.website.getColumIndex();
       this.website.setColumIndex(columnIndex + 1);
       console.log("added new ", this.website.getInformation());
 
-      // this.information.set(this.columnOrder.toString(), arr);
-      // this.columnOrder++;
-      // this.parserService.sendInfo(this.information);
-      // console.log(this.information);
     }
   }
 

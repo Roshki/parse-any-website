@@ -25,18 +25,18 @@ public class EhCacheConfig {
         return CacheManagerBuilder.newCacheManagerBuilder()
                 .with(CacheManagerBuilder.persistence(new File("parserCache/", "data")))
                 .withCache("website", CacheConfigurationBuilder.newCacheConfigurationBuilder(String.class, Website.class,
-                                ResourcePoolsBuilder.newResourcePoolsBuilder().disk(100, MemoryUnit.MB, true))
+                                ResourcePoolsBuilder.newResourcePoolsBuilder().disk(200, MemoryUnit.GB, true))
                         .withExpiry(ExpiryPolicyBuilder.timeToLiveExpiration(Duration.ofDays(7))).build())
                 .build(true);
     }
 
-    @Bean
-    public Cache<String, Website> websiteCache(PersistentCacheManager persistentCacheManager) {
-
-        return persistentCacheManager.createCache("websiteCache",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(String.class, Website.class,
-                        ResourcePoolsBuilder.newResourcePoolsBuilder()
-                                .heap(100, MemoryUnit.MB)
-                                .disk(500, MemoryUnit.MB, true)));
-    }
+//    @Bean
+//    public Cache<String, Website> websiteCache(PersistentCacheManager persistentCacheManager) {
+//
+//        return persistentCacheManager.createCache("websiteCache",
+//                CacheConfigurationBuilder.newCacheConfigurationBuilder(String.class, Website.class,
+//                        ResourcePoolsBuilder.newResourcePoolsBuilder()
+//                                .heap(200, MemoryUnit.GB)
+//                                .disk(200, MemoryUnit.GB, true)));
+//    }
 }

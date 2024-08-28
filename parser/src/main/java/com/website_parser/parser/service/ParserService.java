@@ -33,21 +33,25 @@ public class ParserService {
 
     public String getInitialHtmlFromUrl(String url) throws MalformedURLException {
         Website websiteCache = cacheService.getWebsiteCache(url);
+        String htmlContent = null;
         if (websiteCache != null) {
             website = websiteCache;
-            return websiteCache.getInitialHtml();
+            htmlContent = websiteCache.getInitialHtml();
         } else {
             WebDriver driver = driverPool.getDriverPool();
-            String htmlContent = queryPageByUrl(url, driver);
-            String manualInput = getManualInput();
-            if (!manualInput.isEmpty()) {
+            htmlContent = retrievePage(url, driver);
+            System.out.println("Browser is opened. Please perform the required actions manually and press any button when finished..");
+            Scanner scanner = new Scanner(System.in); //TODO change it to FE pressing of enter
+            String s = scanner.nextLine();
+            if (!s.isEmpty()) {
+                htmlContent = driver.getPageSource();
                 htmlContent = htmlContent.replaceAll("(?s)<header[^>]*>.*?</header>", "");
-                website = Website.builder().websiteUrl(new URL(url)).initialHtml(htmlContent).build();
+                website = Website.builder().websiteUrl(new URL(url)).initialHtml(htmlContent).pages(new HashMap<>()).build();
                 cacheService.setWebsiteCache(url, website);
             }
-            return website.getInitialHtml();
+            driverPool.releaseDriver(driver);
         }
-
+        return htmlContent;
     }
 
 
@@ -71,9 +75,11 @@ public class ParserService {
                 CompletableFuture<Void> completableFuture = CompletableFuture.supplyAsync(() -> {
                     if (!isPageCached(url)) {
                         // Page is not in the cache, so we retrieve it via WebDriver
-                        String htmlPage = queryPageByUrl(url, driverMulti);
+                        String htmlPage = retrievePage(url, driverMulti);
                         htmlPagesMap.put(url, htmlPage);
-                        cacheService.setWebsiteCache(website.getWebsiteUrl().toString(), website);
+                    }
+                    else{
+                        htmlPagesMap.put(url, website.getPages().get(url));
                     }
                     return null;
                 }).thenAccept(result -> {
@@ -92,7 +98,12 @@ public class ParserService {
             }
             CompletableFuture<Void> allOf = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
             resultFuture = allOf.thenApply(v -> {
-                website.getPages().putAll(htmlPagesMap);
+                //   Optional.of(website).map(Website::getPages).ifPresent(map-> map.putAll(htmlPagesMap));
+              //  website.getPages().putAll(htmlPagesMap);
+//                website.setPages(stringStringMap);
+                website.setPages(htmlPagesMap);
+               // website.getPages().putAll(htmlPagesMap);
+                cacheService.setWebsiteCache(website.getWebsiteUrl().toString(), website);
                 log.info("All tasks completed. Total successful: {}", successfulCount.get());
                 log.info("HTML list size: {}", website.getPages().entrySet().size());
                 return website.getPages().values().stream().toList();
@@ -102,14 +113,13 @@ public class ParserService {
     }
 
     private boolean isPageCached(String url) {
-        return website != null && website.getPages()!=null && website.getPages().containsKey(url);
-//        return Optional.ofNullable(website)
-//                .map(Website::getPages)
-//                .map(pages -> pages.containsKey(url))
-//                .orElse(false);
+        return Optional.ofNullable(website)
+                .map(Website::getPages)
+                .map(pages -> pages.containsKey(url))
+                .orElse(false);
     }
 
-    private String queryPageByUrl(String url, WebDriver driver) {
+    private String retrievePage(String url, WebDriver driver) {
         try {
             driver.get(url);
         } catch (WebDriverException e) {
@@ -120,10 +130,5 @@ public class ParserService {
 
     }
 
-    private static String getManualInput() {
-        System.out.println("Browser is opened. Please perform the required actions manually and press any button when finished..");
-        Scanner scanner = new Scanner(System.in); //TODO change it to FE pressing of enter
-        return scanner.nextLine();
-    }
 
 }

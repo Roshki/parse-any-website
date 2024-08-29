@@ -6,29 +6,29 @@
     <button class="item" (click)="htmlOnClick()">Open Website</button>
   </div>
   <button (click)="toggleSlide()" id="slide-toggle-btn" class="btn btn-light mt-2">Tools</button>
+  <div [ngClass]="{ 'active': isOpen}" class="tools container text-center" >
+    <div class="row">
+      <div class="col " style="margin: auto; ">
+        <app-dev-mode></app-dev-mode>
+      </div>
+      <div class="col " style="margin: auto;">
+        <h4>Pagination</h4>
+        <button class="item" (click)="paginationModeOnClick()" id="paginationBtn">Choose Last page</button><br />
+        <label class="item">OR insert link of the last page: </label><br />
+        <input class="item" [(ngModel)]="sendLastPageUrl" placeholder="ExampleDomain" type="text" id="fname"
+          name="fname" />
+        <button (click)="InsertUrlOfLastPageOnClick()">OK</button>
+      </div>
+      <div class="col" style="margin: auto;">
+        <h4>Export all</h4>
+        <button (click)="exportBtnOnClick()">Click!</button>
+      </div>
+    </div>
+  </div>
   <!-- <div id="sliding-section" [ngClass]="{ 'active': isOpen}" class="bg-info text-white text-center py-2 slide-animation">
     <h2>Sliding Section</h2>
     <p>This section slides down when the button is clicked.</p>
   </div> -->
 </header>
-<div [ngClass]="{ 'active': isOpen}" class="tools container text-center" >
-  <div class="row">
-    <div class="col  border-right border-left">
-      <app-dev-mode></app-dev-mode>
-    </div>
-    <div class="col  border-right">
-      <h4>Pagination</h4>
-      <button class="item" (click)="paginationModeOnClick()" id="paginationBtn">Choose Last page</button><br />
-      <label class="item">OR insert link of the last page: </label><br />
-      <input class="item" [(ngModel)]="sendLastPageUrl" placeholder="ExampleDomain" type="text" id="fname"
-        name="fname" />
-      <button (click)="InsertUrlOfLastPageOnClick()">OK</button>
-    </div>
-    <div class="col">
-      <h4>Export all</h4>
-      <button (click)="exportBtnOnClick()">Click!</button>
-    </div>
-  </div>
-</div>
 <div crossorigin="anonymous" class="content" (click)="elementsOnClick($event)"
   (mouseover)="onMouseOverHighliteElement($event)" (mouseout)="onMouseOut($event)" [innerHTML]="display"></div>

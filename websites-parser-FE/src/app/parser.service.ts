@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { saveAs } from 'file-saver';
+import { DomSanitizer} from '@angular/platform-browser';
 
 @Injectable({
   providedIn: 'root',
@@ -10,13 +10,14 @@ export class ParserService {
   displayHTML = 'test';
 
 
-  private sendHtmlUrl = 'http://localhost:8080/send-html';
+  sendHtmlUrl = 'http://localhost:8080/send-html';
 
   private lastPage = 'http://localhost:8080/last-page';
 
   private getInfoUrl = 'http://localhost:8080/get-info-url'
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private sanitizer: DomSanitizer) {
+  }
 
 
   fetchHtmlFromUrl(webUrl: string): Observable<string> {
@@ -31,17 +32,18 @@ export class ParserService {
     return this.http.post<string>(this.sendHtmlUrl, webUrl, httpOptions);
   }
 
-  retrieveAllPages(paginationTagString: string | null): string[] {
+  retrieveAllPages(paginationHref: string | null): string[] {
     let allPagesHtml: string[] = [];
     //console.log(paginationTagString)
-    this.http.post<string[]>(this.lastPage, paginationTagString).subscribe({
+    this.http.post<string[]>(this.lastPage, paginationHref).subscribe({
       next: (data: string[]) => {
-        //console.log(data)
+        console.log(data)
         data.forEach(item => allPagesHtml.push(item));
         alert("done");
+        alert(allPagesHtml.length + " length of all pages");
       },
       error: (error) => {
-
+        alert(error);
         console.error('There was an error!', error);
       },
     });;
@@ -55,7 +57,7 @@ export class ParserService {
         'Content-Type': 'application/json' // Set content type
       }),
       responseType: 'text' as 'json' // Specify response type as text
-     // params: new HttpParams().set('param1', 'value1')
+      // params: new HttpParams().set('param1', 'value1')
 
     };
     alert(map);

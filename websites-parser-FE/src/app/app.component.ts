@@ -1,5 +1,6 @@
-import { Component, inject, Renderer2, RendererStyleFlags2, HostListener, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, Renderer2, RendererStyleFlags2, HostListener, ChangeDetectorRef, ViewEncapsulation } from '@angular/core';
 import { DevModeComponent } from './dev-mode/dev-mode.component';
+import { DisplayComponent } from './display/display.component';
 import { ParserService } from './parser.service';
 import { TergetedItemService } from './targeted-item.service';
 import { PaginationService } from './pagination.service';
@@ -12,10 +13,10 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-parser',
   templateUrl: './app.html',
-  imports: [FormsModule, CommonModule, DevModeComponent],
+  styleUrl: "../styles.css",
+  imports: [FormsModule, CommonModule, DevModeComponent, DisplayComponent],
   standalone: true,
   providers: [Website]
-
 })
 export class ParserComponent {
   parserService = inject(ParserService);
@@ -24,7 +25,8 @@ export class ParserComponent {
   display: SafeHtml | undefined;
   sendUrl: string = '';
   sendLastPageUrl: string = '';
-  isOpen = true;  // The visibility of the sliding section
+  isOpen = true;
+
 
   private ifPaginationMode: boolean = false;
 
@@ -63,7 +65,6 @@ export class ParserComponent {
   }
 
   htmlOnClick(): void {
-    console.log("testtest", this.sendUrl);
     this.parserService.fetchHtmlFromUrl(this.sendUrl).subscribe({
       next: (data: string) => {
         this.display = this.sanitizer.bypassSecurityTrustHtml(data);
@@ -78,7 +79,6 @@ export class ParserComponent {
   paginationOnClick(event: MouseEvent): void {
     event.preventDefault();
     const target = event.target as HTMLElement;
-    const htmlContent = target.outerHTML;
     let hrefAttr = target.getAttribute("href");
     this.website.setAllPagesHtml(this.parserService.retrieveAllPages(hrefAttr));
   }
@@ -154,16 +154,13 @@ export class ParserComponent {
       if (target) {
 
         const items = this.paginationService.getFromAllPagesTargetFlow(target, this.website.getAllPagesHtml());
+        console.log("we have so many pages now ", this.website.getAllPagesHtml().length);
         items.forEach((nodeList, index) => {
           nodeList.forEach((item: Element) => {
             this.renderer.setStyle(item, 'color', 'red', RendererStyleFlags2.Important);
             (item as HTMLElement).style.color = 'red';
             this.renderer.setStyle(item, 'color', 'red', RendererStyleFlags2.Important);
             arr.push(this.tergetedItemService.fetchInfoFromChosenItem(item));
-            this.renderer.setStyle(item, 'color', 'red', RendererStyleFlags2.Important);
-           // (item as HTMLElement).style.color = 'red';
-            console.log("added as red")
-            this.renderer.setStyle(item, 'color', 'red', RendererStyleFlags2.Important);
             this.renderer.setStyle(item, 'color', 'red', RendererStyleFlags2.Important);
             this.renderer.setStyle(item, 'color', 'red', RendererStyleFlags2.Important);
           });
@@ -193,5 +190,6 @@ export class ParserComponent {
   template: `<app-parser></app-parser>`,
   standalone: true,
   imports: [ParserComponent],
+  encapsulation: ViewEncapsulation.Emulated
 })
 export class AppComponent { }

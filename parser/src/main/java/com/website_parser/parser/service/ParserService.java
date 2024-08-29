@@ -6,12 +6,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.*;
 import org.springframework.stereotype.Service;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static com.website_parser.parser.util.CssUtil.cssLinkToStyle;
 
 
 @Service
@@ -31,11 +32,12 @@ public class ParserService {
 
     }
 
-    public String getInitialHtmlFromUrl(String url) throws MalformedURLException {
+    public String getInitialHtmlFromUrl(String url) throws Exception {
         Website websiteCache = cacheService.getWebsiteCache(url);
-        String htmlContent = null;
+        String htmlContent;
         if (websiteCache != null) {
             website = websiteCache;
+            System.out.println("Cached pages:::   " + website.getPages().size());
             htmlContent = websiteCache.getInitialHtml();
         } else {
             WebDriver driver = driverPool.getDriverPool();
@@ -44,8 +46,9 @@ public class ParserService {
             Scanner scanner = new Scanner(System.in); //TODO change it to FE pressing of enter
             String s = scanner.nextLine();
             if (!s.isEmpty()) {
-                htmlContent = driver.getPageSource();
-                htmlContent = htmlContent.replaceAll("(?s)<header[^>]*>.*?</header>", "");
+               String driverPageSource = driver.getPageSource();
+                htmlContent = driverPageSource.replaceAll("(?s)<header[^>]*>.*?</header>", "");
+                htmlContent = cssLinkToStyle(htmlContent, new URL(url));
                 website = Website.builder().websiteUrl(new URL(url)).initialHtml(htmlContent).pages(new HashMap<>()).build();
                 cacheService.setWebsiteCache(url, website);
             }
@@ -54,17 +57,9 @@ public class ParserService {
         return htmlContent;
     }
 
-
-    private String getLastPageWithHost(String lastPage) {
-        if (!lastPage.contains("http")) {
-            return website.getWebsiteUrl().getProtocol() + "://" + website.getWebsiteUrl().getHost() + lastPage;
-        }
-        return lastPage;
-    }
-
     public List<String> getHtmlOfAllPagesBasedOnLastPage(String lastPage) throws ExecutionException, InterruptedException {
         AtomicInteger successfulCount = new AtomicInteger(0);
-        ArrayList<String> allPageUrls = UrlUtil.predictAllUrls(getLastPageWithHost(lastPage));
+        ArrayList<String> allPageUrls = UrlUtil.predictAllUrls(UrlUtil.verifyHost(lastPage, website.getWebsiteUrl()));
         List<CompletableFuture<Void>> futures = new ArrayList<>();
         CompletableFuture<List<String>> resultFuture = null;
         Map<String, String> htmlPagesMap = new HashMap<>();
@@ -77,8 +72,7 @@ public class ParserService {
                         // Page is not in the cache, so we retrieve it via WebDriver
                         String htmlPage = retrievePage(url, driverMulti);
                         htmlPagesMap.put(url, htmlPage);
-                    }
-                    else{
+                    } else {
                         htmlPagesMap.put(url, website.getPages().get(url));
                     }
                     return null;
@@ -98,11 +92,7 @@ public class ParserService {
             }
             CompletableFuture<Void> allOf = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
             resultFuture = allOf.thenApply(v -> {
-                //   Optional.of(website).map(Website::getPages).ifPresent(map-> map.putAll(htmlPagesMap));
-              //  website.getPages().putAll(htmlPagesMap);
-//                website.setPages(stringStringMap);
-                website.setPages(htmlPagesMap);
-               // website.getPages().putAll(htmlPagesMap);
+                website.getPages().putAll(htmlPagesMap);
                 cacheService.setWebsiteCache(website.getWebsiteUrl().toString(), website);
                 log.info("All tasks completed. Total successful: {}", successfulCount.get());
                 log.info("HTML list size: {}", website.getPages().entrySet().size());
@@ -124,6 +114,7 @@ public class ParserService {
             driver.get(url);
         } catch (WebDriverException e) {
             driver = driverPool.reconnectToBrowser(driver);
+            driver.get(url);
         }
         System.out.println(url);
         return driver.getPageSource();

@@ -1,7 +1,6 @@
 package com.website_parser.parser.service;
 
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.stereotype.Service;
@@ -18,6 +17,17 @@ public class WebDriverPool {
     private static final String userAgent = "user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36";
 
     public void addToPool() {
+        for (int i = 0; i < MAX_WEBDRIVERS; i++) {
+            try {
+                driverPool.add(getChromeDriver());
+            } catch (IllegalStateException e) {
+                System.out.println("Queue is full, release all drivers");
+                releaseAllDrivers(driverPool.stream().toList());
+            }
+        }
+    }
+
+    public WebDriver getChromeDriver() {
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--start-maximized");
         options.addArguments("--disable-web-security");
@@ -26,14 +36,7 @@ public class WebDriverPool {
         options.addArguments("--disable-search-engine-choice-screen");
         // options.addArguments("--headless");
         options.addArguments(userAgent);
-        for (int i = 0; i < MAX_WEBDRIVERS; i++) {
-            try {
-                driverPool.add(new ChromeDriver(options));
-            } catch (IllegalStateException e) {
-                System.out.println("Queue is full, release all drivers");
-                releaseAllDrivers(driverPool.stream().toList());
-            }
-        }
+        return new ChromeDriver(options);
     }
 
     public WebDriver getDriverPool() {
@@ -61,9 +64,7 @@ public class WebDriverPool {
         if (driver != null) {
             driver.quit();
         }
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments(userAgent);
-        return new ChromeDriver(options);
+        return getChromeDriver();
     }
 
 }

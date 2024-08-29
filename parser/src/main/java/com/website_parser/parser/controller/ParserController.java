@@ -18,14 +18,9 @@ public class ParserController {
     private final SavingService savingService;
 
     @PostMapping("/send-html")
-    public String getHtml(@RequestBody String url) throws MalformedURLException {
+    public String getHtml(@RequestBody String url) throws Exception {
         System.out.println("testtest");
         return parserService.getInitialHtmlFromUrl(url);
-    }
-
-    @PostMapping("/pagination-tag")
-    public List<String> getAllPages(@RequestBody String paginationTag){
-        return parserService.getHtmlOfAllPages(paginationTag);
     }
 
     @PostMapping("/last-page")

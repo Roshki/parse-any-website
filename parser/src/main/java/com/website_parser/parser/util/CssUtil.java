@@ -25,7 +25,7 @@ public class CssUtil {
             try {
                 cssContent = getContent(verifiedHost);
             } catch (Exception e) {
-                log.warn("not possible to fetch css");
+                log.warn("not possible to fetch css + {}", verifiedHost);
             }
             Element styleElement = doc.createElement("style");
             if (cssContent != null) {

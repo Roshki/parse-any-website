@@ -1,6 +1,5 @@
 import { Component, inject, Renderer2, RendererStyleFlags2, HostListener, ChangeDetectorRef, ViewEncapsulation } from '@angular/core';
 import { DevModeComponent } from './dev-mode/dev-mode.component';
-import { DisplayComponent } from './display/display.component';
 import { ParserService } from './parser.service';
 import { TergetedItemService } from './targeted-item.service';
 import { PaginationService } from './pagination.service';
@@ -14,7 +13,8 @@ import { CommonModule } from '@angular/common';
   selector: 'app-parser',
   templateUrl: './app.html',
   styleUrl: "../styles.css",
-  imports: [FormsModule, CommonModule, DevModeComponent, DisplayComponent],
+  imports: [FormsModule, CommonModule, DevModeComponent],
+  encapsulation: ViewEncapsulation.Emulated,
   standalone: true,
   providers: [Website]
 })

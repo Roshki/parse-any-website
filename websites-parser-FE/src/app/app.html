@@ -1,25 +1,24 @@
 <header class="top-content">
   <div class="item">
     <!-- <app-dev-mode *ngIf="ifDevMode"></app-dev-mode> -->
-    <label class="item" for="fname">URL: </label>
-    <input class="item" [(ngModel)]="sendUrl" type="text" id="fname" name="fname" style="width: 300px" /><br />
+    <input class="item" placeholder="URL" [(ngModel)]="sendUrl" type="text" id="fname" name="fname" style="width: 300px" />
     <button class="item" (click)="htmlOnClick()">Open Website</button>
   </div>
-  <button (click)="toggleSlide()" id="slide-toggle-btn" class="btn btn-light mt-2">Tools</button>
+  <button (click)="toggleSlide()" id="slide-toggle-btn" class="item btn btn-light mt-2" style="margin-right: 100%">Tools</button>
   <div [ngClass]="{ 'active': isOpen}" class="tools container text-center" >
     <div class="row">
-      <div class="col " style="margin: auto; ">
+      <div class="col ">
         <app-dev-mode></app-dev-mode>
       </div>
-      <div class="col " style="margin: auto;">
+      <div class="col " >
         <h4>Pagination</h4>
         <button class="item" (click)="paginationModeOnClick()" id="paginationBtn">Choose Last page</button><br />
-        <label class="item">OR insert link of the last page: </label><br />
-        <input class="item" [(ngModel)]="sendLastPageUrl" placeholder="ExampleDomain" type="text" id="fname"
+        <label class="item">OR </label><br />
+        <input [(ngModel)]="sendLastPageUrl" placeholder="Url of last page" type="text" id="fname"
           name="fname" />
         <button (click)="InsertUrlOfLastPageOnClick()">OK</button>
       </div>
-      <div class="col" style="margin: auto;">
+      <div class="col" >
         <h4>Export all</h4>
         <button (click)="exportBtnOnClick()">Click!</button>
       </div>

@@ -1,4 +1,4 @@
-import { Component, inject, Renderer2, RendererStyleFlags2, HostListener, ChangeDetectorRef, ViewEncapsulation } from '@angular/core';
+import { Component, inject, Renderer2, RendererStyleFlags2, HostListener, ChangeDetectorRef, ViewEncapsulation} from '@angular/core';
 import { DevModeComponent } from './dev-mode/dev-mode.component';
 import { ParserService } from './parser.service';
 import { TergetedItemService } from './targeted-item.service';
@@ -7,13 +7,14 @@ import { Website } from './models/website.model';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { SideListComponent } from './side-list/side-list.component';
 
 
 @Component({
   selector: 'app-parser',
   templateUrl: './app.html',
   styleUrl: "../styles.css",
-  imports: [FormsModule, CommonModule, DevModeComponent],
+  imports: [FormsModule, CommonModule, DevModeComponent, SideListComponent],
   encapsulation: ViewEncapsulation.Emulated,
   standalone: true,
   providers: [Website]

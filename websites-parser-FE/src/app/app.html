@@ -1,10 +1,10 @@
 <header class="top-content">
   <div class="item">
     <!-- <app-dev-mode *ngIf="ifDevMode"></app-dev-mode> -->
-    <input class="item" placeholder="URL" [(ngModel)]="sendUrl" type="text" id="fname" name="fname" style="width: 300px" />
+    <input class="item form-control" placeholder="URL" [(ngModel)]="sendUrl" type="text" style="width: 300px" />
     <button class="item" (click)="htmlOnClick()">Open Website</button>
   </div>
-  <button (click)="toggleSlide()" id="slide-toggle-btn" class="item btn btn-light mt-2" style="margin-right: 100%">Tools</button>
+  <button class="item" (click)="toggleSlide()" id="slide-toggle-btn">Tools</button>
   <div [ngClass]="{ 'active': isOpen}" class="tools container text-center" >
     <div class="row">
       <div class="col ">
@@ -14,8 +14,7 @@
         <h4>Pagination</h4>
         <button class="item" (click)="paginationModeOnClick()" id="paginationBtn">Choose Last page</button><br />
         <label class="item">OR </label><br />
-        <input [(ngModel)]="sendLastPageUrl" placeholder="Url of last page" type="text" id="fname"
-          name="fname" />
+        <input class="item form-control" [(ngModel)]="sendLastPageUrl" placeholder="Url of last page" type="text" />
         <button (click)="InsertUrlOfLastPageOnClick()">OK</button>
       </div>
       <div class="col" >
@@ -29,5 +28,9 @@
     <p>This section slides down when the button is clicked.</p>
   </div> -->
 </header>
+<div *ngIf="!display" class="voluminous-text" style="margin-top:200px;margin-left: 20px; font-size: 30px;">
+  <p>Parse any website with pagination<br><br>Infinite scrolling is coming soon.</p>
+</div>
 <div crossorigin="anonymous" class="content" (click)="elementsOnClick($event)"
-  (mouseover)="onMouseOverHighliteElement($event)" (mouseout)="onMouseOut($event)" [innerHTML]="display"></div>
+  (mouseover)="onMouseOverHighliteElement($event)" (mouseout)="onMouseOut($event)" [innerHTML]="display">
+</div>

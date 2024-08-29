@@ -1,7 +1,6 @@
 package com.website_parser.parser.config;
 
 import com.website_parser.parser.model.Website;
-import org.ehcache.Cache;
 import org.ehcache.PersistentCacheManager;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
 import org.ehcache.config.builders.CacheManagerBuilder;
@@ -29,14 +28,4 @@ public class EhCacheConfig {
                         .withExpiry(ExpiryPolicyBuilder.timeToLiveExpiration(Duration.ofDays(7))).build())
                 .build(true);
     }
-
-//    @Bean
-//    public Cache<String, Website> websiteCache(PersistentCacheManager persistentCacheManager) {
-//
-//        return persistentCacheManager.createCache("websiteCache",
-//                CacheConfigurationBuilder.newCacheConfigurationBuilder(String.class, Website.class,
-//                        ResourcePoolsBuilder.newResourcePoolsBuilder()
-//                                .heap(200, MemoryUnit.GB)
-//                                .disk(200, MemoryUnit.GB, true)));
-//    }
 }

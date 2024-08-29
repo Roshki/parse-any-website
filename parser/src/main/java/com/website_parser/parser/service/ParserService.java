@@ -12,7 +12,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.website_parser.parser.util.CssUtil.cssLinkToStyle;
+import static com.website_parser.parser.util.CssUtil.cssLinksToStyle;
 
 
 @Service
@@ -48,7 +48,7 @@ public class ParserService {
             if (!s.isEmpty()) {
                String driverPageSource = driver.getPageSource();
                 htmlContent = driverPageSource.replaceAll("(?s)<header[^>]*>.*?</header>", "");
-                htmlContent = cssLinkToStyle(htmlContent, new URL(url));
+                htmlContent = cssLinksToStyle(htmlContent, new URL(url));
                 website = Website.builder().websiteUrl(new URL(url)).initialHtml(htmlContent).pages(new HashMap<>()).build();
                 cacheService.setWebsiteCache(url, website);
             }

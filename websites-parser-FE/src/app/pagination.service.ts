@@ -13,9 +13,7 @@ export class PaginationService {
     const parser = new DOMParser();
     if (AllPagesHtml.length > 0) {
       AllPagesHtml.forEach(page => {
-         //let tempDiv = document.createElement('div');
          const doc = parser.parseFromString(page, 'text/html');
-         // tempDiv.innerHTML = page;
          elements.push(this.getElementsFromPage(`[${tagId}]`, undefined, doc));
       }
       );
@@ -31,21 +29,17 @@ export class PaginationService {
     let classSelector = target?.className.split(' ').join('.');
     let parentClassSelector = target?.parentElement?.className.split(' ').join('.');
     const parser = new DOMParser();
-
-    elements.push(this.getElementsFromPage(`.${classSelector}`, `.${parentClassSelector}`, document));
     if (AllPagesHtml.length > 0) {
       console.log(AllPagesHtml.length)
       AllPagesHtml.forEach(page => {
-        //let tempDiv = document.createElement('div');
         const doc = parser.parseFromString(page, 'text/html');
-        // tempDiv.innerHTML = page;
         elements.push(this.getElementsFromPage(`.${classSelector}`, `.${parentClassSelector}`, doc));
-        // tempDiv.remove();
+
       }
       );
+      return elements;
     }
-    //  elements.push(this.getElementsFromPage(`.${classSelector}`, `.${parentClassSelector}`, document));
-    //console.log(elements);
+    elements.push(this.getElementsFromPage(`.${classSelector}`, `.${parentClassSelector}`, document));
     return elements;
   }
 

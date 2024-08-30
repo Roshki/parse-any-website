@@ -96,7 +96,7 @@ public class ParserService {
                 cacheService.setWebsiteCache(website.getWebsiteUrl().toString(), website);
                 log.info("All tasks completed. Total successful: {}", successfulCount.get());
                 log.info("HTML list size: {}", website.getPages().entrySet().size());
-                return website.getPages().values().stream().toList();
+                return htmlPagesMap.values().stream().toList();
             });
         }
         return resultFuture.get();

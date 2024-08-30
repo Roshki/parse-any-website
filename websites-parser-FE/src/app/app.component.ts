@@ -28,7 +28,7 @@ export class ParserComponent {
   isOpen = true;
 
 
-  private ifPaginationMode: boolean = false;
+  public ifPaginationMode: boolean = false;
 
 
   constructor(private sanitizer: DomSanitizer, private renderer: Renderer2, private website: Website, private cd: ChangeDetectorRef) { }
@@ -95,7 +95,6 @@ export class ParserComponent {
     const items = document.querySelectorAll('[class*="pagin"]');
     if (this.ifPaginationMode == false) {
       this.ifPaginationMode = true;
-      this.renderer.setStyle(button, 'color', 'red');
       items.forEach(element => {
         this.renderer.setStyle(element, 'border', '2px solid gray');
       });

@@ -1,12 +1,7 @@
-<!-- <div class="form-container active">
-      <form>
-        <label for="tagId">attribute:</label>
-        <input placeholder="test=&quot;test&quot;" class="form-control" type="text" id="tagId" name="tagId" [(ngModel)]="tagId">
-        <button (click)="sendTagIdOnClick()" id="devModeBtn" class="btn btn-secondary" type="submit">Send</button>
-      </form>
-    </div> -->
-
 <div>
   <h4>Find by attribute:</h4>
-      <input class="item" placeholder="test=&quot;test&quot;" type="text" [(ngModel)]="tagId"><br>
-      <button class="item" (click)="sendTagIdOnClick()" id="devModeBtn" type="submit">OK</button></div>
+  <div class="d-flex align-items-center me-2">
+  <input class="form-control me-2" placeholder="class=&quot;class-name&quot;" type="text" [(ngModel)]="tagId">
+  <button class="btn btn-secondary btn-me-2" (click)="sendTagIdOnClick()" id="devModeBtn"
+    type="submit">OK</button></div>
+</div>

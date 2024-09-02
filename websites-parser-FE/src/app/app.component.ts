@@ -9,13 +9,14 @@ import { FormsModule, Validators, FormControl, ReactiveFormsModule } from '@angu
 import { CommonModule } from '@angular/common';
 import { environment } from './../environments/environment';
 import { ListComponent } from './list/list.component';
+import { WebsiteContentComponent } from './website-content/website-content.component';
 
 
 @Component({
   selector: 'app-parser',
   templateUrl: './app.html',
   styleUrl: "../styles.css",
-  imports: [FormsModule, CommonModule, DevModeComponent, ReactiveFormsModule, ListComponent],
+  imports: [FormsModule, CommonModule, DevModeComponent, ReactiveFormsModule, ListComponent, WebsiteContentComponent],
   encapsulation: ViewEncapsulation.Emulated,
   standalone: true,
   providers: [Website],
@@ -124,66 +125,65 @@ export class ParserComponent {
   }
 
 
-  onMouseOverHighliteElement(event: MouseEvent) {
-    event.preventDefault();
-    const target = event.target as HTMLElement;
-    const src = target.getAttribute('src');
-    const parentTarget = target?.parentElement?.className;
-    if (target || parentTarget) {
-      if (target.className.length > 0 || parentTarget) {
-        this.renderer.setStyle(target, 'background-color', 'rgba(255, 255, 0, 0.5)');
-        ;
-      }
-    }
-  }
-  getSimilarElementsAmnt(target: HTMLElement) {
-    throw new Error('Method not implemented.');
-  }
+  // onMouseOverHighliteElement(event: MouseEvent) {
+  //   event.preventDefault();
+  //   const target = event.target as HTMLElement;
+  //   const src = target.getAttribute('src');
+  //   const parentTarget = target?.parentElement?.className;
+  //   if (target || parentTarget) {
+  //     if (target.className.length > 0 || parentTarget) {
+  //       this.renderer.setStyle(target, 'background-color', 'rgba(255, 255, 0, 0.5)');
+  //       ;
+  //     }
+  //   }
+  // }
+  // getSimilarElementsAmnt(target: HTMLElement) {
+  //   throw new Error('Method not implemented.');
+  // }
 
-  onMouseOut(event: MouseEvent) {
-    event.preventDefault();
-    const target = event.target as HTMLElement;
-    const children = document.querySelectorAll('*');
+  // onMouseOut(event: MouseEvent) {
+  //   event.preventDefault();
+  //   const target = event.target as HTMLElement;
+  //   const children = document.querySelectorAll('*');
 
-    if (target) {
-      children.forEach(child => {
+  //   if (target) {
+  //     children.forEach(child => {
 
-        this.renderer.removeStyle(child, 'background-color');
-      });
-    }
-  }
+  //       this.renderer.removeStyle(child, 'background-color');
+  //     });
+  //   }
+  // }
 
 
-  elementsOnClick(event: MouseEvent): void {
-    event.preventDefault();
+  // elementsOnClick(event: MouseEvent): void {
+  //   event.preventDefault();
 
-    if (this.ifPaginationMode == true) {
-      this.paginationOnClick(event);
-    }
-    else {
-      const target = event.target as HTMLElement;
-      const arr: string[] = [];
-      if (target) {
+  //   if (this.ifPaginationMode == true) {
+  //     this.paginationOnClick(event);
+  //   }
+  //   else {
+  //     const target = event.target as HTMLElement;
+  //     const arr: string[] = [];
+  //     if (target) {
 
-        const items = this.paginationService.getFromAllPagesTargetFlow(target, this.website.getAllPagesHtml());
-        console.log("we have so many pages now ", this.website.getAllPagesHtml().length);
-        items.forEach((nodeList) => {
-          nodeList.forEach((item: Element) => {
-            arr.push(this.tergetedItemService.fetchInfoFromChosenItem(item));
-            this.renderer.setStyle(item, 'color', 'red', RendererStyleFlags2.Important);
-          });
-        });
-      }
+  //       const items = this.paginationService.getFromAllPagesTargetFlow(target, this.website.getAllPagesHtml());
+  //       console.log("we have so many pages now ", this.website.getAllPagesHtml().length);
+  //       items.forEach((nodeList) => {
+  //         nodeList.forEach((item: Element) => {
+  //           arr.push(this.tergetedItemService.fetchInfoFromChosenItem(item));
+  //           this.renderer.setStyle(item, 'color', 'red', RendererStyleFlags2.Important);
+  //         });
+  //       });
+  //     }
 
-      const uniqueSet = new Set(arr);
-      this.website.setInformation(this.website.getColumIndex().toString(), Array.from(uniqueSet));
-      this.listItems = Array.from(this.website.getInformation()).map(([key, values]) => ({ key, values }));
-      let columnIndex = this.website.getColumIndex();
-      this.website.setColumIndex(columnIndex + 1);
-      console.log("added new ", this.website.getInformation());
+  //     const uniqueSet = new Set(arr);
+  //     this.website.setInformation(this.website.getColumIndex().toString(), Array.from(uniqueSet));
+  //     let columnIndex = this.website.getColumIndex();
+  //     this.website.setColumIndex(columnIndex + 1);
+  //     console.log("added new ", this.website.getInformation());
 
-    }
-  }
+  //   }
+  // }
 
   exportBtnOnClick(): void {
     this.parserService.sendInfo(this.website.getInformation());

@@ -20,7 +20,3 @@ body {
 #sendUrlInput:focus{
   border: none;
 }
-
-:root {
-  color-scheme: only light;
-}

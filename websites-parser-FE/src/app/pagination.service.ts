@@ -62,30 +62,4 @@ export class PaginationService {
     return items;
   }
 
-  // private getUniqueElements(selector: string, div: Element): Element[] {
-  //   // Query all elements matching the selector
-  //   const nodeList = div.querySelectorAll(selector);
-  
-  //   // Create a Set to store unique elements
-  //   const uniqueElements = new Set<string>();
-  
-  //   // Array to store the unique elements
-  //   const uniqueArray: Element[] = [];
-  
-  //   // Convert NodeList to array and iterate over it
-  //   Array.from(nodeList).forEach(element => {
-  //     // Use outerHTML or another property for uniqueness check
-  //     const elementContent = element.outerHTML;
-  
-  //     // If the Set does not already contain this element, add it
-  //     if (!uniqueElements.has(elementContent)) {
-  //       uniqueElements.add(elementContent);
-  //       uniqueArray.push(element);
-  //     }
-  //   });
-  
-  //   return uniqueArray;
-  // }
-
-
 }

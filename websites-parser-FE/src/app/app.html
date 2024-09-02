@@ -41,7 +41,7 @@
     </div>
   </div>
 </nav>
-<app-list [display]="display"></app-list>
+<app-list [listItems]="listItems" [display]="display"></app-list>
 <!-- <app-website-content [display]="display"></app-website-content> -->
 <div crossorigin="anonymous" class="content" (click)="elementsOnClick($event)"
   (mouseover)="onMouseOverHighliteElement($event)" (mouseout)="onMouseOut($event)" *ngIf="display" [innerHTML]="display"

@@ -44,16 +44,16 @@ export class TergetedItemService {
       if (src) {
         itemStr += " " + src; // Append src from parent
       }
-      if (href) {
+     else if (href) {
         itemStr += " " + href;
       }
     }
-    if (childElement) {
+   else if (childElement) {
 
       if (src) {
         itemStr += " " + src; // Append src from child
       }
-      if (href) {
+     else if (href) {
         itemStr += " " + href;
       }
     }

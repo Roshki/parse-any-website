@@ -9,14 +9,13 @@ import { FormsModule, Validators, FormControl, ReactiveFormsModule } from '@angu
 import { CommonModule } from '@angular/common';
 import { environment } from './../environments/environment';
 import { ListComponent } from './list/list.component';
-import { WebsiteContentComponent } from './website-content/website-content.component';
 
 
 @Component({
   selector: 'app-parser',
   templateUrl: './app.html',
   styleUrl: "../styles.css",
-  imports: [FormsModule, CommonModule, DevModeComponent, ReactiveFormsModule, ListComponent, WebsiteContentComponent],
+  imports: [FormsModule, CommonModule, DevModeComponent, ReactiveFormsModule, ListComponent],
   encapsulation: ViewEncapsulation.Emulated,
   standalone: true,
   providers: [Website],
@@ -26,6 +25,7 @@ export class ParserComponent {
   tergetedItemService = inject(TergetedItemService);
   paginationService = inject(PaginationService);
   display: SafeHtml | undefined;
+  listItems: { key: string, values: string[] }[] = [];
   // sendUrl: string = ''
   sendLastPageUrl: string = '';
   sendUrl = new FormControl('', [
@@ -177,6 +177,7 @@ export class ParserComponent {
 
       const uniqueSet = new Set(arr);
       this.website.setInformation(this.website.getColumIndex().toString(), Array.from(uniqueSet));
+      this.listItems = Array.from(this.website.getInformation()).map(([key, values]) => ({ key, values }));
       let columnIndex = this.website.getColumIndex();
       this.website.setColumIndex(columnIndex + 1);
       console.log("added new ", this.website.getInformation());

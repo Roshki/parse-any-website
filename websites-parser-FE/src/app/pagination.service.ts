@@ -22,9 +22,10 @@ export class PaginationService {
           elements.push(this.getElementsFromPage(`[${tagId}]`, undefined, doc));
         }
         );
-        return elements;
+         return elements;
       }
       elements.push(this.getElementsFromPage(`[${tagId}]`, undefined, docRoot));
+
       return elements;
     }
     throw Error;
@@ -38,17 +39,17 @@ export class PaginationService {
     let docRoot = document.querySelector("app-website-content")?.shadowRoot;
 
     if (docRoot) {
+     // elements.push(this.getElementsFromPage(`.${classSelector}`, `.${parentClassSelector}`, docRoot));
       if (AllPagesHtml.length > 0) {
-console.log("allPagesHtml")
         console.log(AllPagesHtml.length)
         AllPagesHtml.forEach(page => {
           const doc = parser.parseFromString(page, 'text/html');
           elements.push(this.getElementsFromPage(`.${classSelector}`, `.${parentClassSelector}`, doc));
         }
         );
-        return elements;
+         return elements;
       }
-      elements.push(this.getElementsFromPage(`.${classSelector}`, `.${parentClassSelector}`, docRoot));
+       elements.push(this.getElementsFromPage(`.${classSelector}`, `.${parentClassSelector}`, docRoot));
 
       return elements;
     }
@@ -59,11 +60,11 @@ console.log("allPagesHtml")
   private getElementsFromPage(selector: string, parentClassSelector: string | undefined, div: Document | ShadowRoot): NodeListOf<Element> {
     let items;
     try {
-      items = div?.querySelectorAll(selector);
+      items = div.querySelectorAll(selector);
     }
     catch (error) {
       if (parentClassSelector != undefined) {
-        items = div?.querySelectorAll(parentClassSelector);
+        items = div.querySelectorAll(parentClassSelector);
       }
       else throw Error;
     }

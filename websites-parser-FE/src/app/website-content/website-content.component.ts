@@ -73,8 +73,6 @@ export class WebsiteContentComponent {
         items.forEach((nodeList) => {
           nodeList.forEach((item: Element) => {
             (item as HTMLElement).style.color = 'red';
-            console.log(item);
-           // this.renderer.setStyle(docrRoot.shadowRoot?.querySelector(item.className), 'color', 'red', RendererStyleFlags2.Important);
             arr.push(this.tergetedItemService.fetchInfoFromChosenItem(item));
             this.renderer.setStyle(item, 'color', 'red', RendererStyleFlags2.Important);
             this.renderer.setStyle(item, 'color', 'red', RendererStyleFlags2.Important);

@@ -11,20 +11,23 @@ export class PaginationService {
   getFromAllPagesDevMode(tagId: string, AllPagesHtml: string[]): NodeListOf<Element>[] {
     let elements: NodeListOf<Element>[] = [];
     const parser = new DOMParser();
+    let docRoot = document.querySelector("app-website-content")?.shadowRoot;
 
-    if (AllPagesHtml.length > 0) {
-      AllPagesHtml.forEach(page => {
-        //let tempDiv = document.createElement('div');
-        const doc = parser.parseFromString(page, 'text/html');
-        // tempDiv.innerHTML = page;
-        elements.push(this.getElementsFromPage(`[${tagId}]`, undefined, doc));
+    if (docRoot) {
+      if (AllPagesHtml.length > 0) {
+        AllPagesHtml.forEach(page => {
+          //let tempDiv = document.createElement('div');
+          const doc = parser.parseFromString(page, 'text/html');
+          // tempDiv.innerHTML = page;
+          elements.push(this.getElementsFromPage(`[${tagId}]`, undefined, docRoot));
+        }
+        );
+        return elements;
       }
-      );
+      elements.push(this.getElementsFromPage(`[${tagId}]`, undefined, docRoot));
       return elements;
     }
-    elements.push(this.getElementsFromPage(`[${tagId}]`, undefined, document));
-    return elements;
-
+    throw Error;
   }
 
   getFromAllPagesTargetFlow(target: HTMLElement, AllPagesHtml: string[]): NodeListOf<Element>[] {
@@ -32,30 +35,35 @@ export class PaginationService {
     let classSelector = target?.className.split(' ').join('.');
     let parentClassSelector = target?.parentElement?.className.split(' ').join('.');
     const parser = new DOMParser();
+    let docRoot = document.querySelector("app-website-content")?.shadowRoot;
 
-    if (AllPagesHtml.length > 0) {
-      console.log(AllPagesHtml.length)
-      AllPagesHtml.forEach(page => {
-        const doc = parser.parseFromString(page, 'text/html');
-        elements.push(this.getElementsFromPage(`.${classSelector}`, `.${parentClassSelector}`, doc));
+    if (docRoot) {
+      if (AllPagesHtml.length > 0) {
+console.log("allPagesHtml")
+        console.log(AllPagesHtml.length)
+        AllPagesHtml.forEach(page => {
+          const doc = parser.parseFromString(page, 'text/html');
+          elements.push(this.getElementsFromPage(`.${classSelector}`, `.${parentClassSelector}`, doc));
+        }
+        );
+        return elements;
       }
-      );
+      elements.push(this.getElementsFromPage(`.${classSelector}`, `.${parentClassSelector}`, docRoot));
+
       return elements;
     }
-    elements.push(this.getElementsFromPage(`.${classSelector}`, `.${parentClassSelector}`, document));
-    
-    return elements;
+    throw Error;
   }
 
 
-  private getElementsFromPage(selector: string, parentClassSelector: string | undefined, div: Element | Document): NodeListOf<Element> {
+  private getElementsFromPage(selector: string, parentClassSelector: string | undefined, div: Document | ShadowRoot): NodeListOf<Element> {
     let items;
     try {
-      items = div.querySelectorAll(selector);
+      items = div?.querySelectorAll(selector);
     }
     catch (error) {
       if (parentClassSelector != undefined) {
-        items = div.querySelectorAll(parentClassSelector);
+        items = div?.querySelectorAll(parentClassSelector);
       }
       else throw Error;
     }
@@ -65,25 +73,25 @@ export class PaginationService {
   // private getUniqueElements(selector: string, div: Element): Element[] {
   //   // Query all elements matching the selector
   //   const nodeList = div.querySelectorAll(selector);
-  
+
   //   // Create a Set to store unique elements
   //   const uniqueElements = new Set<string>();
-  
+
   //   // Array to store the unique elements
   //   const uniqueArray: Element[] = [];
-  
+
   //   // Convert NodeList to array and iterate over it
   //   Array.from(nodeList).forEach(element => {
   //     // Use outerHTML or another property for uniqueness check
   //     const elementContent = element.outerHTML;
-  
+
   //     // If the Set does not already contain this element, add it
   //     if (!uniqueElements.has(elementContent)) {
   //       uniqueElements.add(elementContent);
   //       uniqueArray.push(element);
   //     }
   //   });
-  
+
   //   return uniqueArray;
   // }
 

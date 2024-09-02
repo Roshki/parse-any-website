@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, inject, RendererStyleFlags2, Renderer2, ViewEncapsulation } from '@angular/core';
-import {SafeHtml, DomSanitizer} from '@angular/platform-browser';
+import { SafeHtml, DomSanitizer } from '@angular/platform-browser';
 import { ParserService } from '../parser.service';
 import { PaginationService } from '../pagination.service';
 import { TergetedItemService } from '../targeted-item.service';
@@ -11,9 +11,8 @@ import { Website } from '../models/website.model';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './website-content.html',
-  encapsulation: ViewEncapsulation.Emulated,
-  styles: ``,
-  providers: [Website]
+  encapsulation: ViewEncapsulation.ShadowDom,
+  styles: ``
 })
 export class WebsiteContentComponent {
 
@@ -24,7 +23,7 @@ export class WebsiteContentComponent {
   @Input() display: SafeHtml | undefined;
   public ifPaginationMode: boolean = false;
 
-  constructor(private sanitizer: DomSanitizer, private renderer: Renderer2, private website: Website){}
+  constructor(private sanitizer: DomSanitizer, private renderer: Renderer2, private website: Website) { }
 
 
   onMouseOverHighliteElement(event: MouseEvent) {
@@ -40,43 +39,43 @@ export class WebsiteContentComponent {
     }
   }
 
-  paginationModeOnClick(): void {
-    const button = document.querySelector('#paginationBtn');
-    const items = document.querySelectorAll('[class*="pagin"]');
-    if (this.ifPaginationMode == false) {
-      this.ifPaginationMode = true;
-      items.forEach(element => {
-        this.renderer.setStyle(element, 'border', '2px solid gray');
-      });
-      return;
-    }
-    else {
-      this.ifPaginationMode = false;
-      this.renderer.removeStyle(button, 'color');
-      items.forEach(element => {
-        this.renderer.removeStyle(element, 'border');
-      });
-      return;
-    }
-  }
+  // paginationModeOnClick(): void {
+  //   const button = document.querySelector('#paginationBtn');
+  //   const items = document.querySelectorAll('[class*="pagin"]');
+  //   if (this.ifPaginationMode == false) {
+  //     this.ifPaginationMode = true;
+  //     items.forEach(element => {
+  //       this.renderer.setStyle(element, 'border', '2px solid gray');
+  //     });
+  //     return;
+  //   }
+  //   else {
+  //     this.ifPaginationMode = false;
+  //     this.renderer.removeStyle(button, 'color');
+  //     items.forEach(element => {
+  //       this.renderer.removeStyle(element, 'border');
+  //     });
+  //     return;
+  //   }
+  // }
 
 
   onMouseOut(event: MouseEvent) {
     event.preventDefault();
     const target = event.target as HTMLElement;
-    const children = document.querySelectorAll('*');
-
+    let docrRoot = document.querySelector("app-website-content") as HTMLElement;
+    const children = docrRoot.shadowRoot?.querySelectorAll('*');
     if (target) {
-      children.forEach(child => {
+      children?.forEach(child => {
 
         this.renderer.removeStyle(child, 'background-color');
       });
     }
   }
-  
+
   elementsOnClick(event: MouseEvent): void {
     event.preventDefault();
-
+console.log("checking:: "+ this.website.getAllPagesHtml());
     if (this.ifPaginationMode == true) {
       this.paginationOnClick(event);
     }
@@ -84,7 +83,6 @@ export class WebsiteContentComponent {
       const target = event.target as HTMLElement;
       const arr: string[] = [];
       if (target) {
-
         const items = this.paginationService.getFromAllPagesTargetFlow(target, this.website.getAllPagesHtml());
         console.log("we have so many pages now ", this.website.getAllPagesHtml().length);
         items.forEach((nodeList) => {

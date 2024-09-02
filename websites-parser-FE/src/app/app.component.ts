@@ -105,11 +105,12 @@ export class ParserComponent {
   }
 
   paginationModeOnClick(): void {
-    const button = document.querySelector('#paginationBtn');
-    const items = document.querySelectorAll('[class*="pagin"]');
+    let docRoot = document.querySelector("app-website-content")?.shadowRoot;
+    const button = docRoot?.querySelector('#paginationBtn');
+    const items = docRoot?.querySelectorAll('[class*="pagin"]');
     if (this.ifPaginationMode == false) {
       this.ifPaginationMode = true;
-      items.forEach(element => {
+      items?.forEach(element => {
         this.renderer.setStyle(element, 'border', '2px solid gray');
       });
       return;
@@ -117,7 +118,7 @@ export class ParserComponent {
     else {
       this.ifPaginationMode = false;
       this.renderer.removeStyle(button, 'color');
-      items.forEach(element => {
+      items?.forEach(element => {
         this.renderer.removeStyle(element, 'border');
       });
       return;

@@ -1,0 +1,49 @@
+
+.sticky-right-middle {
+    position: fixed;
+    right: 0;
+    top: 20%;
+    /* transform: translateY(50%); */
+    z-index: 9999; /* Ensures it overlaps other content */
+  }
+  
+  .list-group-item {
+    position: relative;
+  }
+  .btn-remove {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem; 
+    font-size: 0.6rem;
+    color: #6c757d; 
+    border: 1px solid #6c757d; 
+  }
+  .btn-remove:hover {
+    background-color: #e2e6ea; 
+    color: #495057; 
+  }
+  
+  .accordion-body {
+    max-height: 100px; 
+    overflow-y: auto;
+  }
+  
+  .btn-remove-group {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.6rem; 
+    color: #6c757d; 
+    border: 1px solid #6c757d; 
+    margin-right: 0.5rem; }
+  
+  .btn-remove-group:hover {
+    background-color: #e2e6ea; 
+    color: #495057;
+  }
+  .accordion-header {
+    display: flex;
+    align-items: center;
+  }
+  

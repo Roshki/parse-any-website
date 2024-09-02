@@ -11,10 +11,13 @@ export class PaginationService {
   getFromAllPagesDevMode(tagId: string, AllPagesHtml: string[]): NodeListOf<Element>[] {
     let elements: NodeListOf<Element>[] = [];
     const parser = new DOMParser();
+
     if (AllPagesHtml.length > 0) {
       AllPagesHtml.forEach(page => {
-         const doc = parser.parseFromString(page, 'text/html');
-         elements.push(this.getElementsFromPage(`[${tagId}]`, undefined, doc));
+        //let tempDiv = document.createElement('div');
+        const doc = parser.parseFromString(page, 'text/html');
+        // tempDiv.innerHTML = page;
+        elements.push(this.getElementsFromPage(`[${tagId}]`, undefined, doc));
       }
       );
       return elements;
@@ -29,19 +32,21 @@ export class PaginationService {
     let classSelector = target?.className.split(' ').join('.');
     let parentClassSelector = target?.parentElement?.className.split(' ').join('.');
     const parser = new DOMParser();
+
     if (AllPagesHtml.length > 0) {
       console.log(AllPagesHtml.length)
       AllPagesHtml.forEach(page => {
         const doc = parser.parseFromString(page, 'text/html');
         elements.push(this.getElementsFromPage(`.${classSelector}`, `.${parentClassSelector}`, doc));
-
       }
       );
       return elements;
     }
     elements.push(this.getElementsFromPage(`.${classSelector}`, `.${parentClassSelector}`, document));
+    
     return elements;
   }
+
 
   private getElementsFromPage(selector: string, parentClassSelector: string | undefined, div: Element | Document): NodeListOf<Element> {
     let items;
@@ -56,5 +61,31 @@ export class PaginationService {
     }
     return items;
   }
+
+  // private getUniqueElements(selector: string, div: Element): Element[] {
+  //   // Query all elements matching the selector
+  //   const nodeList = div.querySelectorAll(selector);
+  
+  //   // Create a Set to store unique elements
+  //   const uniqueElements = new Set<string>();
+  
+  //   // Array to store the unique elements
+  //   const uniqueArray: Element[] = [];
+  
+  //   // Convert NodeList to array and iterate over it
+  //   Array.from(nodeList).forEach(element => {
+  //     // Use outerHTML or another property for uniqueness check
+  //     const elementContent = element.outerHTML;
+  
+  //     // If the Set does not already contain this element, add it
+  //     if (!uniqueElements.has(elementContent)) {
+  //       uniqueElements.add(elementContent);
+  //       uniqueArray.push(element);
+  //     }
+  //   });
+  
+  //   return uniqueArray;
+  // }
+
 
 }

@@ -62,7 +62,7 @@ public class WebDriverPool {
     public WebDriver reconnectToBrowser(WebDriver driver) {
         System.out.println("reconnectToBrowser reconnecting....");
         if (driver != null) {
-            driver.quit();
+            driver.close();
         }
         return getChromeDriver();
     }

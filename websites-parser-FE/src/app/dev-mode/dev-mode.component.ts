@@ -23,14 +23,14 @@ export class DevModeComponent {
   sendTagIdOnClick() {
     let items =  this.paginationService.getFromAllPagesDevMode(this.tagId, this.website.getAllPagesHtml());
     const arr: string[] = [];
-    items.forEach((nodeList) => {
+    items?.forEach((nodeList) => {
       nodeList.forEach((item: Element) => {
         arr.push(this.verifierService.fetchInfoFromChosenItem(item));
         (item as HTMLElement).style.color = 'red';
       });
     });
     let columnIndex = this.website.getColumIndex();
-    this.website.getInformation().set(columnIndex.toString(), arr);
+    this.website.setInformation(columnIndex.toString(), arr);
    
    this.website.setColumIndex(columnIndex + 1);
     this.paginationService.getFromAllPagesDevMode(this.tagId, this.website.getAllPagesHtml())

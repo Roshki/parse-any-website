@@ -1,20 +1,23 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { DomSanitizer} from '@angular/platform-browser';
+import { DomSanitizer } from '@angular/platform-browser';
+import { environment } from '../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ParserService {
   displayHTML = 'test';
+  private parserServiceUrl = environment.parserServiceUrl;
+
+  sendHtmlUrl = this.parserServiceUrl + 'send-html';
+
+  private lastPage = this.parserServiceUrl + 'last-page';
+
+  private getInfoUrl = this.parserServiceUrl + 'get-info-url'
 
 
-  sendHtmlUrl = 'http://localhost:8080/send-html';
-
-  private lastPage = 'http://localhost:8080/last-page';
-
-  private getInfoUrl = 'http://localhost:8080/get-info-url'
 
   constructor(private http: HttpClient, private sanitizer: DomSanitizer) {
   }
@@ -23,10 +26,10 @@ export class ParserService {
   fetchHtmlFromUrl(webUrl: string): Observable<string> {
     const httpOptions = {
       headers: new HttpHeaders({
-        'Accept': 'text/plain', // Accept plain text responses
-        'Content-Type': 'text/plain' // Set content type
+        'Accept': 'text/plain', 
+        'Content-Type': 'text/plain' 
       }),
-      responseType: 'text' as 'json' // Specify response type as text
+      responseType: 'text' as 'json' 
     };
     const headers = new HttpHeaders({ 'Content-Type': 'text/plain', "Accept": "text/plain" });
     return this.http.post<string>(this.sendHtmlUrl, webUrl, httpOptions);
@@ -53,10 +56,10 @@ export class ParserService {
   sendInfo(map: Map<string, string[]>): void {
     const httpOptions = {
       headers: new HttpHeaders({
-        'Accept': 'text/plain', // Accept plain text responses
-        'Content-Type': 'application/json' // Set content type
+        'Accept': 'text/plain', 
+        'Content-Type': 'application/json'
       }),
-      responseType: 'text' as 'json' // Specify response type as text
+      responseType: 'text' as 'json'
       // params: new HttpParams().set('param1', 'value1')
 
     };

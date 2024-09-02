@@ -31,7 +31,7 @@ public class CssUtil {
             if (cssContent != null) {
                 styleElement.appendText(cssContent);
                 linkElement.replaceWith(styleElement);
-                System.out.println("Substituted CSS link with inline style: " + styleElement);
+                System.out.println("Substituted CSS link with inline style: " + linkElement);
             }
             htmlContent = doc.html();
         }

@@ -19,7 +19,7 @@ export class PaginationService {
           //let tempDiv = document.createElement('div');
           const doc = parser.parseFromString(page, 'text/html');
           // tempDiv.innerHTML = page;
-          elements.push(this.getElementsFromPage(`[${tagId}]`, undefined, docRoot));
+          elements.push(this.getElementsFromPage(`[${tagId}]`, undefined, doc));
         }
         );
         return elements;

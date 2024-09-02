@@ -1,4 +1,4 @@
-import { Component, inject, Renderer2, RendererStyleFlags2, HostListener, ViewEncapsulation, Output, Input } from '@angular/core';
+import { Component, inject, Renderer2, RendererStyleFlags2, HostListener, ViewEncapsulation} from '@angular/core';
 import { DevModeComponent } from './dev-mode/dev-mode.component';
 import { ParserService } from './parser.service';
 import { TergetedItemService } from './targeted-item.service';

@@ -5,7 +5,16 @@ import { Injectable } from '@angular/core';
 })
 export class PaginationService {
 
+
+  // private elementsOnMainPage: Element[] = [];
+
   constructor() { }
+
+
+  // public get getElementsOnMainPage(): Element[] {
+  //   return this.elementsOnMainPage;
+  // }
+
 
 
   getFromAllPagesDevMode(tagId: string, AllPagesHtml: string[]): NodeListOf<Element>[] {
@@ -13,22 +22,22 @@ export class PaginationService {
     const parser = new DOMParser();
     let docRoot = document.querySelector("app-website-content")?.shadowRoot;
 
-    if (docRoot) {
-      if (AllPagesHtml.length > 0) {
-        AllPagesHtml.forEach(page => {
-          //let tempDiv = document.createElement('div');
-          const doc = parser.parseFromString(page, 'text/html');
-          // tempDiv.innerHTML = page;
-          elements.push(this.getElementsFromPage(`[${tagId}]`, undefined, doc));
-        }
-        );
-         return elements;
-      }
-      elements.push(this.getElementsFromPage(`[${tagId}]`, undefined, docRoot));
-
-      return elements;
+    if (!docRoot) {
+      throw new Error("Shadow root not found");
     }
-    throw Error;
+
+    if (AllPagesHtml.length > 0) {
+      AllPagesHtml.forEach(page => {
+        const doc = parser.parseFromString(page, 'text/html');
+        let elementsFromPage = this.getElementsFromPage(`[${tagId}]`, undefined, doc);
+        elements.push(elementsFromPage);
+      }
+      );
+    }
+    else {
+      elements.push(this.getElementsFromPage(`[${tagId}]`, undefined, docRoot));
+    }
+    return elements;
   }
 
   getFromAllPagesTargetFlow(target: HTMLElement, AllPagesHtml: string[]): NodeListOf<Element>[] {
@@ -38,22 +47,23 @@ export class PaginationService {
     const parser = new DOMParser();
     let docRoot = document.querySelector("app-website-content")?.shadowRoot;
 
-    if (docRoot) {
-     // elements.push(this.getElementsFromPage(`.${classSelector}`, `.${parentClassSelector}`, docRoot));
-      if (AllPagesHtml.length > 0) {
-        console.log(AllPagesHtml.length)
-        AllPagesHtml.forEach(page => {
-          const doc = parser.parseFromString(page, 'text/html');
-          elements.push(this.getElementsFromPage(`.${classSelector}`, `.${parentClassSelector}`, doc));
-        }
-        );
-         return elements;
-      }
-       elements.push(this.getElementsFromPage(`.${classSelector}`, `.${parentClassSelector}`, docRoot));
-
-      return elements;
+    if (!docRoot) {
+      throw new Error("Shadow root not found");
     }
-    throw Error;
+
+    if (AllPagesHtml.length > 0) {
+      AllPagesHtml.forEach(page => {
+        const doc = parser.parseFromString(page, 'text/html');
+        let elementsFromPage = this.getElementsFromPage(`.${classSelector}`, `.${parentClassSelector}`, doc);
+        elements.push(elementsFromPage);
+      }
+      );
+    }
+    else {
+      elements.push(this.getElementsFromPage(`.${classSelector}]`, `.${parentClassSelector}`, docRoot));
+    }
+    return elements;
+
   }
 
 
@@ -68,7 +78,11 @@ export class PaginationService {
       }
       else throw Error;
     }
+    // this.elementsOnMainPage.length = 0;
+    // items.forEach(e => {
+    //   this.elementsOnMainPage.push(e);
+    // });
+    // console.log(this.elementsOnMainPage);
     return items;
   }
-
 }

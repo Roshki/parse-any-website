@@ -72,13 +72,13 @@ export class WebsiteContentComponent {
         console.log("we have so many pages now ", this.website.getAllPagesHtml().length);
         items.forEach((nodeList) => {
           nodeList.forEach((item: Element) => {
-            (item as HTMLElement).style.color = 'red';
             arr.push(this.tergetedItemService.fetchInfoFromChosenItem(item));
-            this.renderer.setStyle(item, 'color', 'red', RendererStyleFlags2.Important);
-            this.renderer.setStyle(item, 'color', 'red', RendererStyleFlags2.Important);
           }
           );
         });
+        // this.paginationService.getElementsOnMainPage.forEach((element) => {
+        //     this.renderer.setStyle(element, 'color', 'red', RendererStyleFlags2.Important);
+        // });
       }
 
      // const uniqueSet = new Set(arr);

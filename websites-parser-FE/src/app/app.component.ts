@@ -90,17 +90,16 @@ export class ParserComponent {
     }
   }
 
-  paginationOnClick(event: MouseEvent): void {
-    event.preventDefault();
-    const target = event.target as HTMLElement;
-    let hrefAttr = target.getAttribute("href");
-    this.website.setAllPagesHtml(this.parserService.retrieveAllPages(hrefAttr));
-  }
+  // paginationOnClick(event: MouseEvent): void {
+  //   event.preventDefault();
+  //   const target = event.target as HTMLElement;
+  //   let hrefAttr = target.getAttribute("href");
+  //   this.website.setAllPagesHtml(this.parserService.retrieveAllPages(hrefAttr));
+  // }
 
   InsertUrlOfLastPageOnClick(): void {
     if (this.sendLastPageUrl != null) {
       this.website.setAllPagesHtml(this.parserService.retrieveAllPages(this.sendLastPageUrl));
-
     }
   }
 

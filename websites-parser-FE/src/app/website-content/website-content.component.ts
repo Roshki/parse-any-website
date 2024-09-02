@@ -1,15 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, inject, RendererStyleFlags2, Renderer2, ViewEncapsulation } from '@angular/core';
+import { Component, Input, inject, RendererStyleFlags2, Renderer2, ViewEncapsulation, Output, EventEmitter } from '@angular/core';
 import { SafeHtml, DomSanitizer } from '@angular/platform-browser';
 import { ParserService } from '../parser.service';
 import { PaginationService } from '../pagination.service';
 import { TergetedItemService } from '../targeted-item.service';
 import { Website } from '../models/website.model';
+import { ListComponent } from '../list/list.component';
 
 @Component({
   selector: 'app-website-content',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ListComponent],
   templateUrl: './website-content.html',
   encapsulation: ViewEncapsulation.ShadowDom,
   styles: ``
@@ -20,10 +21,14 @@ export class WebsiteContentComponent {
   tergetedItemService = inject(TergetedItemService);
   paginationService = inject(PaginationService);
 
-  @Input() display: SafeHtml | undefined;
-  public ifPaginationMode: boolean = false;
+  listItems: { key: string, values: string[] }[] = [];
+  @Output() listItemsChange = new EventEmitter<any[]>();
 
-  constructor(private sanitizer: DomSanitizer, private renderer: Renderer2, private website: Website) { }
+  @Input() display: SafeHtml | undefined;
+  @Input() ifPaginationMode: boolean = false;
+
+  constructor(private sanitizer: DomSanitizer, private renderer: Renderer2, private website: Website) {
+   }
 
 
   onMouseOverHighliteElement(event: MouseEvent) {
@@ -38,26 +43,6 @@ export class WebsiteContentComponent {
       }
     }
   }
-
-  // paginationModeOnClick(): void {
-  //   const button = document.querySelector('#paginationBtn');
-  //   const items = document.querySelectorAll('[class*="pagin"]');
-  //   if (this.ifPaginationMode == false) {
-  //     this.ifPaginationMode = true;
-  //     items.forEach(element => {
-  //       this.renderer.setStyle(element, 'border', '2px solid gray');
-  //     });
-  //     return;
-  //   }
-  //   else {
-  //     this.ifPaginationMode = false;
-  //     this.renderer.removeStyle(button, 'color');
-  //     items.forEach(element => {
-  //       this.renderer.removeStyle(element, 'border');
-  //     });
-  //     return;
-  //   }
-  // }
 
 
   onMouseOut(event: MouseEvent) {
@@ -75,7 +60,6 @@ export class WebsiteContentComponent {
 
   elementsOnClick(event: MouseEvent): void {
     event.preventDefault();
-console.log("checking:: "+ this.website.getAllPagesHtml());
     if (this.ifPaginationMode == true) {
       this.paginationOnClick(event);
     }
@@ -87,7 +71,11 @@ console.log("checking:: "+ this.website.getAllPagesHtml());
         console.log("we have so many pages now ", this.website.getAllPagesHtml().length);
         items.forEach((nodeList) => {
           nodeList.forEach((item: Element) => {
+            this.renderer.setStyle(item, 'color', 'red', RendererStyleFlags2.Important);
             arr.push(this.tergetedItemService.fetchInfoFromChosenItem(item));
+            this.renderer.setStyle(item, 'color', 'red', RendererStyleFlags2.Important);
+            this.renderer.setStyle(item, 'color', 'red', RendererStyleFlags2.Important);
+            this.renderer.setStyle(item, 'color', 'red', RendererStyleFlags2.Important);
             this.renderer.setStyle(item, 'color', 'red', RendererStyleFlags2.Important);
           });
         });
@@ -95,6 +83,8 @@ console.log("checking:: "+ this.website.getAllPagesHtml());
 
       const uniqueSet = new Set(arr);
       this.website.setInformation(this.website.getColumIndex().toString(), Array.from(uniqueSet));
+      this.listItems = Array.from(this.website.getInformation()).map(([key, values]) => ({ key, values }));
+      this.listItemsChange.emit(this.listItems); 
       let columnIndex = this.website.getColumIndex();
       this.website.setColumIndex(columnIndex + 1);
       console.log("added new ", this.website.getInformation());

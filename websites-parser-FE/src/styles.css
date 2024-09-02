@@ -4,14 +4,20 @@ body *{
   /* font-size: 15px; */
 }
 
-body {
+/* body {
   background-color: #E8EAE6;
-}
+} */
 
 /* .content * {
   font-family: "Helvetica Neue", "Helvetica", Helvetica, Arial, sans-serif !important;
   font-size: 25px !important;
 } */
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
 
 .ng-invalid-url  {
   border: 1px solid #a94442; /* red */

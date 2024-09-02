@@ -13,7 +13,7 @@
         </button>
         <div class="dropdown-menu p-3" style="min-width: 400px;">
           <div class="form-group ">
-            <app-dev-mode></app-dev-mode>
+            <app-dev-mode (listItemsChange)="handleListItemsChange($event)"></app-dev-mode>
           </div>
           <div class="form-group" >
             <div class="dropdown-divider"></div>
@@ -41,8 +41,16 @@
     </div>
   </div>
 </nav>
-<app-list [display]="display"></app-list>
-<app-website-content [display]="display"></app-website-content>
+<app-list [listItems]="listItems" [display]="display"></app-list>
+<div *ngIf="!display" style="padding-left: 10px; padding-top: 70px; background-color: #E8EAE6; height: 100%; width: 100%;">
+  <div>
+    <h3>lala</h3>
+    <h3>
+      <small class="text-muted">With faded secondary text</small>
+    </h3>
+  </div>
+</div>
+<app-website-content (listItemsChange)="handleListItemsChange($event)" [display]="display" [ifPaginationMode]="ifPaginationMode"></app-website-content>
 <!-- <div crossorigin="anonymous" class="content" (click)="elementsOnClick($event)"
   (mouseover)="onMouseOverHighliteElement($event)" (mouseout)="onMouseOut($event)" *ngIf="display" [innerHTML]="display"
   style="padding-left: 10px; padding-top: 70px; background-color: white !important;"></div> -->

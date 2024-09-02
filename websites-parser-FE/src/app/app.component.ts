@@ -1,4 +1,4 @@
-import { Component, inject, Renderer2, RendererStyleFlags2, HostListener, ViewEncapsulation, Output } from '@angular/core';
+import { Component, inject, Renderer2, RendererStyleFlags2, HostListener, ViewEncapsulation, Output, Input } from '@angular/core';
 import { DevModeComponent } from './dev-mode/dev-mode.component';
 import { ParserService } from './parser.service';
 import { TergetedItemService } from './targeted-item.service';
@@ -26,7 +26,7 @@ export class ParserComponent {
   tergetedItemService = inject(TergetedItemService);
   paginationService = inject(PaginationService);
   display: SafeHtml | undefined;
-  listItems: { key: string, values: string[] }[] = [];
+   listItems: { key: string, values: string[] }[] = [];
   // sendUrl: string = ''
   sendLastPageUrl: string = '';
   sendUrl = new FormControl('', [
@@ -69,6 +69,10 @@ export class ParserComponent {
       };
       //console.log('Navigation prevented for:', target.getAttribute('href'));
     }
+  }
+
+  handleListItemsChange(newListItems: any[]) {
+    this.listItems = newListItems;  // Update the listItems that will be passed to app-list
   }
 
   htmlOnClick(): void {

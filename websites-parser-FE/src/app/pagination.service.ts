@@ -1,25 +1,20 @@
 import { Injectable } from '@angular/core';
-
+import { TergetedItemService } from './targeted-item.service';
 @Injectable({
   providedIn: 'root'
 })
 export class PaginationService {
 
-
-  // private elementsOnMainPage: Element[] = [];
-
-  constructor() { }
+  public elementsOnMainPage: Element[] = [];
 
 
-  // public get getElementsOnMainPage(): Element[] {
-  //   return this.elementsOnMainPage;
-  // }
+  constructor(private targetedService: TergetedItemService) { }
 
 
 
-  getFromAllPagesDevMode(tagId: string, AllPagesHtml: string[]): NodeListOf<Element>[] {
-    let elements: NodeListOf<Element>[] = [];
-    const parser = new DOMParser();
+
+  getFromAllPagesInfoDevMode(tagId: string, AllPagesHtml: string[]): string[] {
+    let InfoArray: string[] = [];
     let docRoot = document.querySelector("app-website-content")?.shadowRoot;
 
     if (!docRoot) {
@@ -28,43 +23,57 @@ export class PaginationService {
 
     if (AllPagesHtml.length > 0) {
       AllPagesHtml.forEach(page => {
+        const parser = new DOMParser();
         const doc = parser.parseFromString(page, 'text/html');
         let elementsFromPage = this.getElementsFromPage(`[${tagId}]`, undefined, doc);
-        elements.push(elementsFromPage);
-      }
-      );
+        elementsFromPage.forEach((item: Element) => {
+          InfoArray.push(this.targetedService.fetchInfoFromChosenItem(item));
+        });
+      });
     }
     else {
-      elements.push(this.getElementsFromPage(`[${tagId}]`, undefined, docRoot));
+      let elementsFromPage = this.getElementsFromPage(`[${tagId}]`, undefined, docRoot);
+      elementsFromPage.forEach((item: Element) => {
+        InfoArray.push(this.targetedService.fetchInfoFromChosenItem(item));
+      });
     }
-    return elements;
+    return InfoArray;
   }
 
-  getFromAllPagesTargetFlow(target: HTMLElement, AllPagesHtml: string[]): NodeListOf<Element>[] {
-    let elements: NodeListOf<Element>[] = [];
+  getFromAllPagesInfoTargetFlow(target: HTMLElement, AllPagesHtml: string[]): string[] {
     let classSelector = target?.className.split(' ').join('.');
     let parentClassSelector = target?.parentElement?.className.split(' ').join('.');
-    const parser = new DOMParser();
+    let InfoArray: string[] = [];
+    this.elementsOnMainPage.length=0;
     let docRoot = document.querySelector("app-website-content")?.shadowRoot;
 
     if (!docRoot) {
       throw new Error("Shadow root not found");
     }
-
+    let elementsFromMainPage = this.getElementsFromPage(`.${classSelector}`, `.${parentClassSelector}`, docRoot);
+    elementsFromMainPage.forEach((item: Element) => {
+      this.elementsOnMainPage.push(item);
+    });
+    console.log(this.elementsOnMainPage.length)
     if (AllPagesHtml.length > 0) {
       AllPagesHtml.forEach(page => {
+        const parser = new DOMParser();
         const doc = parser.parseFromString(page, 'text/html');
         let elementsFromPage = this.getElementsFromPage(`.${classSelector}`, `.${parentClassSelector}`, doc);
-        elements.push(elementsFromPage);
-      }
-      );
+        elementsFromPage.forEach((item: Element) => {
+          InfoArray.push(this.targetedService.fetchInfoFromChosenItem(item));
+        });
+      });
     }
     else {
-      elements.push(this.getElementsFromPage(`.${classSelector}]`, `.${parentClassSelector}`, docRoot));
+      this.elementsOnMainPage.forEach((item: Element) => {
+        InfoArray.push(this.targetedService.fetchInfoFromChosenItem(item));
+      });
     }
-    return elements;
+    return InfoArray;
 
   }
+
 
 
   private getElementsFromPage(selector: string, parentClassSelector: string | undefined, div: Document | ShadowRoot): NodeListOf<Element> {
@@ -78,11 +87,6 @@ export class PaginationService {
       }
       else throw Error;
     }
-    // this.elementsOnMainPage.length = 0;
-    // items.forEach(e => {
-    //   this.elementsOnMainPage.push(e);
-    // });
-    // console.log(this.elementsOnMainPage);
     return items;
   }
 }

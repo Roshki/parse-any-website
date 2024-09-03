@@ -65,25 +65,19 @@ export class WebsiteContentComponent {
     }
     else {
       const target = event.target as HTMLElement;
-      let docrRoot = document.querySelector("app-website-content") as HTMLElement;
-      const arr: string[] = [];
+      let arr: string[] = [];
       if (target) {
-        const items = this.paginationService.getFromAllPagesTargetFlow(target, this.website.getAllPagesHtml());
         console.log("we have so many pages now ", this.website.getAllPagesHtml().length);
-        items.forEach((nodeList) => {
-          nodeList.forEach((item: Element) => {
-            arr.push(this.tergetedItemService.fetchInfoFromChosenItem(item));
-          }
-          );
-        });
-        // this.paginationService.getElementsOnMainPage.forEach((element) => {
-        //     this.renderer.setStyle(element, 'color', 'red', RendererStyleFlags2.Important);
-        // });
+        arr = this.paginationService.getFromAllPagesInfoTargetFlow(target, this.website.getAllPagesHtml());
+        setTimeout(() => {
+          this.paginationService.elementsOnMainPage.forEach(e => {
+            this.renderer.setStyle(e, 'color', 'red');
+          });
+        }, 0);
+        // this.paginationService.elementsOnMainPage.forEach(e => this.renderer.setStyle(e, 'color', 'red'));
       }
 
-     // const uniqueSet = new Set(arr);
-      //this.website.setInformation(this.website.getColumIndex().toString(), Array.from(uniqueSet));
-      this.website.setInformation(this.website.getColumIndex().toString(), arr);
+      this.website.setInformation(target.className+" "+this.website.getColumIndex().toString(), arr);
       this.listItems = Array.from(this.website.getInformation()).map(([key, values]) => ({ key, values }));
       this.listItemsChange.emit(this.listItems);
       let columnIndex = this.website.getColumIndex();

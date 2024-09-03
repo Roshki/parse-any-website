@@ -40,7 +40,7 @@ export class ParserService {
     //console.log(paginationTagString)
     this.http.post<string[]>(this.lastPage, paginationHref).subscribe({
       next: (data: string[]) => {
-        console.log(data)
+        // console.log(data)
         data.forEach(item => allPagesHtml.push(item));
         alert("done");
         alert(allPagesHtml.length + " length of all pages");

@@ -7,14 +7,14 @@
           <h2 class="accordion-header"  attr.id="heading{{i}}">
             <button class="accordion-button collapsed btn-outline-success me-2" type="button" data-bs-toggle="collapse"
               attr.data-bs-target="#collapseOne{{i}}" aria-expanded="true" attr.aria-controls="collapseOne{{i}}">
-              {{item.key}}
+              {{item.key}} ({{item.values.length}})
             </button>
             <div class="dropdown">
-              <button class="btn btn-more-options" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown">
+              <button class="btn btn-more-options" type="button" attr.id="dropdownMenuButton{{i}}" data-bs-toggle="dropdown">
                 <i class="fas fa-ellipsis-vertical"></i>
               </button>
-              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                <li><a class="dropdown-item" href="#">Delete</a></li>
+              <ul class="dropdown-menu" attr.aria-labelledby="dropdownMenuButton{{i}}">
+                <li><button (click)="removeItemsGroup(i)" class="dropdown-item">Delete</button></li>
               </ul>
             </div>
           </h2>

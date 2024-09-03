@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.*;
 import org.springframework.stereotype.Service;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -56,6 +57,19 @@ public class ParserService {
         }
         return htmlContent;
     }
+
+//    public String getPageSource(WebDriver driver, String url) throws MalformedURLException {
+//        String htmlContent = null;
+//        if (website.isIfConfirmed()) {
+//            String driverPageSource = driver.getPageSource();
+//            htmlContent = driverPageSource.replaceAll("(?s)<header[^>]*>.*?</header>", "");
+//            htmlContent = cssLinkToStyle(htmlContent, new URL(url));
+//            website = Website.builder().websiteUrl(new URL(url)).initialHtml(htmlContent).pages(new HashMap<>()).build();
+//            cacheService.setWebsiteCache(url, website);
+//            driverPool.releaseDriver(driver);
+//        }
+//        return htmlContent;
+//    }
 
     public List<String> getHtmlOfAllPagesBasedOnLastPage(String lastPage) throws ExecutionException, InterruptedException {
         AtomicInteger successfulCount = new AtomicInteger(0);
@@ -119,6 +133,10 @@ public class ParserService {
         System.out.println(url);
         return driver.getPageSource();
 
+    }
+
+    public void ifPageConfirmed(boolean ifConfirmed) {
+        website.setIfConfirmed(ifConfirmed);
     }
 
 

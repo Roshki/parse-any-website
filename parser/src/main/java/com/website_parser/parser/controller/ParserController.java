@@ -3,6 +3,7 @@ package com.website_parser.parser.controller;
 import com.website_parser.parser.service.ParserService;
 import com.website_parser.parser.service.SavingService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.net.MalformedURLException;
 import java.util.List;
@@ -35,5 +36,12 @@ public class ParserController {
         //map.forEach((key, value) -> System.out.println(key + " -> " + value));
         savingService.exportMapToExcel(map, "data_books.xlsx");
         return "success";
+    }
+
+    @GetMapping("/if-confirmed")
+    public String confirmInitialHtmlPage(@RequestParam boolean ifConfirmed)  {
+        parserService.getInitialHtmlFromUrl()
+       parserService.ifPageConfirmed(ifConfirmed);
+        return "ok";
     }
 }

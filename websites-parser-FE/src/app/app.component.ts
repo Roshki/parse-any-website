@@ -1,4 +1,4 @@
-import { Component, inject, Renderer2, RendererStyleFlags2, HostListener, ViewEncapsulation} from '@angular/core';
+import { Component, inject, Renderer2, RendererStyleFlags2, HostListener, ViewEncapsulation } from '@angular/core';
 import { DevModeComponent } from './dev-mode/dev-mode.component';
 import { ParserService } from './parser.service';
 import { TergetedItemService } from './targeted-item.service';
@@ -26,7 +26,7 @@ export class ParserComponent {
   tergetedItemService = inject(TergetedItemService);
   paginationService = inject(PaginationService);
   display: SafeHtml | undefined;
-   listItems: { key: string, values: string[] }[] = [];
+  listItems: { key: string, values: string[] }[] = [];
   // sendUrl: string = ''
   sendLastPageUrl: string = '';
   sendUrl = new FormControl('', [
@@ -72,22 +72,27 @@ export class ParserComponent {
   }
 
   handleListItemsChange(newListItems: any[]) {
-    this.listItems = newListItems; 
+    this.listItems = newListItems;
   }
 
-  htmlOnClick(): void {
+  approved(): void{
+    this.parserService.approved();
+  }
+
+
+
+
+   htmlOnClick(): void{
     if (this.sendUrl.valid && this.sendUrl.value) {
       this.isValidUrl = true;
       this.website.getInformation().clear();
-      this.parserService.fetchHtmlFromUrl(this.sendUrl.value).subscribe({
-        next: (data: string) => {
-          this.display = this.sanitizer.bypassSecurityTrustHtml(data);
-        },
-        error: (error) => {
-
-          console.error('There was an error fetching the HTML file!', error);
-        },
-      });
+      
+      this.parserService.getHtmlFromUrl(this.sendUrl.value).then(d=>
+      {
+        this.display =  this.sanitizer.bypassSecurityTrustHtml(d);
+      }
+      );
+        
     }
     else {
       this.isValidUrl = false;

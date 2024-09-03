@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
 import { DomSanitizer } from '@angular/platform-browser';
 import { environment } from '../environments/environment';
+import { lastValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -17,30 +17,79 @@ export class ParserService {
 
   private getInfoUrl = this.parserServiceUrl + 'get-info-url'
 
+  private approveUrl = this.parserServiceUrl + 'approve'
+
+  private noneCachedUrl = this.parserServiceUrl + 'none-cached-page'
 
 
   constructor(private http: HttpClient, private sanitizer: DomSanitizer) {
   }
 
+  async getHtmlFromUrl(webUrl: string): Promise<string> {
+    let getCachedWebIfExists = this.firstCall(webUrl);
+    console.log(getCachedWebIfExists)
 
-  fetchHtmlFromUrl(webUrl: string): Observable<string> {
+    if (getCachedWebIfExists == "null") {
+      const notCachedPagePromise = await this.notCachedPage(webUrl);
+
+      return notCachedPagePromise;
+    }
+    else {
+      return getCachedWebIfExists;
+    }
+  }
+
+  async notCachedPage(webUrl: string): Promise<string> {
     const httpOptions = {
       headers: new HttpHeaders({
-        'Accept': 'text/plain', 
-        'Content-Type': 'text/plain' 
+        'Accept': 'text/plain',
+        'Content-Type': 'text/plain'
       }),
-      responseType: 'text' as 'json' 
+      responseType: 'text' as 'json'
     };
-    const headers = new HttpHeaders({ 'Content-Type': 'text/plain', "Accept": "text/plain" });
-    return this.http.post<string>(this.sendHtmlUrl, webUrl, httpOptions);
+    const data = await lastValueFrom(this.http.post<string>(this.noneCachedUrl, webUrl, httpOptions));
+    return data;
+
+  }
+
+  firstCall(webUrl: string): string {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Accept': 'text/plain',
+        'Content-Type': 'text/plain'
+      }),
+      responseType: 'text' as 'json'
+    };
+
+    this.http.post<string>(this.sendHtmlUrl, webUrl, httpOptions).subscribe({
+      next: (data: string) => {
+        console.log(data)
+        return data;
+      },
+      error: (error) => {
+        alert(error);
+        console.error('There was an error!', error);
+      },
+    });
+    return "null";
+  }
+
+  approved(): Promise<string> {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Accept': 'text/plain',
+        'Content-Type': 'text/plain'
+      }),
+      responseType: 'text' as 'json'
+    };
+    const data = lastValueFrom(this.http.post<string>(this.approveUrl, {}, httpOptions));
+    return data;
   }
 
   retrieveAllPages(paginationHref: string | null): string[] {
     let allPagesHtml: string[] = [];
-    //console.log(paginationTagString)
     this.http.post<string[]>(this.lastPage, paginationHref).subscribe({
       next: (data: string[]) => {
-        // console.log(data)
         data.forEach(item => allPagesHtml.push(item));
         alert("done");
         alert(allPagesHtml.length + " length of all pages");
@@ -56,18 +105,17 @@ export class ParserService {
   sendInfo(map: Map<string, string[]>): void {
     const httpOptions = {
       headers: new HttpHeaders({
-        'Accept': 'text/plain', 
+        'Accept': 'text/plain',
         'Content-Type': 'application/json'
       }),
       responseType: 'text' as 'json'
-      // params: new HttpParams().set('param1', 'value1')
 
     };
     alert(map);
     console.log("sending this: ", map);
     this.http.post<string>(this.getInfoUrl, Object.fromEntries(map), httpOptions).subscribe({
       next: (data: string) => {
-        //this.chooseFolder(data);
+   
         console.log("success");
         alert("file is saved!")
 

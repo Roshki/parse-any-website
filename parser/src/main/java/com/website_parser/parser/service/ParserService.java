@@ -58,19 +58,6 @@ public class ParserService {
         return htmlContent;
     }
 
-//    public String getPageSource(WebDriver driver, String url) throws MalformedURLException {
-//        String htmlContent = null;
-//        if (website.isIfConfirmed()) {
-//            String driverPageSource = driver.getPageSource();
-//            htmlContent = driverPageSource.replaceAll("(?s)<header[^>]*>.*?</header>", "");
-//            htmlContent = cssLinkToStyle(htmlContent, new URL(url));
-//            website = Website.builder().websiteUrl(new URL(url)).initialHtml(htmlContent).pages(new HashMap<>()).build();
-//            cacheService.setWebsiteCache(url, website);
-//            driverPool.releaseDriver(driver);
-//        }
-//        return htmlContent;
-//    }
-
     public List<String> getHtmlOfAllPagesBasedOnLastPage(String lastPage) throws ExecutionException, InterruptedException {
         AtomicInteger successfulCount = new AtomicInteger(0);
         ArrayList<String> allPageUrls = UrlUtil.predictAllUrls(UrlUtil.verifyHost(lastPage, website.getWebsiteUrl()));

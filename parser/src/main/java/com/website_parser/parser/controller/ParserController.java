@@ -37,11 +37,4 @@ public class ParserController {
         savingService.exportMapToExcel(map, "data_books.xlsx");
         return "success";
     }
-
-    @GetMapping("/if-confirmed")
-    public String confirmInitialHtmlPage(@RequestParam boolean ifConfirmed)  {
-        parserService.getInitialHtmlFromUrl()
-       parserService.ifPageConfirmed(ifConfirmed);
-        return "ok";
-    }
 }

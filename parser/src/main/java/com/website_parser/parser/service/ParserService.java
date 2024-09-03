@@ -2,6 +2,7 @@ package com.website_parser.parser.service;
 
 import com.website_parser.parser.model.Website;
 import com.website_parser.parser.util.UrlUtil;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.*;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,8 @@ import java.net.URL;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.website_parser.parser.util.CssUtil.cssLinkToStyle;
@@ -23,38 +26,50 @@ public class ParserService {
     private final WebDriverPool driverPool;
     private final CacheService cacheService;
     private Website website;
+    private final ApprovalService approvalService;
 
-    ParserService(WebDriverPool driverPool, Website website, CacheService cacheService) {
-
+    ParserService(WebDriverPool driverPool, Website website, CacheService cacheService, ApprovalService approvalService) {
         this.driverPool = driverPool;
         this.website = website;
         this.cacheService = cacheService;
+        this.approvalService = approvalService;
         driverPool.addToPool();
-
     }
 
-    public String getInitialHtmlFromUrl(String url) throws Exception {
+    public String getCachedPage(String url) throws Exception {
         Website websiteCache = cacheService.getWebsiteCache(url);
-        String htmlContent;
         if (websiteCache != null) {
             website = websiteCache;
             System.out.println("Cached pages:::   " + website.getPages().size());
-            htmlContent = websiteCache.getInitialHtml();
+            return websiteCache.getInitialHtml();
         } else {
-            WebDriver driver = driverPool.getDriverPool();
-            htmlContent = retrievePage(url, driver);
-            System.out.println("Browser is opened. Please perform the required actions manually and press any button when finished..");
-            Scanner scanner = new Scanner(System.in); //TODO change it to FE pressing of enter
-            String s = scanner.nextLine();
-            if (!s.isEmpty()) {
-               String driverPageSource = driver.getPageSource();
-                htmlContent = driverPageSource.replaceAll("(?s)<header[^>]*>.*?</header>", "");
-                htmlContent = cssLinkToStyle(htmlContent, new URL(url));
-                website = Website.builder().websiteUrl(new URL(url)).initialHtml(htmlContent).pages(new HashMap<>()).build();
-                cacheService.setWebsiteCache(url, website);
-            }
-            driverPool.releaseDriver(driver);
+            return null;
+//            WebDriver driver = driverPool.getDriverPool();
+//            retrievePage(url, driver);
+//            return getHtml(url, driver);
         }
+    }
+
+    public String getNotCachedPage(String url) throws MalformedURLException {
+        String htmlContent;
+        WebDriver driver = driverPool.getDriverPool();
+        retrievePage(url, driver);
+        try {
+            approvalService.getApprovalFuture().get(10, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        } catch (TimeoutException e) {
+            log.error("timed out");
+        }
+        System.out.println("Approved!!!");
+        String driverPageSource = driver.getPageSource();
+        htmlContent = driverPageSource.replaceAll("(?s)<header[^>]*>.*?</header>", "");
+        htmlContent = cssLinkToStyle(htmlContent, new URL(url));
+        website = Website.builder().websiteUrl(new URL(url)).initialHtml(htmlContent).pages(new HashMap<>()).build();
+        cacheService.setWebsiteCache(url, website);
+        driverPool.releaseDriver(driver);
+        approvalService.reset();
+
         return htmlContent;
     }
 

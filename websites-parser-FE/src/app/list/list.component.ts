@@ -22,13 +22,10 @@ export class ListComponent {
   };
 
   removeItemsGroup(itemId: number) {
-    console.log(this.website.getInformation(), "FROM LIST COMPONENT");
     const itemKey = this.listItems[itemId]?.key;
     this.listItems.splice(itemId, 1);
     if (itemKey) {
-      console.log("before: "+ this.website.getInformation().size)
       this.website.getInformation().delete(itemKey);
-      console.log("after: "+ this.website.getInformation().size)
     }
     this.website.getAllPagesHtml();
   }

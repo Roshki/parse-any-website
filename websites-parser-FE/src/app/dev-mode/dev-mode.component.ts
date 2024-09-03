@@ -1,4 +1,4 @@
-import { Component, inject, Output, EventEmitter } from '@angular/core';
+import { Component, inject, Output, EventEmitter, Renderer2 } from '@angular/core';
 import { AppComponent } from '../app.component';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -19,20 +19,24 @@ export class DevModeComponent {
   listItems: { key: string, values: string[] }[] = [];
   @Output() listItemsChange = new EventEmitter<any[]>();
 
-  constructor(private website: Website) { }
+  constructor(private website: Website, private renderer: Renderer2) { }
 
 
   sendTagIdOnClick() {
-    //let items =  this.paginationService.getFromAllPagesDevMode(this.tagId, this.website.getAllPagesHtml());
     let arr: string[] = [];
     arr = this.paginationService.getFromAllPagesInfoDevMode(this.tagId, this.website.getAllPagesHtml());
+    setTimeout(() => {
+      this.paginationService.getElementsOnMainPage.forEach(e => {
+        this.renderer.setStyle(e, 'color', 'red');
+      });
+    }, 0);
     let columnIndex = this.website.getColumIndex();
     this.website.setInformation(this.tagId + " " + this.website.getColumIndex().toString(), arr);
 
     this.listItems = Array.from(this.website.getInformation()).map(([key, values]) => ({ key, values }));
     this.listItemsChange.emit(this.listItems);
     this.website.setColumIndex(columnIndex + 1);
-    this.paginationService.getFromAllPagesInfoDevMode(this.tagId, this.website.getAllPagesHtml())
+    //this.paginationService.getFromAllPagesInfoDevMode(this.tagId, this.website.getAllPagesHtml())
     console.log(this.website.getInformation(), "FROM DEV COMPONENT");
 
   }

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, inject, RendererStyleFlags2, Renderer2, ViewEncapsulation, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
-import { SafeHtml, DomSanitizer } from '@angular/platform-browser';
+import { Component, Input, inject, Renderer2, ViewEncapsulation, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
+import { SafeHtml} from '@angular/platform-browser';
 import { ParserService } from '../parser.service';
 import { PaginationService } from '../pagination.service';
 import { TergetedItemService } from '../targeted-item.service';
@@ -27,7 +27,7 @@ export class WebsiteContentComponent {
   @Input() display: SafeHtml | undefined;
   @Input() ifPaginationMode: boolean = false;
 
-  constructor(private sanitizer: DomSanitizer, private renderer: Renderer2, private website: Website, private cd: ChangeDetectorRef) {
+  constructor(private renderer: Renderer2, private website: Website, private cd: ChangeDetectorRef) {
   }
 
 
@@ -70,13 +70,11 @@ export class WebsiteContentComponent {
         console.log("we have so many pages now ", this.website.getAllPagesHtml().length);
         arr = this.paginationService.getFromAllPagesInfoTargetFlow(target, this.website.getAllPagesHtml());
         setTimeout(() => {
-          this.paginationService.elementsOnMainPage.forEach(e => {
+          this.paginationService.getElementsOnMainPage.forEach(e => {
             this.renderer.setStyle(e, 'color', 'red');
           });
         }, 0);
-        // this.paginationService.elementsOnMainPage.forEach(e => this.renderer.setStyle(e, 'color', 'red'));
       }
-
       this.website.setInformation(target.className+" "+this.website.getColumIndex().toString(), arr);
       this.listItems = Array.from(this.website.getInformation()).map(([key, values]) => ({ key, values }));
       this.listItemsChange.emit(this.listItems);

@@ -5,11 +5,16 @@ import { TergetedItemService } from './targeted-item.service';
 })
 export class PaginationService {
 
-  public elementsOnMainPage: Element[] = [];
+  private elementsOnMainPage: Element[] = [];
 
 
   constructor(private targetedService: TergetedItemService) { }
 
+
+
+  public get getElementsOnMainPage(): Element[] {
+    return this.elementsOnMainPage;
+  }
 
 
 
@@ -44,7 +49,7 @@ export class PaginationService {
     let classSelector = target?.className.split(' ').join('.');
     let parentClassSelector = target?.parentElement?.className.split(' ').join('.');
     let InfoArray: string[] = [];
-    this.elementsOnMainPage.length=0;
+    this.elementsOnMainPage.length = 0;
     let docRoot = document.querySelector("app-website-content")?.shadowRoot;
 
     if (!docRoot) {

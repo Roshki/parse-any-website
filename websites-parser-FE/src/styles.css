@@ -1,58 +1,28 @@
 /* You can add global styles to this file, and also import other style files */
 body *{
   font-family: 'Be Vietnam Pro', sans-serif !important;
-  font-size: 15px !important;
+  /* font-size: 15px; */
 }
+
+/* body {
+  background-color: #E8EAE6;
+} */
 
 /* .content * {
   font-family: "Helvetica Neue", "Helvetica", Helvetica, Arial, sans-serif !important;
   font-size: 25px !important;
 } */
 
-.sticky-right-middle {
-  position: fixed;
-  right: 0;
-  top: 20%;
-  /* transform: translateY(50%); */
-  z-index: 9999; /* Ensures it overlaps other content */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
-.list-group-item {
-  position: relative;
-}
-.btn-remove {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  font-size: 0.75rem;
-  padding: 0.25rem 0.5rem; /* Smaller padding for a smaller button */
-  font-size: 0.6rem; /* Smaller text size */
-  color: #6c757d; /* Gray color */
-  border: 1px solid #6c757d; /* Gray border */
-}
-.btn-remove:hover {
-  background-color: #e2e6ea; /* Light gray background on hover */
-  color: #495057; /* Darker gray text on hover */
+.ng-invalid-url  {
+  border: 1px solid #a94442; /* red */
 }
 
-.accordion-body {
-  max-height: 100px; /* Maximum height to show up to 3 items */
-  overflow-y: auto; /* Enable vertical scroll */
-}
-
-.btn-remove-group {
-  font-size: 0.75rem;
-  padding: 0.25rem 0.5rem; /* Smaller padding for a smaller button */
-  font-size: 0.6rem; /* Smaller text size */
-  color: #6c757d; /* Gray color */
-  border: 1px solid #6c757d; /* Gray border */
-  margin-right: 0.5rem; /* Space between button and group name */
-}
-.btn-remove-group:hover {
-  background-color: #e2e6ea; /* Light gray background on hover */
-  color: #495057; /* Darker gray text on hover */
-}
-.accordion-header {
-  display: flex;
-  align-items: center;
+#sendUrlInput:focus{
+  border: none;
 }

@@ -21,10 +21,16 @@ export class PaginationService {
   getFromAllPagesInfoDevMode(tagId: string, AllPagesHtml: string[]): string[] {
     let InfoArray: string[] = [];
     let docRoot = document.querySelector("app-website-content")?.shadowRoot;
+    this.elementsOnMainPage.length = 0;
 
     if (!docRoot) {
       throw new Error("Shadow root not found");
     }
+
+    let elementsFromMainPage = this.getElementsFromPage(`[${tagId}]`, undefined, docRoot);
+    elementsFromMainPage.forEach((item: Element) => {
+      this.elementsOnMainPage.push(item);
+    });
 
     if (AllPagesHtml.length > 0) {
       AllPagesHtml.forEach(page => {

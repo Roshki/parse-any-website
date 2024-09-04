@@ -40,7 +40,6 @@ public class ParserController {
 
     @GetMapping("/if-confirmed")
     public String confirmInitialHtmlPage(@RequestParam boolean ifConfirmed)  {
-        parserService.getInitialHtmlFromUrl()
        parserService.ifPageConfirmed(ifConfirmed);
         return "ok";
     }

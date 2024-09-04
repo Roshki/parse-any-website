@@ -55,11 +55,9 @@ public class ParserService {
         WebDriver driver = driverPool.getDriverPool();
         retrievePage(url, driver);
         try {
-            approvalService.getApprovalFuture().get(10, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException e) {
+            approvalService.getApprovalFuture().get(30, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new RuntimeException(e);
-        } catch (TimeoutException e) {
-            log.error("timed out");
         }
         System.out.println("Approved!!!");
         String driverPageSource = driver.getPageSource();

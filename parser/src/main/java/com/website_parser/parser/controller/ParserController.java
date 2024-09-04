@@ -21,7 +21,7 @@ public class ParserController {
 
     @PostMapping("/send-html")
     public String getHtml(@RequestBody String url) throws Exception {
-        System.out.println("cached??"+parserService.getCachedPage(url));
+        System.out.println("cached??");
         return parserService.getCachedPage(url);
     }
 

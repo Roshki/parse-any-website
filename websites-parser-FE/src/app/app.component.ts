@@ -79,26 +79,28 @@ export class ParserComponent implements OnInit {
     if (this.sendUrl.valid && this.sendUrl.value) {
       this.isValidUrl = true;
       this.website.getInformation().clear();
-      let cachedPage = this.parserService.tryGetCachedWebPage(this.sendUrl.value);
-      if (cachedPage != "") {
-        this.display = this.sanitizer.bypassSecurityTrustHtml(cachedPage);
-      }
-      else {
-        this.parserService.notCachedPage(this.sendUrl.value).then(notCachedPage => {
-          this.display = this.sanitizer.bypassSecurityTrustHtml(notCachedPage);
-        }
-        );
-      }
-      // this.parserService.getHtmlFromUrl(this.sendUrl.value).then(d => {
-      //   this.display = this.sanitizer.bypassSecurityTrustHtml(d);
-      // }
-      // );
+      this.parserService.openModalSubject.next(false);
+      this.parserService.tryGetCachedWebPage(this.sendUrl.value)
+        .then(cachedPage => {
+          if (cachedPage != "") {
+            this.parserService.openModalSubject.next(false);
+            console.log("this.isModalWindow cached" + this.isModalWindow)
+            this.display = this.sanitizer.bypassSecurityTrustHtml(cachedPage);
+          }
+          else {
+            this.parserService.openModalSubject.next(true);
+            this.parserService.notCachedPage(this.sendUrl.value).then(nonCachedPage => {
+              console.log("this.isModalWindow notcached" + this.isModalWindow)
+              this.display = this.sanitizer.bypassSecurityTrustHtml(nonCachedPage);
+            })
+          }
+        });
     }
     else {
       this.isValidUrl = false;
     }
   }
-
+  
   InsertUrlOfLastPageOnClick(): void {
     if (this.sendLastPageUrl != null) {
       this.website.setAllPagesHtml(this.parserService.retrieveAllPages(this.sendLastPageUrl));

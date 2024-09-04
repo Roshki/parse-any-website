@@ -45,7 +45,7 @@ public class ParserController {
     }
 
     @CrossOrigin(origins = "http://localhost:4200")
-    @PostMapping("/approve")
+    @GetMapping("/approve")
     public String approve() {
         approvalService.approve();
         return "Approved!";

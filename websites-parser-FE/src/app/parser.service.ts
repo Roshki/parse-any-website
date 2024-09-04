@@ -28,21 +28,7 @@ export class ParserService {
   constructor(private http: HttpClient) {
   }
 
-  // async getHtmlFromUrl(webUrl: string): Promise<string> {
-  //   let getCachedWebIfExists = this.firstCall(webUrl);
-  //   console.log(getCachedWebIfExists)
-
-  //   if (getCachedWebIfExists == "") {
-  //     this.openModalSubject.next(true);
-  //     const notCachedPagePromise = await this.notCachedPage(webUrl);
-  //     return notCachedPagePromise;
-  //   }
-  //   else {
-  //     return getCachedWebIfExists;
-  //   }
-  // }
-
-  async notCachedPage(webUrl: string): Promise<string> {
+  async notCachedPage(webUrl: string | null): Promise<string> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Accept': 'text/plain',
@@ -56,9 +42,7 @@ export class ParserService {
 
   }
 
-  tryGetCachedWebPage(webUrl: string): string {
-    let firstPage = "";
-    console.log(firstPage+"data1")
+  tryGetCachedWebPage(webUrl: string): Promise<string> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Accept': 'text/plain',
@@ -66,32 +50,28 @@ export class ParserService {
       }),
       responseType: 'text' as 'json'
     };
-    console.log(firstPage+"data2")
-    this.http.post<string>(this.sendHtmlUrl, webUrl, httpOptions).subscribe({
+    this.openModalSubject.next(false);
+    lastValueFrom(this.http.post<string>(this.sendHtmlUrl, webUrl, httpOptions));
+    return lastValueFrom(this.http.post<string>(this.sendHtmlUrl, webUrl, httpOptions));
+  }
+
+  approved(): void {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Accept': 'text/plain',
+        'Content-Type': 'text/plain'
+      }),
+      responseType: 'text' as 'json'
+    };
+    this.http.get<string>(this.approveUrl, httpOptions).subscribe({
       next: (data: string) => {
-        console.log(data+"data3")
-        firstPage == data;
-        return firstPage;
+        console.log(data);
       },
       error: (error) => {
         alert(error);
         console.error('There was an error!', error);
       },
     });
-    console.log(firstPage+"data4")
-    return firstPage;
-  }
-
-  approved(): Promise<string> {
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'Accept': 'text/plain',
-        'Content-Type': 'text/plain'
-      }),
-      responseType: 'text' as 'json'
-    };
-    const data = lastValueFrom(this.http.post<string>(this.approveUrl, {}, httpOptions));
-    return data;
   }
 
   retrieveAllPages(paginationHref: string | null): string[] {

@@ -55,7 +55,15 @@ public class ParserService {
         WebDriver driver = driverPool.getDriverPool();
         retrievePage(url, driver);
         try {
+            long startTime = System.nanoTime();
+            System.out.println("tries to approve");
             approvalService.getApprovalFuture().get(30, TimeUnit.SECONDS);
+            long endTime = System.nanoTime();
+            System.out.println("approves");
+            long elapsedTime = endTime - startTime;
+            double elapsedTimeInSeconds = elapsedTime / 1_000_000_000.0;
+            System.out.printf("Time taken: %.3f seconds%n", elapsedTimeInSeconds);
+
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new RuntimeException(e);
         }

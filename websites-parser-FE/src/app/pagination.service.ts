@@ -7,15 +7,12 @@ export class PaginationService {
 
   private elementsOnMainPage: Element[] = [];
 
-
   constructor(private targetedService: TergetedItemService) { }
-
 
 
   public get getElementsOnMainPage(): Element[] {
     return this.elementsOnMainPage;
   }
-
 
 
   getFromAllPagesInfoDevMode(tagId: string, AllPagesHtml: string[]): string[] {
@@ -84,8 +81,6 @@ export class PaginationService {
     return InfoArray;
 
   }
-
-
 
   private getElementsFromPage(selector: string, parentClassSelector: string | undefined, div: Document | ShadowRoot): NodeListOf<Element> {
     let items;

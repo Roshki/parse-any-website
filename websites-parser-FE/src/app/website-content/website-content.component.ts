@@ -32,7 +32,7 @@ export class WebsiteContentComponent {
 
 
   onMouseOverHighliteElement(event: MouseEvent) {
-    event.preventDefault();
+   // event.preventDefault();
     const target = event.target as HTMLElement;
     const src = target.getAttribute('src');
     const parentTarget = target?.parentElement?.className;
@@ -46,7 +46,7 @@ export class WebsiteContentComponent {
 
 
   onMouseOut(event: MouseEvent) {
-    event.preventDefault();
+   // event.preventDefault();
     const target = event.target as HTMLElement;
     let docrRoot = document.querySelector("app-website-content") as HTMLElement;
     const children = docrRoot.shadowRoot?.querySelectorAll('*');
@@ -59,7 +59,7 @@ export class WebsiteContentComponent {
   }
 
   elementsOnClick(event: MouseEvent): void {
-    event.preventDefault();
+   // event.preventDefault();
     if (this.ifPaginationMode == true) {
       this.paginationOnClick(event);
     }
@@ -86,7 +86,7 @@ export class WebsiteContentComponent {
   }
 
   paginationOnClick(event: MouseEvent): void {
-    event.preventDefault();
+   // event.preventDefault();
     const target = event.target as HTMLElement;
     let hrefAttr = target.getAttribute("href");
     this.website.setAllPagesHtml(this.parserService.retrieveAllPages(hrefAttr));

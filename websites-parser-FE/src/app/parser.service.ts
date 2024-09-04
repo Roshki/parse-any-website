@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { DomSanitizer } from '@angular/platform-browser';
 import { environment } from '../environments/environment';
-import { lastValueFrom } from 'rxjs';
+import { lastValueFrom, BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -10,6 +9,10 @@ import { lastValueFrom } from 'rxjs';
 export class ParserService {
   displayHTML = 'test';
   private parserServiceUrl = environment.parserServiceUrl;
+
+  openModalSubject = new BehaviorSubject<boolean>(false);
+
+  openModal$ = this.openModalSubject.asObservable();
 
   sendHtmlUrl = this.parserServiceUrl + 'send-html';
 
@@ -22,22 +25,22 @@ export class ParserService {
   private noneCachedUrl = this.parserServiceUrl + 'none-cached-page'
 
 
-  constructor(private http: HttpClient, private sanitizer: DomSanitizer) {
+  constructor(private http: HttpClient) {
   }
 
-  async getHtmlFromUrl(webUrl: string): Promise<string> {
-    let getCachedWebIfExists = this.firstCall(webUrl);
-    console.log(getCachedWebIfExists)
+  // async getHtmlFromUrl(webUrl: string): Promise<string> {
+  //   let getCachedWebIfExists = this.firstCall(webUrl);
+  //   console.log(getCachedWebIfExists)
 
-    if (getCachedWebIfExists == "null") {
-      const notCachedPagePromise = await this.notCachedPage(webUrl);
-
-      return notCachedPagePromise;
-    }
-    else {
-      return getCachedWebIfExists;
-    }
-  }
+  //   if (getCachedWebIfExists == "") {
+  //     this.openModalSubject.next(true);
+  //     const notCachedPagePromise = await this.notCachedPage(webUrl);
+  //     return notCachedPagePromise;
+  //   }
+  //   else {
+  //     return getCachedWebIfExists;
+  //   }
+  // }
 
   async notCachedPage(webUrl: string): Promise<string> {
     const httpOptions = {
@@ -47,12 +50,15 @@ export class ParserService {
       }),
       responseType: 'text' as 'json'
     };
+    this.openModalSubject.next(true);
     const data = await lastValueFrom(this.http.post<string>(this.noneCachedUrl, webUrl, httpOptions));
     return data;
 
   }
 
-  firstCall(webUrl: string): string {
+  tryGetCachedWebPage(webUrl: string): string {
+    let firstPage = "";
+    console.log(firstPage+"data1")
     const httpOptions = {
       headers: new HttpHeaders({
         'Accept': 'text/plain',
@@ -60,18 +66,20 @@ export class ParserService {
       }),
       responseType: 'text' as 'json'
     };
-
+    console.log(firstPage+"data2")
     this.http.post<string>(this.sendHtmlUrl, webUrl, httpOptions).subscribe({
       next: (data: string) => {
-        console.log(data)
-        return data;
+        console.log(data+"data3")
+        firstPage == data;
+        return firstPage;
       },
       error: (error) => {
         alert(error);
         console.error('There was an error!', error);
       },
     });
-    return "null";
+    console.log(firstPage+"data4")
+    return firstPage;
   }
 
   approved(): Promise<string> {
@@ -111,11 +119,10 @@ export class ParserService {
       responseType: 'text' as 'json'
 
     };
-    alert(map);
     console.log("sending this: ", map);
     this.http.post<string>(this.getInfoUrl, Object.fromEntries(map), httpOptions).subscribe({
       next: (data: string) => {
-   
+
         console.log("success");
         alert("file is saved!")
 
@@ -142,7 +149,4 @@ export class ParserService {
   //   }
   // }
 
-  getIt(): string {
-    return this.displayHTML;
-  }
 }

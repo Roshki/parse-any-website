@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { ParserService } from '../parser.service';
 
 @Component({
@@ -8,7 +8,7 @@ import { ParserService } from '../parser.service';
   templateUrl: './module-window.html',
   styles: ``
 })
-export class ModuleWindowComponent {
+export class ModuleWindowComponent implements OnInit {
 
   parserService = inject(ParserService);
   isModalWindow: boolean = false;

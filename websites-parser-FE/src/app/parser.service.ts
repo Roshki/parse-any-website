@@ -28,7 +28,7 @@ export class ParserService {
   constructor(private http: HttpClient) {
   }
 
-  async notCachedPage(webUrl: string | null): Promise<string> {
+  geNotCachedWebPage(webUrl: string | null): Promise<string> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Accept': 'text/plain',
@@ -37,7 +37,7 @@ export class ParserService {
       responseType: 'text' as 'json'
     };
     this.openModalSubject.next(true);
-    const data = await lastValueFrom(this.http.post<string>(this.noneCachedUrl, webUrl, httpOptions));
+    const data = lastValueFrom(this.http.post<string>(this.noneCachedUrl, webUrl, httpOptions));
     return data;
 
   }

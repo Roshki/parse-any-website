@@ -79,17 +79,14 @@ export class ParserComponent implements OnInit {
     if (this.sendUrl.valid && this.sendUrl.value) {
       this.isValidUrl = true;
       this.website.getInformation().clear();
-      this.parserService.openModalSubject.next(false);
       this.parserService.tryGetCachedWebPage(this.sendUrl.value)
         .then(cachedPage => {
           if (cachedPage != "") {
-            this.parserService.openModalSubject.next(false);
             console.log("this.isModalWindow cached" + this.isModalWindow)
             this.display = this.sanitizer.bypassSecurityTrustHtml(cachedPage);
           }
           else {
-            this.parserService.openModalSubject.next(true);
-            this.parserService.notCachedPage(this.sendUrl.value).then(nonCachedPage => {
+            this.parserService.geNotCachedWebPage(this.sendUrl.value).then(nonCachedPage => {
               console.log("this.isModalWindow notcached" + this.isModalWindow)
               this.display = this.sanitizer.bypassSecurityTrustHtml(nonCachedPage);
             })
@@ -100,7 +97,7 @@ export class ParserComponent implements OnInit {
       this.isValidUrl = false;
     }
   }
-  
+
   InsertUrlOfLastPageOnClick(): void {
     if (this.sendLastPageUrl != null) {
       this.website.setAllPagesHtml(this.parserService.retrieveAllPages(this.sendLastPageUrl));

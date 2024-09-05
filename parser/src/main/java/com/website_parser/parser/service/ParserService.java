@@ -2,7 +2,6 @@ package com.website_parser.parser.service;
 
 import com.website_parser.parser.model.Website;
 import com.website_parser.parser.util.UrlUtil;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.*;
 import org.springframework.stereotype.Service;
@@ -44,9 +43,6 @@ public class ParserService {
             return websiteCache.getInitialHtml();
         } else {
             return null;
-//            WebDriver driver = driverPool.getDriverPool();
-//            retrievePage(url, driver);
-//            return getHtml(url, driver);
         }
     }
 

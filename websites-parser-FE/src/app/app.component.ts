@@ -1,4 +1,4 @@
-import { Component, inject, Renderer2, RendererStyleFlags2, HostListener, ViewEncapsulation} from '@angular/core';
+import { Component, inject, Renderer2, HostListener, ViewEncapsulation, OnInit } from '@angular/core';
 import { DevModeComponent } from './dev-mode/dev-mode.component';
 import { ParserService } from './parser.service';
 import { TergetedItemService } from './targeted-item.service';
@@ -10,23 +10,25 @@ import { CommonModule } from '@angular/common';
 import { environment } from './../environments/environment';
 import { ListComponent } from './list/list.component';
 import { WebsiteContentComponent } from './website-content/website-content.component';
+import { ModuleWindowComponent } from './module-window/module-window.component';
 
 
 @Component({
   selector: 'app-parser',
   templateUrl: './app.html',
   styleUrl: "../styles.css",
-  imports: [FormsModule, CommonModule, DevModeComponent, ReactiveFormsModule, ListComponent, WebsiteContentComponent],
+  imports: [FormsModule, CommonModule, DevModeComponent, ReactiveFormsModule, ListComponent, WebsiteContentComponent, ModuleWindowComponent],
   encapsulation: ViewEncapsulation.Emulated,
   standalone: true,
   providers: [Website],
 })
-export class ParserComponent {
+export class ParserComponent implements OnInit {
   parserService = inject(ParserService);
   tergetedItemService = inject(TergetedItemService);
   paginationService = inject(PaginationService);
   display: SafeHtml | undefined;
-   listItems: { key: string, values: string[] }[] = [];
+  isModalWindow: boolean = false;
+  listItems: { key: string, values: string[] }[] = [];
   // sendUrl: string = ''
   sendLastPageUrl: string = '';
   sendUrl = new FormControl('', [
@@ -34,20 +36,11 @@ export class ParserComponent {
     Validators.pattern('https?://.+')
   ]);
   isValidUrl: boolean = false;
-
-
   public ifPaginationMode: boolean = false;
-
 
   constructor(private sanitizer: DomSanitizer, private renderer: Renderer2, private website: Website) {
 
   }
-
-
-
-  ngOnInit(): void {
-  }
-
 
   @HostListener('document:click', ['$event'])
   preventLinkNavigation(event: MouseEvent) {
@@ -72,28 +65,38 @@ export class ParserComponent {
   }
 
   handleListItemsChange(newListItems: any[]) {
-    this.listItems = newListItems; 
+    this.listItems = newListItems;
   }
+  ngOnInit() {
+    this.parserService.openModal$.subscribe(value => {
+      this.isModalWindow = value;
+      console.log('Modal state changed in app:', this.isModalWindow);
+    });
+  }
+
 
   htmlOnClick(): void {
     if (this.sendUrl.valid && this.sendUrl.value) {
       this.isValidUrl = true;
       this.website.getInformation().clear();
-      this.parserService.fetchHtmlFromUrl(this.sendUrl.value).subscribe({
-        next: (data: string) => {
-          this.display = this.sanitizer.bypassSecurityTrustHtml(data);
-        },
-        error: (error) => {
-
-          console.error('There was an error fetching the HTML file!', error);
-        },
-      });
+      this.parserService.tryGetCachedWebPage(this.sendUrl.value)
+        .then(cachedPage => {
+          if (cachedPage != "") {
+            console.log("this.isModalWindow cached" + this.isModalWindow)
+            this.display = this.sanitizer.bypassSecurityTrustHtml(cachedPage);
+          }
+          else {
+            this.parserService.geNotCachedWebPage(this.sendUrl.value).then(nonCachedPage => {
+              console.log("this.isModalWindow notcached" + this.isModalWindow)
+              this.display = this.sanitizer.bypassSecurityTrustHtml(nonCachedPage);
+            })
+          }
+        });
     }
     else {
       this.isValidUrl = false;
     }
   }
-
 
   InsertUrlOfLastPageOnClick(): void {
     if (this.sendLastPageUrl != null) {
@@ -121,8 +124,6 @@ export class ParserComponent {
       return;
     }
   }
-
-
 
   exportBtnOnClick(): void {
     this.parserService.sendInfo(this.website.getInformation());

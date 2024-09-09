@@ -88,7 +88,12 @@ public class ParserService {
                 CompletableFuture<Void> completableFuture = CompletableFuture.supplyAsync(() -> {
                     if (!isPageCached(url)) {
                         // Page is not in the cache, so we retrieve it via WebDriver
-                        String htmlPage = retrievePage(url, driverMulti);
+                        String htmlPage = null;
+                        try {
+                            htmlPage = retrievePage(url, driverMulti);
+                        } catch (MalformedURLException e) {
+                            throw new RuntimeException(e);
+                        }
                         htmlPagesMap.put(url, htmlPage);
                     } else {
                         htmlPagesMap.put(url, website.getPages().get(url));
@@ -127,7 +132,7 @@ public class ParserService {
                 .orElse(false);
     }
 
-    private String retrievePage(String url, WebDriver driver) {
+    private String retrievePage(String url, WebDriver driver) throws MalformedURLException {
         try {
             driver.get(url);
         } catch (WebDriverException e) {

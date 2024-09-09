@@ -56,4 +56,9 @@ public class ParserController {
         System.out.println(url);
         return parserService.getNotCachedPage(url);
     }
+
+    @GetMapping("/test")
+    public String test(){
+        return "test";
+    }
 }

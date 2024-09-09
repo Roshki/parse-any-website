@@ -82,12 +82,10 @@ export class ParserComponent implements OnInit {
       this.parserService.tryGetCachedWebPage(this.sendUrl.value)
         .then(cachedPage => {
           if (cachedPage != "") {
-            console.log("this.isModalWindow cached" + this.isModalWindow)
             this.display = this.sanitizer.bypassSecurityTrustHtml(cachedPage);
           }
           else {
             this.parserService.geNotCachedWebPage(this.sendUrl.value).then(nonCachedPage => {
-              console.log("this.isModalWindow notcached" + this.isModalWindow)
               this.display = this.sanitizer.bypassSecurityTrustHtml(nonCachedPage);
             })
           }

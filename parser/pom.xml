@@ -10,6 +10,7 @@
 	</parent>
 	<groupId>com.website-parser</groupId>
 	<artifactId>parser</artifactId>
+	<packaging>jar</packaging>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>parser</name>
 	<description>parser to parse websites</description>

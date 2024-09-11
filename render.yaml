@@ -1,0 +1,75 @@
+services:
+  - type: web
+    name: selenium-hub
+    env: docker
+    image: seleniarm/hub:latest
+    ports:
+      - port: 4442
+        targetPort: 4442
+      - port: 4443
+        targetPort: 4443
+      - port: 4444
+        targetPort: 4444
+    envVars:
+      - key: SE_EVENT_BUS_HOST
+        value: "selenium-hub"
+      - key: SE_EVENT_BUS_PUBLISH_PORT
+        value: "4442"
+      - key: SE_EVENT_BUS_SUBSCRIBE_PORT
+        value: "4443"
+  - type: web
+    name: chrome-1
+    env: docker
+    image: seleniarm/node-chromium:latest
+    shmSize: 2gb
+    envVars:
+      - key: SE_EVENT_BUS_HOST
+        value: "selenium-hub"
+      - key: SE_EVENT_BUS_PUBLISH_PORT
+        value: "4442"
+      - key: SE_EVENT_BUS_SUBSCRIBE_PORT
+        value: "4443"
+    dependsOn:
+      - selenium-hub
+  - type: web
+    name: chrome-2
+    env: docker
+    image: seleniarm/node-chromium:latest
+    shmSize: 2gb
+    envVars:
+      - key: SE_EVENT_BUS_HOST
+        value: "selenium-hub"
+      - key: SE_EVENT_BUS_PUBLISH_PORT
+        value: "4442"
+      - key: SE_EVENT_BUS_SUBSCRIBE_PORT
+        value: "4443"
+    dependsOn:
+      - selenium-hub
+  - type: web
+    name: chrome-3
+    env: docker
+    image: seleniarm/node-chromium:latest
+    shmSize: 2gb
+    envVars:
+      - key: SE_EVENT_BUS_HOST
+        value: "selenium-hub"
+      - key: SE_EVENT_BUS_PUBLISH_PORT
+        value: "4442"
+      - key: SE_EVENT_BUS_SUBSCRIBE_PORT
+        value: "4443"
+    dependsOn:
+      - selenium-hub
+  - type: web
+    name: chrome-4
+    env: docker
+    image: seleniarm/node-chromium:latest
+    shmSize: 2gb
+    envVars:
+      - key: SE_EVENT_BUS_HOST
+        value: "selenium-hub"
+      - key: SE_EVENT_BUS_PUBLISH_PORT
+        value: "4442"
+      - key: SE_EVENT_BUS_SUBSCRIBE_PORT
+        value: "4443"
+    dependsOn:
+      - selenium-hub

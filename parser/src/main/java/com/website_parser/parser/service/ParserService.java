@@ -35,7 +35,7 @@ public class ParserService {
         driverPool.addToPool();
     }
 
-    public String getCachedPage(String url) throws Exception {
+    public String getCachedPage(String url) {
         Website websiteCache = cacheService.getWebsiteCache(url);
         if (websiteCache != null) {
             website = websiteCache;
@@ -115,7 +115,12 @@ public class ParserService {
             }
             CompletableFuture<Void> allOf = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
             resultFuture = allOf.thenApply(v -> {
-                website.getPages().putAll(htmlPagesMap);
+                Map<String, String> pages = website.getPages();
+                if(pages==null){
+                    pages=new HashMap<>();
+                }
+                pages.putAll(htmlPagesMap);
+                website.setPages(pages);
                 cacheService.setWebsiteCache(website.getWebsiteUrl().toString(), website);
                 log.info("All tasks completed. Total successful: {}", successfulCount.get());
                 log.info("HTML list size: {}", website.getPages().entrySet().size());
@@ -135,7 +140,7 @@ public class ParserService {
     private String retrievePage(String url, WebDriver driver) throws MalformedURLException {
         try {
             driver.get(url);
-        } catch (WebDriverException e) {
+        } catch (Exception e) {
             driver = driverPool.reconnectToBrowser(driver);
             driver.get(url);
         }
@@ -157,4 +162,11 @@ public class ParserService {
     }
 
 
+    public String getCleanHtml(Website website) {
+        //cacheService.setWebsiteCache(website.getWebsiteUrl().toString(), website);
+        this.website = website;
+        String htmlContent = website.getInitialHtml().replaceAll("(?s)<header[^>]*>.*?</header>", "");
+        htmlContent = cssLinkToStyle(htmlContent, website.getWebsiteUrl());
+        return htmlContent;
+    }
 }

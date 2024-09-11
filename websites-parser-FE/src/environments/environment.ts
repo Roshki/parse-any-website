@@ -1,5 +1,5 @@
 export const environment = {
     production: true,
-    apiUrl: 'http://localhost:80/',
-    parserServiceUrl: 'http://localhost:80/'
+    apiUrl: 'http://localhost:8080/',
+    parserServiceUrl: 'http://localhost:8080/'
   };

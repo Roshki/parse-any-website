@@ -22,8 +22,7 @@ public class Website implements Serializable {
 
     private URL websiteUrl;
     private String initialHtml;
-    private boolean ifConfirmed;
-    private Map<String, String> pages = Collections.emptyMap();
+    private Map<String, String> pages;
 
     public Website(){}
 }

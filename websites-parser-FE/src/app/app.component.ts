@@ -3,6 +3,7 @@ import { DevModeComponent } from './dev-mode/dev-mode.component';
 import { ParserService } from './parser.service';
 import { TergetedItemService } from './targeted-item.service';
 import { PaginationService } from './pagination.service';
+import { GoogleExtensionService } from './google-extension.service';
 import { Website } from './models/website.model';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { FormsModule, Validators, FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -71,6 +72,17 @@ export class ParserComponent implements OnInit {
     this.parserService.openModal$.subscribe(value => {
       this.isModalWindow = value;
       console.log('Modal state changed in app:', this.isModalWindow);
+    });
+
+    window.addEventListener('message', (event) => {
+      console.log(event.data);
+      this.parserService.getCleanPageFromExt(event.data.websiteUrl, event.data.initialHtml).then(cleanPage => {
+        this.sendUrl = event.data.websiteUrl;
+        this.display = this.sanitizer.bypassSecurityTrustHtml(cleanPage);
+      })
+      // if (this.htmlFromExtension != '') {
+      //   this.display = this.sanitizer.bypassSecurityTrustHtml(event.data);
+      // }
     });
   }
 

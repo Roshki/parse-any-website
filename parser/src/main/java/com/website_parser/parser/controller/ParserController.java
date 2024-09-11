@@ -1,5 +1,6 @@
 package com.website_parser.parser.controller;
 
+import com.website_parser.parser.model.Website;
 import com.website_parser.parser.service.ApprovalService;
 import com.website_parser.parser.service.ParserService;
 import com.website_parser.parser.service.SavingService;
@@ -13,7 +14,7 @@ import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "*")
 public class ParserController {
     private final ParserService parserService;
     private final SavingService savingService;
@@ -53,6 +54,12 @@ public class ParserController {
     public String getNotCached(@RequestBody String url) throws Exception {
         System.out.println(url);
         return parserService.getNotCachedPage(url);
+    }
+
+    @PostMapping("/html-page-cleanup")
+    public String getNotCached(@RequestBody Website website) {
+        System.out.println(website);
+        return parserService.getCleanHtml(website);
     }
 
     @GetMapping("/connect")

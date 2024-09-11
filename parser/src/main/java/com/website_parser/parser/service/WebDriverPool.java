@@ -4,6 +4,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.net.MalformedURLException;
@@ -15,6 +17,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 @Service
 public class WebDriverPool {
 
+    private static final Logger log = LoggerFactory.getLogger(WebDriverPool.class);
     private final BlockingQueue<WebDriver> driverPool = new LinkedBlockingQueue<>(MAX_WEBDRIVERS);
 
     private static final int MAX_WEBDRIVERS = 3;
@@ -88,9 +91,13 @@ public class WebDriverPool {
 
     public WebDriver reconnectToBrowser(WebDriver driver) throws MalformedURLException {
         System.out.println("reconnectToBrowser reconnecting....");
-        if (driver != null) {
+        try {
             driver.quit();
         }
+        catch (Exception e){
+            log.warn("Driver couldn't find session!");
+        }
+
         return getRemoteChromeDriver();
     }
 

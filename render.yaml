@@ -24,7 +24,10 @@ services:
       url: docker.io/selenium/node-chrome
     envVars:
       - key: SE_EVENT_BUS_HOST
-        value: "selenium-hub"
+        fromService:
+          name: selenium-hub
+          type: web
+          property: host
       - key: SE_EVENT_BUS_PUBLISH_PORT
         fromService:
           name: selenium-hub
@@ -34,7 +37,7 @@ services:
         fromService:
           name: selenium-hub
           type: web
-          envVarKey: SUBSCRIBE_PORT
+          envVarKey: PORT
   # - type: web
   #   name: chrome-2
   #   runtime: image

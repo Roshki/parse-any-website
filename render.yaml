@@ -1,17 +1,11 @@
 services:
   - type: web
     name: selenium-hub
-    env: docker
-    image: seleniarm/hub:latest
-    runtime: docker
-    ports:
-      - port: 4442
-        targetPort: 4442
-      - port: 4443
-        targetPort: 4443
-      - port: 4444
-        targetPort: 4444
+    runtime: image
     plan: free
+    region: frankfurt
+    image:
+      url: docker.io/selenium/hub:latest
     envVars:
       - key: SE_EVENT_BUS_HOST
         value: "selenium-hub"
@@ -21,9 +15,11 @@ services:
         value: "4443"
   - type: web
     name: chrome-1
-    env: docker
-    image: seleniarm/node-chromium:latest
+    runtime: image
     plan: free
+    region: frankfurt
+    image:
+      url: docker.io/selenium/node-chrome
     envVars:
       - key: SE_EVENT_BUS_HOST
         value: "selenium-hub"
@@ -33,9 +29,11 @@ services:
         value: "4443"
   - type: web
     name: chrome-2
-    env: docker
-    image: seleniarm/node-chromium:latest
+    runtime: image
     plan: free
+    region: frankfurt
+    image:
+      url: docker.io/selenium/node-chrome
     envVars:
       - key: SE_EVENT_BUS_HOST
         value: "selenium-hub"
@@ -45,9 +43,11 @@ services:
         value: "4443"
   - type: web
     name: chrome-3
-    env: docker
-    image: seleniarm/node-chromium:latest
+    runtime: image
     plan: free
+    region: frankfurt
+    image:
+      url: docker.io/selenium/node-chrome
     envVars:
       - key: SE_EVENT_BUS_HOST
         value: "selenium-hub"
@@ -57,9 +57,11 @@ services:
         value: "4443"
   - type: web
     name: chrome-4
-    env: docker
-    image: seleniarm/node-chromium:latest
+    runtime: image
     plan: free
+    region: frankfurt
+    image:
+      url: docker.io/selenium/node-chrome
     envVars:
       - key: SE_EVENT_BUS_HOST
         value: "selenium-hub"
@@ -67,3 +69,4 @@ services:
         value: "4442"
       - key: SE_EVENT_BUS_SUBSCRIBE_PORT
         value: "4443"
+  

@@ -1,7 +1,7 @@
 
 
 services:
-  - type: web
+  - type: pserv
     name: selenium-hub
     runtime: image
     plan: free
@@ -9,26 +9,32 @@ services:
     image:
       url: docker.io/selenium/hub:latest
     envVars:
+      - key:  PORT
+        value: 4444
+      - key: SUBSCRIBE_PORT
+        value: 4443
+      - key: PUBLISH_PORT
+        value: 4442
+  - type: pserv
+    name: chrome-1
+    runtime: image
+    plan: free
+    region: frankfurt
+    image:
+      url: docker.io/selenium/node-chrome
+    envVars:
       - key: SE_EVENT_BUS_HOST
         value: "selenium-hub"
       - key: SE_EVENT_BUS_PUBLISH_PORT
-        value: "4442"
+        fromService:
+          name: selenium-hub
+          type: web
+          envVarKey: PUBLISH_PORT
       - key: SE_EVENT_BUS_SUBSCRIBE_PORT
-        value: "4443"
-  # - type: web
-  #   name: chrome-1
-  #   runtime: image
-  #   plan: free
-  #   region: frankfurt
-  #   image:
-  #     url: docker.io/selenium/node-chrome
-  #   envVars:
-  #     - key: SE_EVENT_BUS_HOST
-  #       value: "selenium-hub"
-  #     - key: SE_EVENT_BUS_PUBLISH_PORT
-  #       value: "4442"
-  #     - key: SE_EVENT_BUS_SUBSCRIBE_PORT
-  #       value: "4443"
+        fromService:
+          name: selenium-hub
+          type: web
+          envVarKey: SUBSCRIBE_PORT
   # - type: web
   #   name: chrome-2
   #   runtime: image

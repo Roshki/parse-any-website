@@ -3,7 +3,6 @@ package com.website_parser.parser.service;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.springframework.stereotype.Service;
 
@@ -45,17 +44,25 @@ public class WebDriverPool {
         return new ChromeDriver(options);
     }
 
-    private WebDriver getRemoteChromeDriver() throws MalformedURLException {
-        URL serverurl = new URL(remoteServerUrl);
+
+    public WebDriver getRemoteChromeDriver() throws MalformedURLException {
+        String remoteServerUrl = "http://192.168.1.25:4444";
+        URL serverurl = null;
+        try {
+            serverurl = new URL(remoteServerUrl);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--start-maximized");
         options.addArguments("--disable-web-security");
         options.addArguments("--allow-running-insecure-content");
         options.addArguments("--disable-blink-features=AutomationControlled");
         options.addArguments("--disable-search-engine-choice-screen");
-        // options.addArguments("--headless");
+// options.addArguments("--headless");
         options.addArguments(userAgent);
-        return new RemoteWebDriver(serverurl, options, false);
+
+        return new RemoteWebDriver(serverurl, options);
     }
 
 

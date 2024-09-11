@@ -144,8 +144,16 @@ public class ParserService {
 
     }
 
-    public void ifPageConfirmed(boolean ifConfirmed) {
-        website.setIfConfirmed(ifConfirmed);
+    public String ifWebDriverConn() {
+        try {
+            WebDriver w = driverPool.getRemoteChromeDriver();
+            w.get("https://www.google.com/");
+            w.quit();
+        } catch (MalformedURLException e) {
+            log.error("not able to connect!!!");
+            throw new RuntimeException(e);
+        }
+        return "OK!";
     }
 
 

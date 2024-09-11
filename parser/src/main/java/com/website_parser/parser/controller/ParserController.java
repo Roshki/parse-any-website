@@ -38,13 +38,11 @@ public class ParserController {
     @PostMapping("/get-info-url")
     public String getAllPagesBasedOnLastPage(@RequestBody Map<String, List<String>> map) {
         System.out.println(map.size());
-        // Print the map
         //map.forEach((key, value) -> System.out.println(key + " -> " + value));
         savingService.exportMapToExcel(map, "data_books.xlsx");
         return "success";
     }
 
-    @CrossOrigin(origins = "http://localhost:4200")
     @GetMapping("/approve")
     public String approve() {
         approvalService.approve();
@@ -57,8 +55,8 @@ public class ParserController {
         return parserService.getNotCachedPage(url);
     }
 
-    @GetMapping("/test")
-    public String test(){
-        return "test";
+    @GetMapping("/connect")
+    public String test() {
+        return parserService.ifWebDriverConn();
     }
 }

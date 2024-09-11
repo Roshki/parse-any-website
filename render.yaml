@@ -3,6 +3,7 @@ services:
     name: selenium-hub
     env: docker
     image: seleniarm/hub:latest
+    runtime: docker
     ports:
       - port: 4442
         targetPort: 4442
@@ -10,6 +11,7 @@ services:
         targetPort: 4443
       - port: 4444
         targetPort: 4444
+    plan: free
     envVars:
       - key: SE_EVENT_BUS_HOST
         value: "selenium-hub"
@@ -21,7 +23,7 @@ services:
     name: chrome-1
     env: docker
     image: seleniarm/node-chromium:latest
-    shmSize: 2gb
+    plan: free
     envVars:
       - key: SE_EVENT_BUS_HOST
         value: "selenium-hub"
@@ -29,13 +31,11 @@ services:
         value: "4442"
       - key: SE_EVENT_BUS_SUBSCRIBE_PORT
         value: "4443"
-    dependsOn:
-      - selenium-hub
   - type: web
     name: chrome-2
     env: docker
     image: seleniarm/node-chromium:latest
-    shmSize: 2gb
+    plan: free
     envVars:
       - key: SE_EVENT_BUS_HOST
         value: "selenium-hub"
@@ -43,13 +43,11 @@ services:
         value: "4442"
       - key: SE_EVENT_BUS_SUBSCRIBE_PORT
         value: "4443"
-    dependsOn:
-      - selenium-hub
   - type: web
     name: chrome-3
     env: docker
     image: seleniarm/node-chromium:latest
-    shmSize: 2gb
+    plan: free
     envVars:
       - key: SE_EVENT_BUS_HOST
         value: "selenium-hub"
@@ -57,13 +55,11 @@ services:
         value: "4442"
       - key: SE_EVENT_BUS_SUBSCRIBE_PORT
         value: "4443"
-    dependsOn:
-      - selenium-hub
   - type: web
     name: chrome-4
     env: docker
     image: seleniarm/node-chromium:latest
-    shmSize: 2gb
+    plan: free
     envVars:
       - key: SE_EVENT_BUS_HOST
         value: "selenium-hub"
@@ -71,5 +67,3 @@ services:
         value: "4442"
       - key: SE_EVENT_BUS_SUBSCRIBE_PORT
         value: "4443"
-    dependsOn:
-      - selenium-hub

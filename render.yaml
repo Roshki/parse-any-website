@@ -1,7 +1,7 @@
 
 
 services:
-  - type: pserv
+  - type: web
     name: selenium-hub
     runtime: image
     plan: free
@@ -15,7 +15,7 @@ services:
         value: 4443
       - key: PUBLISH_PORT
         value: 4442
-  - type: pserv
+  - type: web
     name: chrome-1
     runtime: image
     plan: free

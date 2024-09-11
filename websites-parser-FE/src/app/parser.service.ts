@@ -24,6 +24,8 @@ export class ParserService {
 
   private noneCachedUrl = this.parserServiceUrl + 'none-cached-page'
 
+  private cleanPageExtUrl = this.parserServiceUrl + 'html-page-cleanup'
+
 
   constructor(private http: HttpClient) {
   }
@@ -88,6 +90,24 @@ export class ParserService {
       },
     });;
     return allPagesHtml;
+  }
+
+  getCleanPageFromExt(url: string, html: string): Promise<string> {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Accept': 'text/plain',
+       // 'Content-Type': 'text/plain'
+      }),
+      responseType: 'text' as 'json'
+    };
+    const website = {
+      websiteUrl: url,
+      initialHtml: html
+    }
+    this.openModalSubject.next(true);
+    const data = lastValueFrom(this.http.post<any>(this.cleanPageExtUrl, website, httpOptions));
+    return data;
+
   }
 
   sendInfo(map: Map<string, string[]>): void {

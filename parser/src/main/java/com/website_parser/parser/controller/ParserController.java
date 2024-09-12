@@ -7,6 +7,7 @@ import com.website_parser.parser.service.SavingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -58,12 +59,13 @@ public class ParserController {
 
     @PostMapping("/html-page-cleanup")
     public String getNotCached(@RequestBody Website website) {
+       // approvalService.approve();
         System.out.println(website);
         return parserService.getCleanHtml(website);
     }
 
     @GetMapping("/connect")
-    public String test() {
+    public String test() throws MalformedURLException {
         return parserService.ifWebDriverConn();
     }
 }

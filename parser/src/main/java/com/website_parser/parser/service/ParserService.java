@@ -149,14 +149,17 @@ public class ParserService {
 
     }
 
-    public String ifWebDriverConn() {
+    public String ifWebDriverConn() throws MalformedURLException {
         try {
+            WebDriver w = driverPool.getDriverPool();
+            w.get("https://www.google.com/");
+            driverPool.releaseDriver(w);
+           // w.quit();
+        } catch (Exception e) {
+            log.error("not able to connect!!!");
             WebDriver w = driverPool.getRemoteChromeDriver();
             w.get("https://www.google.com/");
-            w.quit();
-        } catch (MalformedURLException e) {
-            log.error("not able to connect!!!");
-            throw new RuntimeException(e);
+            //throw new RuntimeException(e);
         }
         return "OK!";
     }

@@ -32,7 +32,7 @@ public class ParserService {
         this.website = website;
         this.cacheService = cacheService;
         this.approvalService = approvalService;
-        driverPool.addToPool();
+//        driverPool.addToPool();
     }
 
     public String getCachedPage(String url) throws Exception {
@@ -48,7 +48,7 @@ public class ParserService {
 
     public String getNotCachedPage(String url) throws MalformedURLException {
         String htmlContent;
-        WebDriver driver = driverPool.getDriverPool();
+        WebDriver driver = driverPool.getChromeDriver();
         retrievePage(url, driver);
         try {
             long startTime = System.nanoTime();
@@ -69,7 +69,8 @@ public class ParserService {
         htmlContent = cssLinkToStyle(htmlContent, new URL(url));
         website = Website.builder().websiteUrl(new URL(url)).initialHtml(htmlContent).pages(new HashMap<>()).build();
         cacheService.setWebsiteCache(url, website);
-        driverPool.releaseDriver(driver);
+        //driverPool.releaseDriver(driver);
+        driver.close();
         approvalService.reset();
 
         return htmlContent;
@@ -81,6 +82,7 @@ public class ParserService {
         List<CompletableFuture<Void>> futures = new ArrayList<>();
         CompletableFuture<List<String>> resultFuture = null;
         Map<String, String> htmlPagesMap = new HashMap<>();
+        driverPool.addToPool();
         if (allPageUrls != null) {
             for (String url : allPageUrls) {
                 WebDriver driverMulti = driverPool.getDriverPool();

@@ -51,7 +51,7 @@ public class WebDriverPool {
 
 
     public WebDriver getRemoteChromeDriver() throws MalformedURLException {
-        String remoteServerUrl = "https://selenium-hub-dm4o.onrender.com";
+        String remoteServerUrl = "http://192.168.1.25:4444";
         URL serverurl = null;
         try {
             serverurl = new URL(remoteServerUrl);

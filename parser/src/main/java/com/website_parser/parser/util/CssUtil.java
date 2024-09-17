@@ -25,10 +25,11 @@ public class CssUtil {
             try {
                 cssContent = getContent(verifiedHost);
             } catch (Exception e) {
+                log.warn("was before + {}", cssUrl);
                 log.warn("not possible to fetch css + {}", verifiedHost);
             }
-            Element styleElement = doc.createElement("style");
             if (cssContent != null) {
+                Element styleElement = doc.createElement("style");
                 styleElement.appendText(cssContent);
                 linkElement.replaceWith(styleElement);
                 System.out.println("Substituted CSS link with inline style: " + linkElement);

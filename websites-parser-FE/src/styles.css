@@ -1,8 +1,4 @@
 /* You can add global styles to this file, and also import other style files */
-body *{
-  font-family: 'Be Vietnam Pro', sans-serif !important;
-  /* font-size: 15px; */
-}
 
 /* body {
   background-color: #E8EAE6;
@@ -13,17 +9,19 @@ body *{
   font-size: 25px !important;
 } */
 
-html, body {
+html,
+body {
   height: 100%;
   margin: 0;
   padding: 0;
 }
 
-.ng-invalid-url  {
-  border: 1px solid #a94442; /* red */
+.ng-invalid-url {
+  border: 1px solid #a94442;
+  /* red */
 }
 
-#sendUrlInput:focus{
+#sendUrlInput:focus {
   border: none;
 }
 
@@ -38,5 +36,24 @@ html, body {
   width: 100vw;
   height: 100vh;
   z-index: 9999;
-  background-color: rgba(0, 0, 0, 0.5); 
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.dropdown-menu {
+  background: linear-gradient(180deg, #f9f9f9, #e2e2e2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  transform: perspective(1px) translateZ(0);
+  transition: all 0.3s ease;
+}
+
+.dropdown-menu>li>a {
+  border-radius: 4px;
+  padding: 10px 20px;
+  transition: all 0.2s ease;
+}
+
+.dropdown-menu>li>a:hover {
+  background: #e2e2e2;
+  transform: translateZ(1px);
 }

@@ -29,7 +29,6 @@ export class ParserComponent implements OnInit {
   display: SafeHtml | undefined;
   isModalWindow: boolean = false;
   listItems: { key: string, values: string[] }[] = [];
-  // sendUrl: string = ''
   sendLastPageUrl: string = '';
   sendUrl = new FormControl('', [
     Validators.required,
@@ -105,9 +104,8 @@ export class ParserComponent implements OnInit {
   }
 
   paginationModeOnClick(): void {
-    let docRoot = document.querySelector("app-website-content")?.shadowRoot;
-    const button = docRoot?.querySelector('#paginationBtn');
-    const items = docRoot?.querySelectorAll('[class*="pagin"]');
+    let docRoot = document.querySelector("app-website-content") as HTMLElement;
+    const items = docRoot.shadowRoot?.querySelectorAll('[class*="pagin"]');
     if (this.ifPaginationMode == false) {
       this.ifPaginationMode = true;
       items?.forEach(element => {
@@ -117,7 +115,6 @@ export class ParserComponent implements OnInit {
     }
     else {
       this.ifPaginationMode = false;
-      this.renderer.removeStyle(button, 'color');
       items?.forEach(element => {
         this.renderer.removeStyle(element, 'border');
       });
@@ -125,9 +122,40 @@ export class ParserComponent implements OnInit {
     }
   }
 
+  onPaginationModeChanged(newData: boolean) {
+    this.ifPaginationMode = newData;
+    console.log("ifPaginationMode " + newData)
+    let docRoot = document.querySelector("app-website-content") as HTMLElement;
+    const items = docRoot.shadowRoot?.querySelectorAll('[class*="pagin"]');
+    items?.forEach(element => {
+      this.renderer.removeStyle(element, 'border');
+    });
+    return;
+  }
+
   exportBtnOnClick(): void {
     this.parserService.sendInfo(this.website.getInformation());
     console.log("exported:  ", this.website.getInformation());
+  }
+
+  inifiniteScrollingOnClick(): void {
+    if (this.sendUrl.valid && this.sendUrl.value) {
+      this.isValidUrl = true;
+      this.website.getInformation().clear();
+      this.parserService.getInfiniteScrolling(this.sendUrl.value)
+        .then(data => {
+          if (data != "") {
+            console.log("this.isModalWindow from infiniteScroll" + this.isModalWindow)
+            this.display = this.sanitizer.bypassSecurityTrustHtml(data);
+          }
+          else {
+            
+          }
+        });
+    }
+    else {
+      this.isValidUrl = false;
+    }
   }
 
 

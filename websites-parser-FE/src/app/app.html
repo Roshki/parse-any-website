@@ -35,6 +35,11 @@
             <h4>Export all</h4>
             <button class="btn btn-secondary btn-sm" (click)="exportBtnOnClick()">Click!</button>
           </div>
+          <div class="form-group ">
+            <div class="dropdown-divider"></div>
+            <h4>Infinite Scrolling</h4>
+            <button class="btn btn-secondary btn-sm" (click)="inifiniteScrollingOnClick()">Click!</button>
+          </div>
         </div>
       </div>
     </div>
@@ -51,7 +56,7 @@
   </div>
 </div>
 <app-website-content (listItemsChange)="handleListItemsChange($event)" [display]="display"
-  [ifPaginationMode]="ifPaginationMode"></app-website-content>
+  [ifPaginationMode]="ifPaginationMode" (ifPaginationModeChanged)="onPaginationModeChanged($event)"></app-website-content>
   <!-- modal show -->
   <app-module-window *ngIf="isModalWindow" class="custom-modal modal fade show"></app-module-window>
 <!-- <div crossorigin="anonymous" class="content" (click)="elementsOnClick($event)"

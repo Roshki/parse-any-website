@@ -1,14 +1,14 @@
 package com.website_parser.parser.controller;
 
-import com.website_parser.parser.service.ApprovalService;
-import com.website_parser.parser.service.ParserService;
-import com.website_parser.parser.service.SavingService;
+import com.website_parser.parser.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 
 @RestController
@@ -18,21 +18,23 @@ public class ParserController {
     private final ParserService parserService;
     private final SavingService savingService;
     private final ApprovalService approvalService;
+    private final PaginationService paginationService;
+    private final ScrollingService scrollingService;
 
     @PostMapping("/send-html")
-    public String getHtml(@RequestBody String url) throws Exception {
+    public String getHtml(@RequestBody String url) {
         System.out.println("cached??");
         return parserService.getCachedPage(url);
     }
 
     @PostMapping("/cached-page")
-    public String getCached(@RequestBody String url) throws Exception {
+    public String getCached(@RequestBody String url) {
         return parserService.getCachedPage(url);
     }
 
     @PostMapping("/last-page")
-    public List<String> getAllPagesBasedOnLastPage(@RequestBody String lastPage) throws ExecutionException, InterruptedException {
-        return parserService.getHtmlOfAllPagesBasedOnLastPage(lastPage);
+    public List<String> getAllPagesBasedOnLastPage(@RequestBody String lastPage) throws ExecutionException, InterruptedException, MalformedURLException {
+        return paginationService.getHtmlOfAllPagesBasedOnLastPage(lastPage);
     }
 
     @PostMapping("/get-info-url")
@@ -55,5 +57,10 @@ public class ParserController {
     public String getNotCached(@RequestBody String url) throws Exception {
         System.out.println(url);
         return parserService.getNotCachedPage(url);
+    }
+
+    @PostMapping("/infinite-scroll")
+    public String getInfiniteScrolling(@RequestBody String url) throws ExecutionException, InterruptedException, TimeoutException, MalformedURLException {
+        return scrollingService.getInfiniteScrolling(url);
     }
 }

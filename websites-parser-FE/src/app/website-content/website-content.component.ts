@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, inject, Renderer2, ViewEncapsulation, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
-import { SafeHtml} from '@angular/platform-browser';
+import { SafeHtml } from '@angular/platform-browser';
 import { ParserService } from '../parser.service';
 import { PaginationService } from '../pagination.service';
 import { TergetedItemService } from '../targeted-item.service';
@@ -25,14 +25,15 @@ export class WebsiteContentComponent {
   @Output() listItemsChange = new EventEmitter<any[]>();
 
   @Input() display: SafeHtml | undefined;
-  @Input() ifPaginationMode: boolean = false;
+  @Input()  ifPaginationMode: boolean = false;
+  @Output() ifPaginationModeChanged = new EventEmitter<boolean>();
 
   constructor(private renderer: Renderer2, private website: Website, private cd: ChangeDetectorRef) {
   }
 
 
   onMouseOverHighliteElement(event: MouseEvent) {
-   // event.preventDefault();
+    // event.preventDefault();
     const target = event.target as HTMLElement;
     const src = target.getAttribute('src');
     const parentTarget = target?.parentElement?.className;
@@ -46,7 +47,7 @@ export class WebsiteContentComponent {
 
 
   onMouseOut(event: MouseEvent) {
-   // event.preventDefault();
+    // event.preventDefault();
     const target = event.target as HTMLElement;
     let docrRoot = document.querySelector("app-website-content") as HTMLElement;
     const children = docrRoot.shadowRoot?.querySelectorAll('*');
@@ -59,9 +60,10 @@ export class WebsiteContentComponent {
   }
 
   elementsOnClick(event: MouseEvent): void {
-   // event.preventDefault();
+    // event.preventDefault();
     if (this.ifPaginationMode == true) {
       this.paginationOnClick(event);
+      this.ifPaginationModeChanged.emit(false)
     }
     else {
       const target = event.target as HTMLElement;
@@ -75,7 +77,7 @@ export class WebsiteContentComponent {
           });
         }, 0);
       }
-      this.website.setInformation(target.className+" "+this.website.getColumIndex().toString(), arr);
+      this.website.setInformation(target.className + " " + this.website.getColumIndex().toString(), arr);
       this.listItems = Array.from(this.website.getInformation()).map(([key, values]) => ({ key, values }));
       this.listItemsChange.emit(this.listItems);
       let columnIndex = this.website.getColumIndex();
@@ -86,9 +88,10 @@ export class WebsiteContentComponent {
   }
 
   paginationOnClick(event: MouseEvent): void {
-   // event.preventDefault();
+    // event.preventDefault();
     const target = event.target as HTMLElement;
     let hrefAttr = target.getAttribute("href");
     this.website.setAllPagesHtml(this.parserService.retrieveAllPages(hrefAttr));
+    this.ifPaginationMode = false;
   }
 }

@@ -5,25 +5,24 @@ import org.springframework.stereotype.Component;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.net.URL;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 @Component
 @Getter
 @Setter
-@Builder
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class Website implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 6529685098267757690L;
 
-    private URL websiteUrl;
+    private String websiteUrl;
     private String initialHtml;
-    private boolean ifConfirmed;
-    private Map<String, String> pages = Collections.emptyMap();
+    private Map<String, String> pages;
 
-    public Website(){}
+    public Website(String websiteUrl, String initialHtml, Map<String, String> pages) {
+        this.websiteUrl = websiteUrl;
+        this.initialHtml = initialHtml;
+        this.pages = pages;
+    }
 }

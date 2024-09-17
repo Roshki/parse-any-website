@@ -24,6 +24,8 @@ export class ParserService {
 
   private noneCachedUrl = this.parserServiceUrl + 'none-cached-page'
 
+  private infiniteScrollingUrl = this.parserServiceUrl + 'infinite-scroll'
+
 
   constructor(private http: HttpClient) {
   }
@@ -39,7 +41,6 @@ export class ParserService {
     this.openModalSubject.next(true);
     const data = lastValueFrom(this.http.post<string>(this.noneCachedUrl, webUrl, httpOptions));
     return data;
-
   }
 
   tryGetCachedWebPage(webUrl: string): Promise<string> {
@@ -51,7 +52,6 @@ export class ParserService {
       responseType: 'text' as 'json'
     };
     this.openModalSubject.next(false);
-    lastValueFrom(this.http.post<string>(this.sendHtmlUrl, webUrl, httpOptions));
     return lastValueFrom(this.http.post<string>(this.sendHtmlUrl, webUrl, httpOptions));
   }
 
@@ -72,6 +72,19 @@ export class ParserService {
         console.error('There was an error!', error);
       },
     });
+  }
+
+  getInfiniteScrolling(webUrl: string): Promise<string> {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Accept': 'text/plain',
+        'Content-Type': 'text/plain'
+      }),
+      responseType: 'text' as 'json'
+    };
+    this.openModalSubject.next(true);
+    const data = lastValueFrom(this.http.post<string>(this.infiniteScrollingUrl, webUrl, httpOptions));
+    return data;
   }
 
   retrieveAllPages(paginationHref: string | null): string[] {

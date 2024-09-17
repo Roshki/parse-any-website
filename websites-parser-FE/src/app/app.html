@@ -4,7 +4,8 @@
     <div class="d-flex align-items-center">
       <input class="form-control me-2" [ngClass]="{'ng-invalid-url': !isValidUrl}" type="text" placeholder="URL"
         [formControl]="sendUrl" style="width: 300px; margin-left: 2px;" id="sendUrlInput">
-      <button id="openWebsiteBtn" class="btn btn-outline-success me-2" type="submit" (click)="htmlOnClick()">Open Website</button>
+      <button id="openWebsiteBtn" class="btn btn-outline-success me-2" type="submit" (click)="htmlOnClick()">Open
+        Website</button>
       <div class="dropdown">
         <button [disabled]="!display" type="button" class="btn btn-me-2 btn-success dropdown-toggle"
           data-bs-toggle="dropdown" data-bs-auto-close="outside">
@@ -35,6 +36,11 @@
             <h4>Export all</h4>
             <button class="btn btn-secondary btn-sm" (click)="exportBtnOnClick()">Click!</button>
           </div>
+          <div class="form-group ">
+            <div class="dropdown-divider"></div>
+            <h4>Infinite Scrolling</h4>
+            <button class="btn btn-secondary btn-sm" (click)="inifiniteScrollingOnClick()">Click!</button>
+          </div>
         </div>
       </div>
     </div>
@@ -44,16 +50,47 @@
 <div *ngIf="!display"
   style="padding-left: 10px; padding-top: 70px; background-color: #E8EAE6; height: 100%; width: 100%;">
   <div>
-    <h3>Parse most of websites with pagination.</h3>
-    <h3>
-      <small class="text-muted">Infinite scrolling is coming soon.</small>
-    </h3>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-8 offset-md-2">
+          <div class="card">
+            <div class="card-header bg-primary text-white">
+              <h5 class="card-title">Instructions</h5>
+            </div>
+            <div class="card-body">
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                  <span class="font-weight-bold">1.</span> Type in the URL you want to retrieve info from (with pagination or infinite scrolling).
+                </li>
+                <li class="list-group-item">
+                  <span class="font-weight-bold">2.</span> Check the page in the browser opened by the Selenium library (ensure there are no cookie/sign-in windows and close any that appear); then approve.
+                </li>
+                <li class="list-group-item">
+                  <span class="font-weight-bold">3.</span> 
+                  <strong> FOR PAGINATION:</strong> Type in the URL of the last page, and it will parse the first X pages or press the button "Choose last page". The button can give you a hint where to find the pagination.
+                  <br>
+                  <strong> FOR INFINITE SCROLLING:</strong> Press the button "Infinite scrolling > Click!"
+                </li>
+                <li class="list-group-item">
+                  <span class="font-weight-bold">4.</span> Start pressing the information you want to retrieve from the website, and it will be added to a list on the right.
+                  Sometimes the attributes on the website have tricky names, so you can retrieve the info by using the "find by attribute" field. Inspect the item and get the attribute yourself (e.g., class="className").
+                </li>
+                <li class="list-group-item">
+                  <span class="font-weight-bold">5.</span> Export!
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 <app-website-content (listItemsChange)="handleListItemsChange($event)" [display]="display"
-  [ifPaginationMode]="ifPaginationMode"></app-website-content>
-  <!-- modal show -->
-  <app-module-window *ngIf="isModalWindow" class="custom-modal modal fade show"></app-module-window>
+  [ifPaginationMode]="ifPaginationMode"
+  (ifPaginationModeChanged)="onPaginationModeChanged($event)"></app-website-content>
+<!-- modal show -->
+<app-module-window *ngIf="isModalWindow" class="custom-modal modal fade show"></app-module-window>
 <!-- <div crossorigin="anonymous" class="content" (click)="elementsOnClick($event)"
   (mouseover)="onMouseOverHighliteElement($event)" (mouseout)="onMouseOut($event)" *ngIf="display" [innerHTML]="display"
   style="padding-left: 10px; padding-top: 70px; background-color: white !important;"></div> -->

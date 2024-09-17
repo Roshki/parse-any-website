@@ -1,8 +1,9 @@
 /* You can add global styles to this file, and also import other style files */
 
-/* body {
-  background-color: #E8EAE6;
-} */
+body {
+  background-color: #e8eae62e;
+  font-family: "Helvetica Neue", "Helvetica", Helvetica, Arial, sans-serif 
+}
 
 /* .content * {
   font-family: "Helvetica Neue", "Helvetica", Helvetica, Arial, sans-serif !important;

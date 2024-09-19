@@ -85,6 +85,7 @@ export class ParserService {
       }),
       responseType: 'text' as 'json'
     };
+    console.log("this is what we've got: ", webUrl);
     this.openModalSubject.next(false);
     const data = lastValueFrom(this.http.post<string>(this.infiniteScrollingUrl, webUrl, httpOptions));
     return data;
@@ -118,7 +119,7 @@ export class ParserService {
       websiteUrl: url,
       initialHtml: html
     }
-    this.openModalSubject.next(true);
+    this.openModalSubject.next(false);
     const data = lastValueFrom(this.http.post<any>(this.cleanPageExtUrl, website, httpOptions));
     return data;
 

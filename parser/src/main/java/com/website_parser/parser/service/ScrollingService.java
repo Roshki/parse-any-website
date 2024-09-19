@@ -7,10 +7,12 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Service;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.List;
 
 import java.util.stream.Collectors;
@@ -33,9 +35,9 @@ public class ScrollingService {
             timesOfScrolling++;
             ((JavascriptExecutor) driver).executeScript("window.scrollTo(0, document.body.scrollHeight-1000);");
 
-            Thread.sleep(3000);
+            Thread.sleep(2000);
 
-//            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
+//            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(120));
 //            long finalLastHeight = lastHeight;
 //            try {
 //                wait.until(d -> {
@@ -61,8 +63,8 @@ public class ScrollingService {
                     }
                 }
             }
-            long newHeight = (long) ((JavascriptExecutor) driver).executeScript("return document.body.scrollHeight");
             Thread.sleep(2000);
+            long newHeight = (long) ((JavascriptExecutor) driver).executeScript("return document.body.scrollHeight");
             System.out.println(lastHeight + " - " + newHeight);
             if (newHeight == lastHeight) {
                 System.out.println(timesOfScrolling);
@@ -75,7 +77,7 @@ public class ScrollingService {
             lastHeight = newHeight;
         }
         String htmlContent = driver.getPageSource();
-        CssUtil.cssLinksToStyleAndReturn(htmlContent, new URL(url));
+       // CssUtil.cssLinksToStyleAndReturn(htmlContent, new URL(url));
         driverPool.safelyCloseAndQuitDriver(driver);
         return htmlContent;
     }

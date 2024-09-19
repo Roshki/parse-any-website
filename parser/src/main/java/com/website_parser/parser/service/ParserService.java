@@ -1,10 +1,11 @@
 package com.website_parser.parser.service;
 
 import com.website_parser.parser.model.Website;
-import com.website_parser.parser.util.UrlUtil;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.net.MalformedURLException;
@@ -24,8 +25,11 @@ public class ParserService {
 
     private final WebDriverService webDriverService;
     private final CacheService cacheService;
-    private Website website;
+    private final Website website;
     private final ApprovalService approvalService;
+
+    @Value("${parser.remote-chrome-1}")
+    private String chromePort1;
 
 
     public String getCachedPage(String url) {
@@ -90,7 +94,7 @@ public class ParserService {
             return driver.getPageSource();
         } catch (Exception e) {
             webDriverService.safelyCloseAndQuitDriver(driver);
-            driver = webDriverService.getNewChromeDriver();
+            driver = webDriverService.getRemoteChromeDriver(chromePort1);
             driver.get(url);
             return driver.getPageSource();
         }
@@ -110,8 +114,8 @@ public class ParserService {
 
     public String getCleanHtml(Website website) throws MalformedURLException {
         //cacheService.setWebsiteCache(website.getWebsiteUrl().toString(), website);
-        this.website = website;
-        String htmlContent = website.getInitialHtml().replaceAll("(?s)<header[^>]*>.*?</header>", "");
+        populateWebsite(new Website(website.getWebsiteUrl(), website.getInitialHtml(), new HashMap<>()));
+        String htmlContent = this.website.getInitialHtml().replaceAll("(?s)<header[^>]*>.*?</header>", "");
         htmlContent = cssLinksToStyleAndReturn(htmlContent, new URL(website.getWebsiteUrl()));
         return htmlContent;
     }

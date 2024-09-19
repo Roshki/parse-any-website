@@ -1,7 +1,7 @@
 package com.website_parser.parser.service;
 
 import com.website_parser.parser.model.Website;
-
+import com.website_parser.parser.util.UrlUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.*;
@@ -24,7 +24,7 @@ public class ParserService {
 
     private final WebDriverService webDriverService;
     private final CacheService cacheService;
-    private final Website website;
+    private Website website;
     private final ApprovalService approvalService;
 
 
@@ -96,4 +96,23 @@ public class ParserService {
         }
     }
 
+    public String ifWebDriverConn() throws MalformedURLException {
+        try {
+            WebDriver w = webDriverService.getDriverFromPool();
+            w.get("https://www.google.com/");
+            webDriverService.releaseDriverToThePool(w);
+            // w.quit();
+        } catch (Exception e) {
+            log.error("not able to connect!!!");
+        }
+        return "OK!";
+    }
+
+    public String getCleanHtml(Website website) throws MalformedURLException {
+        //cacheService.setWebsiteCache(website.getWebsiteUrl().toString(), website);
+        this.website = website;
+        String htmlContent = website.getInitialHtml().replaceAll("(?s)<header[^>]*>.*?</header>", "");
+        htmlContent = cssLinksToStyleAndReturn(htmlContent, new URL(website.getWebsiteUrl()));
+        return htmlContent;
+    }
 }

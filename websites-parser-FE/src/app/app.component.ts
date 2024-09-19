@@ -3,6 +3,7 @@ import { DevModeComponent } from './dev-mode/dev-mode.component';
 import { ParserService } from './parser.service';
 import { TergetedItemService } from './targeted-item.service';
 import { PaginationService } from './pagination.service';
+import { GoogleExtensionService } from './google-extension.service';
 import { Website } from './models/website.model';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { FormsModule, Validators, FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -71,6 +72,17 @@ export class ParserComponent implements OnInit {
       this.isModalWindow = value;
       console.log('Modal state changed in app:', this.isModalWindow);
     });
+
+    window.addEventListener('message', (event) => {
+      console.log(event.data);
+      this.parserService.getCleanPageFromExt(event.data.websiteUrl, event.data.initialHtml).then(cleanPage => {
+        this.sendUrl = event.data.websiteUrl;
+        this.display = this.sanitizer.bypassSecurityTrustHtml(cleanPage);
+      })
+      // if (this.htmlFromExtension != '') {
+      //   this.display = this.sanitizer.bypassSecurityTrustHtml(event.data);
+      // }
+    });
   }
 
 
@@ -81,12 +93,10 @@ export class ParserComponent implements OnInit {
       this.parserService.tryGetCachedWebPage(this.sendUrl.value)
         .then(cachedPage => {
           if (cachedPage != "") {
-            console.log("this.isModalWindow cached" + this.isModalWindow)
             this.display = this.sanitizer.bypassSecurityTrustHtml(cachedPage);
           }
           else {
             this.parserService.geNotCachedWebPage(this.sendUrl.value).then(nonCachedPage => {
-              console.log("this.isModalWindow notcached" + this.isModalWindow)
               this.display = this.sanitizer.bypassSecurityTrustHtml(nonCachedPage);
             })
           }

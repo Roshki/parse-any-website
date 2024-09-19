@@ -14,7 +14,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static com.website_parser.parser.util.CssUtil.cssLinkToStyle;
+import static com.website_parser.parser.util.CssUtil.cssLinksToStyleAndReturn;
 
 
 @Service
@@ -22,7 +22,7 @@ import static com.website_parser.parser.util.CssUtil.cssLinkToStyle;
 @RequiredArgsConstructor
 public class ParserService {
 
-    private final WebDriverPool driverPool;
+    private final WebDriverService webDriverService;
     private final CacheService cacheService;
     private final Website website;
     private final ApprovalService approvalService;
@@ -47,8 +47,9 @@ public class ParserService {
 
     public String getNotCachedPage(String url) throws MalformedURLException {
         String htmlContent;
-        WebDriver driver = driverPool.getChromeDriver();
-        retrievePage(url, driver);
+        // WebDriver initialDriver = driverPool.getNewChromeDriver();
+        WebDriver initialDriver = webDriverService.getInitialDriver();
+        retrievePage(url, initialDriver);
         try {
             long startTime = System.nanoTime();
             System.out.println("tries to approve");
@@ -63,12 +64,14 @@ public class ParserService {
             throw new RuntimeException(e);
         }
         System.out.println("Approved!!!");
-        String driverPageSource = driver.getPageSource();
-        htmlContent = driverPageSource.replaceAll("(?s)<header[^>]*>.*?</header>", "");
-        htmlContent = cssLinkToStyle(htmlContent, new URL(url));
+        String driverPageSource = retrievePage(url, initialDriver);
+        htmlContent = cssLinksToStyleAndReturn(driverPageSource, new URL(url))
+                .replaceAll("(?s)<header[^>]*>.*?</header>", "")
+                .replaceAll("z-index:\\s*\\d+", "")
+                .replaceAll("(?s)<nav[^>]*>.*?</nav>", "");
         populateWebsite(new Website(url, htmlContent, new HashMap<>()));
         cacheService.setWebsiteCache(url, website);
-        driver.close();
+//        initialDriver.close();
         approvalService.reset();
 
         return htmlContent;
@@ -84,13 +87,13 @@ public class ParserService {
     public String retrievePage(String url, WebDriver driver) {
         try {
             driver.get(url);
-        } catch (WebDriverException e) {
-            driver = driverPool.reconnectToBrowser(driver);
+            return driver.getPageSource();
+        } catch (Exception e) {
+            webDriverService.safelyCloseAndQuitDriver(driver);
+            driver = webDriverService.getNewChromeDriver();
             driver.get(url);
+            return driver.getPageSource();
         }
-        System.out.println(url);
-        return driver.getPageSource();
-
     }
 
 }

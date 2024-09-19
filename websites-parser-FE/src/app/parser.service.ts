@@ -82,7 +82,7 @@ export class ParserService {
       }),
       responseType: 'text' as 'json'
     };
-    this.openModalSubject.next(true);
+    this.openModalSubject.next(false);
     const data = lastValueFrom(this.http.post<string>(this.infiniteScrollingUrl, webUrl, httpOptions));
     return data;
   }

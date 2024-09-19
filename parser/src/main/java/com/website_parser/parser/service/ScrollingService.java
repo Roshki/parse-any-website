@@ -12,10 +12,7 @@ import org.springframework.stereotype.Service;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -23,31 +20,20 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ScrollingService {
 
-    private final WebDriverPool driverPool;
-    private final ApprovalService approvalService;
-    private static final String URL_scroll_linkedin = "https://www.linkedin.com/jobs/search?keywords=&location=Netherlands&geoId=102890719&f_TPR=r86400&position=1&pageNum=0";
-    private static final String URL_scroll_marktplaats = "https://www.marktplaats.nl/";
+    private final WebDriverService driverPool;
 
-
-    public String getInfiniteScrolling(String url) throws ExecutionException, InterruptedException, TimeoutException, MalformedURLException {
+    // @TODO parameters: speed, pauses, amount of scrolls
+    public String getInfiniteScrolling(String url) throws InterruptedException, MalformedURLException {
         int timesOfScrolling = 0;
-        WebDriver driver = driverPool.getChromeDriver();
+        WebDriver driver = driverPool.getInitialDriver();
         driver.get(url);
-        long startTime = System.nanoTime();
-        System.out.println("tries to approve");
-        approvalService.getApprovalFuture().get(300, TimeUnit.SECONDS);
-        long endTime = System.nanoTime();
-        System.out.println("approves");
-        long elapsedTime = endTime - startTime;
-        double elapsedTimeInSeconds = elapsedTime / 1_000_000_000.0;
-        System.out.printf("Time taken: %.3f seconds%n", elapsedTimeInSeconds);
         List<String> seenButtons = getElementIdentifiers(driver.findElements(By.cssSelector("button")));
         long lastHeight = (long) ((JavascriptExecutor) driver).executeScript("return document.body.scrollHeight");
         while (true) {
             timesOfScrolling++;
             ((JavascriptExecutor) driver).executeScript("window.scrollTo(0, document.body.scrollHeight-1000);");
 
-            Thread.sleep(2000);
+            Thread.sleep(3000);
 
 //            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
 //            long finalLastHeight = lastHeight;
@@ -82,12 +68,15 @@ public class ScrollingService {
                 System.out.println(timesOfScrolling);
                 break;
             }
+            if (timesOfScrolling == 5) {
+                System.out.println(timesOfScrolling);
+                break;
+            }
             lastHeight = newHeight;
         }
         String htmlContent = driver.getPageSource();
-        CssUtil.cssLinkToStyle(htmlContent, new URL(url));
-        driver.close();
-        driver.quit();
+        CssUtil.cssLinksToStyleAndReturn(htmlContent, new URL(url));
+        driverPool.safelyCloseAndQuitDriver(driver);
         return htmlContent;
     }
 

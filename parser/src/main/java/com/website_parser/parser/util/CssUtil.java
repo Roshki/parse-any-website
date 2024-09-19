@@ -14,7 +14,7 @@ import static com.website_parser.parser.util.UrlUtil.verifyHost;
 @Slf4j
 public class CssUtil {
 
-    public static String cssLinkToStyle(String htmlContent, URL mainUrl) {
+    public static String cssLinksToStyleAndReturn(String htmlContent, URL mainUrl) {
         Document doc = Jsoup.parse(htmlContent);
         Elements linkElements = doc.select("link[rel=stylesheet]");
         linkElements.addAll(doc.select("link[rel=preload]"));

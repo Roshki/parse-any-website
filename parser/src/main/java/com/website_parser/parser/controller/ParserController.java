@@ -2,13 +2,15 @@ package com.website_parser.parser.controller;
 
 import com.website_parser.parser.service.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 
 
 @RestController
@@ -60,7 +62,12 @@ public class ParserController {
     }
 
     @PostMapping("/infinite-scroll")
-    public String getInfiniteScrolling(@RequestBody String url) throws ExecutionException, InterruptedException, TimeoutException, MalformedURLException {
-        return scrollingService.getInfiniteScrolling(url);
+    public ResponseEntity<String> getInfiniteScrolling(@RequestBody String url) {
+        try {
+            return new ResponseEntity<>(
+                    scrollingService.getInfiniteScrolling(url), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>("error occurred! " + ex, HttpStatusCode.valueOf(500));
+        }
     }
 }

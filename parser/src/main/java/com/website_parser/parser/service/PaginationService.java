@@ -24,11 +24,12 @@ public class PaginationService {
 
     private final ParserService parserService;
     private final CacheService cacheService;
-    private final WebDriverPool driverPool;
+    private final WebDriverService webDriverService;
     private final Website website;
 
     public List<String> getHtmlOfAllPagesBasedOnLastPage(String lastPage) throws ExecutionException, InterruptedException, MalformedURLException {
-        driverPool.addToPool();
+        webDriverService.closeInitialDriver();
+        webDriverService.addToPool();
         AtomicInteger successfulCount = new AtomicInteger(0);
         ArrayList<String> allPageUrls = UrlUtil.predictAllUrls(UrlUtil.verifyHost(lastPage, new URL(website.getWebsiteUrl())));
         List<CompletableFuture<Void>> futures = new ArrayList<>();
@@ -36,7 +37,7 @@ public class PaginationService {
         Map<String, String> htmlPagesMap = new HashMap<>();
         if (allPageUrls != null) {
             for (String url : allPageUrls) {
-                WebDriver driverMulti = driverPool.getDriver();
+                WebDriver driverMulti = webDriverService.getDriverFromPool();
 
                 CompletableFuture<Void> completableFuture = CompletableFuture.supplyAsync(() -> {
                     if (!parserService.isPageCached(url)) {
@@ -50,11 +51,11 @@ public class PaginationService {
                 }).thenAccept(result -> {
                     int count = successfulCount.incrementAndGet();
                     System.out.println("success -- " + url);
-                    driverPool.releaseDriver(driverMulti);
+                    webDriverService.releaseDriverToThePool(driverMulti);
                     //emit sse
                 }).exceptionally(ex -> {
                     if (driverMulti != null) {
-                        driverPool.releaseDriver(driverMulti);
+                        webDriverService.releaseDriverToThePool(driverMulti);
                     }
                     log.error("error! -- {}", url, ex.getCause());
                     return null;
@@ -65,6 +66,7 @@ public class PaginationService {
             resultFuture = allOf.thenApply(v -> {
                 website.getPages().putAll(htmlPagesMap);
                 cacheService.setWebsiteCache(website.getWebsiteUrl(), website);
+               // webDriverService.closeAllPool();
                 log.info("All tasks completed. Total successful: {}", successfulCount.get());
                 log.info("HTML list size: {}", website.getPages().entrySet().size());
                 return htmlPagesMap.values().stream().toList();

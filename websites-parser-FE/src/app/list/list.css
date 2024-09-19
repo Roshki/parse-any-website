@@ -3,7 +3,7 @@
   right: 0;
   top: 20%;
   /* transform: translateY(50%); */
-  z-index: 300001000;
+  z-index: 3000010;
   /* Ensures it overlaps other content */
 }
 

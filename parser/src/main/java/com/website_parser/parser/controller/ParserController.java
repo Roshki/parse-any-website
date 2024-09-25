@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.MalformedURLException;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -25,13 +26,13 @@ public class ParserController {
     private final ScrollingService scrollingService;
 
     @PostMapping("/send-html")
-    public String getHtml(@RequestBody String url) throws Exception {
+    public String getHtml(@RequestBody String url) {
         System.out.println("cached??");
         return parserService.getCachedPage(url);
     }
 
     @PostMapping("/cached-page")
-    public String getCached(@RequestBody String url) throws Exception {
+    public String getCached(@RequestBody String url) {
         return parserService.getCachedPage(url);
     }
 
@@ -44,7 +45,8 @@ public class ParserController {
     public String getAllPagesBasedOnLastPage(@RequestBody Map<String, List<String>> map) {
         System.out.println(map.size());
         //map.forEach((key, value) -> System.out.println(key + " -> " + value));
-        savingService.exportMapToExcel(map, "data_books.xlsx");
+        System.out.println(Paths.get(System.getProperty("user.home"), "Desktop"));
+        savingService.exportMapToExcel(map, Paths.get(System.getProperty("user.home"), "Desktop") + "/data.xlsx");
         return "success";
     }
 
@@ -78,7 +80,7 @@ public class ParserController {
     }
 
     @GetMapping("/connect")
-    public String test() throws MalformedURLException {
+    public String test() {
         return parserService.ifWebDriverConn();
     }
 }

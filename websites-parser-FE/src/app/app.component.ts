@@ -90,6 +90,8 @@ export class ParserComponent implements OnInit {
     if (this.sendUrl.valid && this.sendUrl.value) {
       this.isValidUrl = true;
       this.website.getInformation().clear();
+      this.website.setColumIndex(1);
+      this.website.setAllPagesHtml([]);
       this.parserService.tryGetCachedWebPage(this.sendUrl.value)
         .then(cachedPage => {
           if (cachedPage != "") {

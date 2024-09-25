@@ -28,8 +28,7 @@ public class PaginationService {
     private final Website website;
 
     public List<String> getHtmlOfAllPagesBasedOnLastPage(String lastPage) throws ExecutionException, InterruptedException, MalformedURLException {
-        webDriverService.closeInitialDriver();
-        webDriverService.addToPool();
+        webDriverService.initPool();
         AtomicInteger successfulCount = new AtomicInteger(0);
         ArrayList<String> allPageUrls = UrlUtil.predictAllUrls(UrlUtil.verifyHost(lastPage, new URL(website.getWebsiteUrl())));
         List<CompletableFuture<Void>> futures = new ArrayList<>();
@@ -42,7 +41,7 @@ public class PaginationService {
                 CompletableFuture<Void> completableFuture = CompletableFuture.supplyAsync(() -> {
                     if (!parserService.isPageCached(url)) {
                         // Page is not in the cache, so we retrieve it via WebDriver
-                        String htmlPage = parserService.retrievePage(url, driverMulti);
+                        String htmlPage = parserService.verifyDriver(url, driverMulti).getPageSource();
                         htmlPagesMap.put(url, htmlPage);
                     } else {
                         htmlPagesMap.put(url, website.getPages().get(url));

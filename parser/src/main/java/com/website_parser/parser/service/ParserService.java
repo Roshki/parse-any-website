@@ -5,7 +5,7 @@ import com.website_parser.parser.model.Website;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.*;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import java.net.MalformedURLException;
@@ -27,15 +27,13 @@ public class ParserService {
     private final CacheService cacheService;
     private final Website website;
     private final ApprovalService approvalService;
-
-    @Value("${parser.remote-chrome-1}")
-    private String chromePort1;
+    private final ApplicationContext applicationContext;
 
 
     public String getCachedPage(String url) {
         Website websiteCache = cacheService.getWebsiteCache(url);
         if (websiteCache != null) {
-            populateWebsite(websiteCache);
+            website.populateWebsite(websiteCache);
             System.out.println("Cached pages:::   " + website.getPages().size());
             return websiteCache.getInitialHtml();
         } else {
@@ -43,17 +41,10 @@ public class ParserService {
         }
     }
 
-    private void populateWebsite(Website retrievedWebsite) {
-        website.setPages(retrievedWebsite.getPages());
-        website.setWebsiteUrl(retrievedWebsite.getWebsiteUrl());
-        website.setInitialHtml(retrievedWebsite.getInitialHtml());
-    }
-
     public String getNotCachedPage(String url) throws MalformedURLException {
         String htmlContent;
-        // WebDriver initialDriver = driverPool.getNewChromeDriver();
-        WebDriver initialDriver = webDriverService.getInitialDriver();
-        retrievePage(url, initialDriver);
+        WebDriver initialDriver = webDriverService.verifyInitialDriver();
+        WebDriver webDriver = verifyDriver(url, initialDriver);
         try {
             long startTime = System.nanoTime();
             System.out.println("tries to approve");
@@ -68,14 +59,13 @@ public class ParserService {
             throw new RuntimeException(e);
         }
         System.out.println("Approved!!!");
-        String driverPageSource = retrievePage(url, initialDriver);
+        String driverPageSource = retrievePage(webDriver);
         htmlContent = cssLinksToStyleAndReturn(driverPageSource, new URL(url))
                 .replaceAll("(?s)<header[^>]*>.*?</header>", "")
-                .replaceAll("z-index:\\s*\\d+", "")
-                .replaceAll("(?s)<nav[^>]*>.*?</nav>", "");
-        populateWebsite(new Website(url, htmlContent, new HashMap<>()));
+                .replaceAll("(?s)<nav[^>]*>.*?</nav>", "")
+                .replaceAll("(?s)position: sticky;", "");
+        website.populateWebsite(new Website(url, htmlContent, new HashMap<>()));
         cacheService.setWebsiteCache(url, website);
-//        initialDriver.close();
         approvalService.reset();
 
         return htmlContent;
@@ -88,19 +78,23 @@ public class ParserService {
                 .orElse(false);
     }
 
-    public String retrievePage(String url, WebDriver driver) {
-        try {
-            driver.get(url);
-            return driver.getPageSource();
-        } catch (Exception e) {
-            webDriverService.safelyCloseAndQuitDriver(driver);
-            driver = webDriverService.getRemoteChromeDriver(chromePort1);
-            driver.get(url);
-            return driver.getPageSource();
-        }
+    public String retrievePage(WebDriver driver) {
+        return driver.getPageSource();
     }
 
-    public String ifWebDriverConn() throws MalformedURLException {
+    public WebDriver verifyDriver(String url, WebDriver driver) {
+        try {
+            driver = webDriverService.verifyAndGetWebDriver(driver);
+            driver.get(url);
+        } catch (Exception e) {
+            webDriverService.safelyCloseAndQuitDriver(driver);
+            driver = applicationContext.getBean(WebDriver.class);
+            driver.get(url);
+        }
+        return driver;
+    }
+
+    public String ifWebDriverConn() {
         try {
             WebDriver w = webDriverService.getDriverFromPool();
             w.get("https://www.google.com/");
@@ -114,9 +108,10 @@ public class ParserService {
 
     public String getCleanHtml(Website website) throws MalformedURLException {
         //cacheService.setWebsiteCache(website.getWebsiteUrl().toString(), website);
-        populateWebsite(new Website(website.getWebsiteUrl(), website.getInitialHtml(), new HashMap<>()));
-        String htmlContent = this.website.getInitialHtml().replaceAll("(?s)<header[^>]*>.*?</header>", "");
-        htmlContent = cssLinksToStyleAndReturn(htmlContent, new URL(website.getWebsiteUrl()));
-        return htmlContent;
+        this.website.populateWebsite(new Website(website.getWebsiteUrl(), website.getInitialHtml(), new HashMap<>()));
+        return cssLinksToStyleAndReturn(website.getInitialHtml(), new URL(website.getWebsiteUrl()))
+                .replaceAll("(?s)<header[^>]*>.*?</header>", "")
+                .replaceAll("(?s)<nav[^>]*>.*?</nav>", "")
+                .replaceAll("(?s)position: sticky;", "");
     }
 }

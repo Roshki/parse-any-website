@@ -1,9 +1,4 @@
-#parser:
-#  remote-chrome-1: ${CHROME_1}
-#  remote-chrome-2: ${CHROME_2}
-#  remote-chrome-3: ${CHROME_3}
-
 parser:
-  remote-chrome-1: https://chrome-thelast.onrender.com
-  remote-chrome-2: https://chrome-thelast3.onrender.com
-  remote-chrome-3: https://chrome-thelast2.onrender.com
+  remote-chrome-1: ${CHROME_1}
+  remote-chrome-2: ${CHROME_2}
+  remote-chrome-3: ${CHROME_3}

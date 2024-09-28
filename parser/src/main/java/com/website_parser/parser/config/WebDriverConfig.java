@@ -21,8 +21,7 @@ import java.util.Random;
 public class WebDriverConfig {
 
     private static final String userAgent = "user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36";
-
-
+    private static final String userProfile = "/Users/tetianabondar/Library/Application Support/Google/Chrome/Default";
     @Bean
     @Profile("dev")
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -35,10 +34,12 @@ public class WebDriverConfig {
         options.addArguments("--allow-running-insecure-content");
         options.addArguments("--disable-blink-features=AutomationControlled");
         options.addArguments("--disable-search-engine-choice-screen");
-        options.addArguments("--headless=new");
+        //options.addArguments("--headless=new");
         options.addArguments("--enable-gpu");
+        options.addArguments("user-data-dir=" + userProfile);
+        options.addArguments("profile-directory=Default");
         //options.setProxy(ProxyUtil.getRandomProxy());
-        //options.setCapability("proxy", ProxyUtil.getRandomProxy());
+        // options.setCapability("proxy", ProxyUtil.getRandomProxy());
         options.addArguments(userAgent);
         return new ChromeDriver(options);
     }
@@ -53,7 +54,7 @@ public class WebDriverConfig {
         URL serverurl;
         try {
             serverurl = new URL(chromesList.get(new Random().nextInt(chromesList.size())));
-            System.out.println(serverurl+"serverurl");
+            System.out.println(serverurl + " serverurl");
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }

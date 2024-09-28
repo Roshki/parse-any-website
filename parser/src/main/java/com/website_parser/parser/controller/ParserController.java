@@ -63,10 +63,10 @@ public class ParserController {
     }
 
     @PostMapping("/infinite-scroll")
-    public ResponseEntity<String> getInfiniteScrolling(@RequestBody String url) {
+    public ResponseEntity<String> getInfiniteScrolling(@RequestBody String url, @RequestParam String speed) {
         try {
             return new ResponseEntity<>(
-                    scrollingService.getInfiniteScrolling(url), HttpStatus.OK);
+                    scrollingService.getInfiniteScrolling(url, speed), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>("error occurred! " + ex, HttpStatusCode.valueOf(500));
         }

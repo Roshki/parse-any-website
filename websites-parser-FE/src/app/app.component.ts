@@ -11,13 +11,15 @@ import { environment } from './../environments/environment';
 import { ListComponent } from './list/list.component';
 import { WebsiteContentComponent } from './website-content/website-content.component';
 import { ModuleWindowComponent } from './module-window/module-window.component';
+import { SpinnerComponent } from './spinner/spinner.component';
 
 
 @Component({
   selector: 'app-parser',
   templateUrl: './app.html',
   styleUrl: "../styles.css",
-  imports: [FormsModule, CommonModule, DevModeComponent, ReactiveFormsModule, ListComponent, WebsiteContentComponent, ModuleWindowComponent],
+  imports: [FormsModule, CommonModule, DevModeComponent, ReactiveFormsModule, ListComponent, 
+    WebsiteContentComponent, ModuleWindowComponent, SpinnerComponent],
   encapsulation: ViewEncapsulation.Emulated,
   standalone: true,
   providers: [Website],
@@ -30,6 +32,7 @@ export class ParserComponent implements OnInit {
   isModalWindow: boolean = false;
   listItems: { key: string, values: string[] }[] = [];
   sendLastPageUrl: string = '';
+  scrollingSpeed: string = '';
   sendUrl = new FormControl('', [
     Validators.required,
     Validators.pattern('https?://.+')
@@ -74,15 +77,16 @@ export class ParserComponent implements OnInit {
 
     window.addEventListener('message', (event) => {
       if (event.data && event.data.websiteUrl) {
-      console.log(event.data);
-      this.parserService.getCleanPageFromExt(event.data.websiteUrl, event.data.initialHtml).then(cleanPage => {
-        this.sendUrl.setValue(event.data.websiteUrl);
-        this.display = this.sanitizer.bypassSecurityTrustHtml(cleanPage);
-      })
-      // if (this.htmlFromExtension != '') {
-      //   this.display = this.sanitizer.bypassSecurityTrustHtml(event.data);
-      // }
-    }});
+        console.log(event.data);
+        this.parserService.getCleanPageFromExt(event.data.websiteUrl, event.data.initialHtml).then(cleanPage => {
+          this.sendUrl.setValue(event.data.websiteUrl);
+          this.display = this.sanitizer.bypassSecurityTrustHtml(cleanPage);
+        })
+        // if (this.htmlFromExtension != '') {
+        //   this.display = this.sanitizer.bypassSecurityTrustHtml(event.data);
+        // }
+      }
+    });
   }
 
 
@@ -154,14 +158,14 @@ export class ParserComponent implements OnInit {
     if (this.sendUrl.valid && this.sendUrl.value) {
       this.isValidUrl = true;
       this.website.getInformation().clear();
-      this.parserService.getInfiniteScrolling(this.sendUrl.value)
+      this.parserService.getInfiniteScrolling(this.sendUrl.value, this.scrollingSpeed)
         .then(data => {
           if (data != "") {
             console.log("this.isModalWindow from infiniteScroll" + this.isModalWindow)
             this.display = this.sanitizer.bypassSecurityTrustHtml(data);
           }
           else {
-            
+
           }
         });
     }

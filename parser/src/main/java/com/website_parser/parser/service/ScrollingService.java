@@ -1,20 +1,23 @@
 package com.website_parser.parser.service;
 
-import com.website_parser.parser.util.BannersUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Service;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.time.Duration;
 import java.util.List;
 
 import java.util.stream.Collectors;
+
+import static com.website_parser.parser.util.BannersUtil.handleBannerIfPresent;
+import static com.website_parser.parser.util.HtmlContentUtil.updateHtmlAndReturn;
 
 @Slf4j
 @Service
@@ -23,63 +26,65 @@ public class ScrollingService {
 
     private final WebDriverService driverPool;
 
+    private static final String returnPageHeightScript = "return document.body.scrollHeight";
+
     // @TODO parameters: speed, pauses, amount of scrolls
-    // @TODO handling of iframe,section
-    public String getInfiniteScrolling(String url) throws InterruptedException {
+    // @TODO handling of iframe,section (do not press on buttons if there is no banner anymore
+    public String getInfiniteScrolling(String url, String speed) throws MalformedURLException {
         int timesOfScrolling = 0;
         WebDriver driver = driverPool.verifyInitialDriver();
         driver.get(url);
         List<String> seenButtons = getElementIdentifiers(driver.findElements(By.cssSelector("button")));
         JavascriptExecutor jsExecutor = (JavascriptExecutor) driver;
-        final long[] lastHeight = {(long) jsExecutor.executeScript("return document.body.scrollHeight")};
+        final long[] lastHeight = {(long) jsExecutor.executeScript(returnPageHeightScript)};
+
+        handleBannerIfPresent(driver);
+
         while (true) {
             timesOfScrolling++;
-            Thread.sleep(1000);
-            ((JavascriptExecutor) driver).executeScript("window.scrollTo(0, document.body.scrollHeight);");
-            BannersUtil.handleBannerIfPresent(driver);
+
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(100));
             try {
-                wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(By.id("sp_message_iframe_1177873")));
-                System.out.println("ok");
-                System.out.println(driver.getPageSource());
+                // wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(By.id("sp_message_iframe_1177873")));
                 wait.until(driver1 -> {
-                    jsExecutor.executeScript("window.scrollTo(0, document.body.scrollHeight+500);");
-                    long newHeight = (long) jsExecutor.executeScript("return document.body.scrollHeight");
+                    jsExecutor.executeScript("window.scrollTo(0, document.body.scrollHeight-" + speed + ");");
+                    long newHeight = (long) jsExecutor.executeScript(returnPageHeightScript);
                     System.out.println(newHeight);
                     return newHeight > lastHeight[0];
                 });
             } catch (Exception e) {
-                log.warn("Page didn't load or timeout occurred", e);
+                log.warn("Page could load only {} times for now.", timesOfScrolling);
+                pressButtonIfPreventsScrolling(driver, seenButtons);
             }
-
-            List<WebElement> currentButtons = driver.findElements(By.cssSelector("button"));
-
-//            for (WebElement button : currentButtons) {
-//                String currentButtonId = getElementIdentifier(button);
-//                if (!seenButtons.contains(currentButtonId)) {
-//                    if (button.isDisplayed() && button.isEnabled()) {
-//                        System.out.println("New button found and clicked: " + button.getText());
-//                        try {
-//                            button.click();
-//                        } catch (Exception e) {
-//                            log.warn("button is not clickable because of: {}", e.getMessage());
-//                        }
-//                        break;
-//                    }
-//                }
-//            }
-            long newHeight = (long) jsExecutor.executeScript("return document.body.scrollHeight");
+            long newHeight = (long) jsExecutor.executeScript(returnPageHeightScript);
             System.out.println(lastHeight[0] + " - " + newHeight);
-            if (newHeight == lastHeight[0] || timesOfScrolling == 5) {
+            //newHeight == lastHeight[0] || -in if statement
+            if (timesOfScrolling == 5) {
                 System.out.println("Scroll limit reached: " + timesOfScrolling);
                 break;
             }
             lastHeight[0] = newHeight;
         }
-        String htmlContent = driver.getPageSource();
-        // CssUtil.cssLinksToStyleAndReturn(htmlContent, new URL(url));
-        driverPool.safelyCloseAndQuitDriver(driver);
-        return htmlContent;
+
+        //  driverPool.safelyCloseAndQuitDriver(driver);
+        return updateHtmlAndReturn(driver.getPageSource(), new URL(url));
+    }
+
+    private void pressButtonIfPreventsScrolling(WebDriver driver, List<String> seenButtons) {
+        List<WebElement> currentButtons = driver.findElements(By.cssSelector("button"));
+
+        for (WebElement button : currentButtons) {
+            String currentButtonId = getElementIdentifier(button);
+            if (!seenButtons.contains(currentButtonId) && button.isDisplayed() && button.isEnabled()) {
+                System.out.println("New button found: " + button.getText());
+                try {
+                    button.click();
+                } catch (Exception e) {
+                    log.warn("button is not clickable because of: {}", e.getMessage());
+                }
+                break;
+            }
+        }
     }
 
     private List<String> getElementIdentifiers(List<WebElement> elements) {

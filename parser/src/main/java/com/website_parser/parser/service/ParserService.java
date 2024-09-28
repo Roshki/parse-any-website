@@ -15,7 +15,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static com.website_parser.parser.util.CssUtil.cssLinksToStyleAndReturn;
+import static com.website_parser.parser.util.HtmlContentUtil.*;
 
 
 @Service
@@ -60,10 +60,7 @@ public class ParserService {
         }
         System.out.println("Approved!!!");
         String driverPageSource = retrievePage(webDriver);
-        htmlContent = cssLinksToStyleAndReturn(driverPageSource, new URL(url))
-                .replaceAll("(?s)<header[^>]*>.*?</header>", "")
-                .replaceAll("(?s)<nav[^>]*>.*?</nav>", "")
-                .replaceAll("(?s)position: sticky;", "");
+        htmlContent = updateHtmlAndReturn(driverPageSource, new URL(url));
         website.populateWebsite(new Website(url, htmlContent, new HashMap<>()));
         cacheService.setWebsiteCache(url, website);
         approvalService.reset();
@@ -87,7 +84,7 @@ public class ParserService {
             driver = webDriverService.verifyAndGetWebDriver(driver);
             driver.get(url);
         } catch (Exception e) {
-            webDriverService.safelyCloseAndQuitDriver(driver);
+            //webDriverService.safelyCloseAndQuitDriver(driver);
             driver = applicationContext.getBean(WebDriver.class);
             driver.get(url);
         }
@@ -99,7 +96,6 @@ public class ParserService {
             WebDriver w = webDriverService.getDriverFromPool();
             w.get("https://www.google.com/");
             webDriverService.releaseDriverToThePool(w);
-            // w.quit();
         } catch (Exception e) {
             log.error("not able to connect!!!");
         }
@@ -109,9 +105,6 @@ public class ParserService {
     public String getCleanHtml(Website website) throws MalformedURLException {
         //cacheService.setWebsiteCache(website.getWebsiteUrl().toString(), website);
         this.website.populateWebsite(new Website(website.getWebsiteUrl(), website.getInitialHtml(), new HashMap<>()));
-        return cssLinksToStyleAndReturn(website.getInitialHtml(), new URL(website.getWebsiteUrl()))
-                .replaceAll("(?s)<header[^>]*>.*?</header>", "")
-                .replaceAll("(?s)<nav[^>]*>.*?</nav>", "")
-                .replaceAll("(?s)position: sticky;", "");
+        return updateHtmlAndReturn(website.getInitialHtml(), new URL(website.getWebsiteUrl()));
     }
 }

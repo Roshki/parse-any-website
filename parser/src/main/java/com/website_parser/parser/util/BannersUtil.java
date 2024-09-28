@@ -7,10 +7,65 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
 public class BannersUtil {
+
+    public static List<String> getButtonSelectors() {
+        return Arrays.asList(
+                "//button[text()= 'Dismiss']",
+                "//button[text()= 'Close']",
+                "//button[text()= 'Accept']",
+                "//button[contains(text(), 'Agree')]",
+                "//button[text()= 'Accepteren']",
+                "button[title='Accepteren']",
+                "button[class*='dismiss']",
+                ".cookie-banner button",
+                ".consent-banner button",
+                "button[aria-label='Close']"
+        );
+    }
+    public static void handleBannerIfPresent(WebDriver driver) {
+        if (isBannerPresent(driver)) {
+            log.info("Banner is present.");
+            boolean ifProcessed = ifProcessedBannerButtons(driver);
+            if (!ifProcessed) {
+                log.info("No buttons to press found. Attempting to switch to iframe.");
+                switchToBannerIframeIfPresent(driver);
+                ifProcessed = ifProcessedBannerButtons(driver);
+                System.out.println(ifProcessed);
+            }
+        }
+        driver.switchTo().defaultContent();
+    }
+
+
+    private static boolean ifProcessedBannerButtons(WebDriver driver) {
+        List<WebElement> buttons = new ArrayList<>();
+        for (String selector : getButtonSelectors()) {
+            if (selector.startsWith("//")) {
+                buttons.addAll(driver.findElements(By.xpath(selector)));
+            } else {
+                buttons.addAll(driver.findElements(By.cssSelector(selector)));
+            }
+        }
+        if (!buttons.isEmpty()) {
+            for (WebElement button : buttons) {
+                if (button.isDisplayed()) {
+                    button.click();
+                    log.info("Clicked on consent button");
+                    return true;
+                }
+            }
+            log.info("No visible buttons found on the banner.");
+        } else {
+            log.info("No buttons found on the banner.");
+        }
+        return false;
+    }
+
 
     private static boolean isBannerPresent(WebDriver driver) {
         try {
@@ -21,44 +76,16 @@ public class BannersUtil {
         }
     }
 
-    public static void handleBannerIfPresent(WebDriver driver) {
-        boolean isPresent = isBannerPresent(driver);
-        List<WebElement> buttons = new ArrayList<>();
-        System.out.println("???-" + isPresent + "-???");
-        if (isPresent) {
-            try {
-                String[] buttonSelectors = {
-                        "//button[text()= 'Dismiss']",
-                        "//button[text()= 'Close']",
-                        "//button[text()= 'Accept']",
-                        "//button[contains(text(), 'Agree')]",
-                        "//button[text()= 'Accepteren']",
-                        "button[title='Accepteren']",
-                        "button[class*='dismiss']",
-                        ".cookie-banner button",
-                        ".consent-banner button"
-                };
-                for (String selector : buttonSelectors) {
-                    if (selector.startsWith("//")) {
-                        buttons.addAll(driver.findElements(By.xpath(selector)));
-                    } else {
-                        buttons.addAll(driver.findElements(By.cssSelector(selector)));
-                    }
-                }
-                if (!buttons.isEmpty()) {
-                    for (WebElement button : buttons) {
-                        if (button.isDisplayed()) {
-                            button.click();
-                            System.out.println("Clicked on cookies consent button: " + button.getText());
-                            return;
-                        }
-                        System.out.println(button.getText() + "not displayed");
-                    }
-                }
-                System.out.println("No cookies consent pop-up found.");
-            } catch (Exception e) {
-                System.out.println("Error handling banner: " + e.getMessage());
+    private static void switchToBannerIframeIfPresent(WebDriver driver) {
+        try {
+            WebElement iframeElement = driver.findElement(By.xpath("//div//iframe"));
+            if (iframeElement != null) {
+                driver.switchTo().frame(iframeElement);
+                log.info("Switched to banner iframe.");
             }
+        } catch (NoSuchElementException e) {
+            log.info("the banner is not in iframe");
         }
     }
+
 }

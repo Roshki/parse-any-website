@@ -10,7 +10,7 @@ import { TergetedItemService } from '../targeted-item.service';
   standalone: true,
   imports: [FormsModule, CommonModule, AppComponent],
   templateUrl: './dev-mode.html',
-  styles: ``
+  styleUrl: '/src/styles.css'
 })
 export class DevModeComponent {
   paginationService = inject(PaginationService);

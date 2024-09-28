@@ -6,18 +6,24 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import static com.website_parser.parser.util.UrlUtil.getContent;
 import static com.website_parser.parser.util.UrlUtil.verifyHost;
 
 @Slf4j
-public class CssUtil {
+public class HtmlContentUtil {
 
-    public static String cssLinkToStyle(String htmlContent, URL mainUrl) {
+    public static String updateHtmlAndReturn(String htmlContent, URL mainUrl) {
+        htmlContent = cssLinksToStyleAndReturn(htmlContent, mainUrl);
+        return removeTagsAndReturn(htmlContent);
+    }
+
+    public static String cssLinksToStyleAndReturn(String htmlContent, URL mainUrl) {
         Document doc = Jsoup.parse(htmlContent);
-        Elements linkElements = doc.select("link[rel=stylesheet]");
-        linkElements.addAll(doc.select("link[rel=preload]"));
+        //  Elements linkElements = doc.select("link[rel=stylesheet]");
+        Elements linkElements = doc.select("link[rel=preload]");
         for (Element linkElement : linkElements) {
             String cssUrl = linkElement.attr("href");
             String verifiedHost = verifyHost(cssUrl, mainUrl);
@@ -25,8 +31,7 @@ public class CssUtil {
             try {
                 cssContent = getContent(verifiedHost);
             } catch (Exception e) {
-                log.warn("was before + {}", cssUrl);
-                log.warn("not possible to fetch css + {}", verifiedHost);
+                log.warn("not possible to fetch css {}", verifiedHost);
             }
             if (cssContent != null) {
                 Element styleElement = doc.createElement("style");
@@ -38,6 +43,13 @@ public class CssUtil {
         }
 
         return htmlContent;
+    }
+
+    public static String removeTagsAndReturn(String htmlContent) {
+        return htmlContent
+                .replaceAll("(?s)<header[^>]*>.*?</header>", "")
+                .replaceAll("(?s)<nav[^>]*>.*?</nav>", "")
+                .replaceAll("(?s)position: sticky;", "");
     }
 
 }

@@ -1,0 +1,4 @@
+parser:
+  remote-chrome-1: ${CHROME_1}
+  remote-chrome-2: ${CHROME_2}
+  remote-chrome-3: ${CHROME_3}

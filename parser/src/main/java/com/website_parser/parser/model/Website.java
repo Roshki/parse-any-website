@@ -25,4 +25,11 @@ public class Website implements Serializable {
         this.initialHtml = initialHtml;
         this.pages = pages;
     }
+
+    public void populateWebsite(Website retrievedWebsite) {
+        this.setPages(retrievedWebsite.getPages());
+        this.setWebsiteUrl(retrievedWebsite.getWebsiteUrl());
+        this.setInitialHtml(retrievedWebsite.getInitialHtml());
+    }
+
 }

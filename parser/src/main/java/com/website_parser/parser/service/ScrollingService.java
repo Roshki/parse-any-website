@@ -41,7 +41,6 @@ public class ScrollingService {
         handleBannerIfPresent(driver);
 
         while (true) {
-            timesOfScrolling++;
 
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(100));
             try {
@@ -64,10 +63,12 @@ public class ScrollingService {
                 break;
             }
             lastHeight[0] = newHeight;
-        }
 
-        //  driverPool.safelyCloseAndQuitDriver(driver);
-        return updateHtmlAndReturn(driver.getPageSource(), new URL(url));
+            timesOfScrolling++;
+        }
+        String pageSource = driver.getPageSource();
+        driverPool.safelyCloseAndQuitDriver(driver);
+        return updateHtmlAndReturn(pageSource, new URL(url));
     }
 
     private void pressButtonIfPreventsScrolling(WebDriver driver, List<String> seenButtons) {

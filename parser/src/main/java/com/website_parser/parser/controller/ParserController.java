@@ -67,15 +67,14 @@ public class ParserController {
         try {
             return new ResponseEntity<>(
                     scrollingService.getInfiniteScrolling(url, speed), HttpStatus.OK);
-        } catch (Exception ex) {
-            return new ResponseEntity<>("error occurred! " + ex, HttpStatusCode.valueOf(500));
+        } catch (MalformedURLException e) {
+            return new ResponseEntity<>("error occurred! " + e, HttpStatusCode.valueOf(500));
         }
     }
 
     @PostMapping("/html-page-cleanup")
     public String getNotCached(@RequestBody Website website) throws MalformedURLException {
         // approvalService.approve();
-        System.out.println(website);
         return parserService.getCleanHtml(website);
     }
 

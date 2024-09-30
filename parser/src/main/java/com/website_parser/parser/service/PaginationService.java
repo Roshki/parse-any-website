@@ -27,6 +27,7 @@ public class PaginationService {
     private final WebDriverService webDriverService;
     private final Website website;
 
+    //todo improve pagination option
     public List<String> getHtmlOfAllPagesBasedOnLastPage(String lastPage) throws ExecutionException, InterruptedException, MalformedURLException {
         webDriverService.initPool();
         AtomicInteger successfulCount = new AtomicInteger(0);

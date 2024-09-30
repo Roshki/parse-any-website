@@ -22,8 +22,8 @@ public class HtmlContentUtil {
 
     public static String cssLinksToStyleAndReturn(String htmlContent, URL mainUrl) {
         Document doc = Jsoup.parse(htmlContent);
-        //  Elements linkElements = doc.select("link[rel=stylesheet]");
-        Elements linkElements = doc.select("link[rel=preload]");
+        Elements linkElements = doc.select("link[rel=stylesheet]");
+        linkElements.addAll(doc.select("link[rel=preload]"));
         for (Element linkElement : linkElements) {
             String cssUrl = linkElement.attr("href");
             String verifiedHost = verifyHost(cssUrl, mainUrl);

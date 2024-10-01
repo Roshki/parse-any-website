@@ -58,19 +58,18 @@ export class PaginationService {
     if (!docRoot) {
       throw new Error("Shadow root not found");
     }
-    let elementsFromMainPage = this.getElementsFromPage(`.${classSelector}`, `.${parentClassSelector}`, docRoot);
-    elementsFromMainPage.forEach((item: Element) => {
-      this.elementsOnMainPage.push(item);
-    });
+    this.elementsOnMainPage.push(...Array.from(this.getElementsFromPage(`.${classSelector}`, `.${parentClassSelector}`, docRoot)));
+   
     console.log(this.elementsOnMainPage.length)
     if (AllPagesHtml.length > 0) {
-      AllPagesHtml.forEach(page => {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(page, 'text/html');
+      AllPagesHtml.map(page => {
+        const doc = new DOMParser().parseFromString(page, 'text/html');
         let elementsFromPage = this.getElementsFromPage(`.${classSelector}`, `.${parentClassSelector}`, doc);
-        elementsFromPage.forEach((item: Element) => {
-          InfoArray.push(this.targetedService.fetchInfoFromChosenItem(item));
+        return Array.from(elementsFromPage).map((item: Element) => {
+          return this.targetedService.fetchInfoFromChosenItem(item);
         });
+      }).forEach(resultArray => {
+        InfoArray.push(...resultArray);
       });
     }
     else {

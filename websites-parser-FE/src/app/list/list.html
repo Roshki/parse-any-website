@@ -22,8 +22,11 @@
             data-bs-parent="#accordionExample">
             <div class="accordion-body" style="word-wrap: break-word;">
               <ul class="list-group">
-                <li class="list-group-item" *ngFor="let subItem of item.values; let j = index">{{subItem}}</li>
+                <li class="list-group-item" *ngFor="let subItem of item.values | slice:0:10; let j = index">{{subItem}}</li>
               </ul>
+              <div *ngIf="item.values.length > 10" class="text-muted">
+                Shows only the first 10 items
+              </div>
             </div>
           </div>
         </div>

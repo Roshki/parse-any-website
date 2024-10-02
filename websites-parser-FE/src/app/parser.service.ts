@@ -10,7 +10,7 @@ export class ParserService {
   displayHTML = 'test';
   private parserServiceUrl = environment.parserServiceUrl;
 
-  openModalSubject = new BehaviorSubject<boolean>(false);
+  private openModalSubject = new BehaviorSubject<boolean>(false);
 
   openModal$ = this.openModalSubject.asObservable();
 
@@ -30,6 +30,10 @@ export class ParserService {
 
 
   constructor(private http: HttpClient) {
+  }
+  
+  public updateOpenModal(openModal: boolean) {
+    this.openModalSubject.next(openModal);
   }
 
   geNotCachedWebPage(webUrl: string | null): Promise<string> {

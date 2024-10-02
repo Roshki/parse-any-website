@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { Website } from '../models/website.model';
 import { PaginationService } from '../pagination.service';
 import { TergetedItemService } from '../targeted-item.service';
+import { ListService } from '../list.service';
 @Component({
   selector: 'app-dev-mode',
   standalone: true,
@@ -15,9 +16,8 @@ import { TergetedItemService } from '../targeted-item.service';
 export class DevModeComponent {
   paginationService = inject(PaginationService);
   verifierService = inject(TergetedItemService);
+  listService = inject(ListService);
   tagId: string = "";
-  listItems: { key: string, values: string[] }[] = [];
-  @Output() listItemsChange = new EventEmitter<any[]>();
 
   constructor(private website: Website, private renderer: Renderer2) { }
 
@@ -33,10 +33,9 @@ export class DevModeComponent {
     let columnIndex = this.website.getColumIndex();
     this.website.setInformation(this.tagId + " " + this.website.getColumIndex().toString(), arr);
 
-    this.listItems = Array.from(this.website.getInformation()).map(([key, values]) => ({ key, values }));
-    this.listItemsChange.emit(this.listItems);
+    let listItems = Array.from(this.website.getInformation()).map(([key, values]) => ({ key, values }));
+    this.listService.updateList(listItems);
     this.website.setColumIndex(columnIndex + 1);
-    //this.paginationService.getFromAllPagesInfoDevMode(this.tagId, this.website.getAllPagesHtml())
     console.log(this.website.getInformation(), "FROM DEV COMPONENT");
 
   }

@@ -30,7 +30,6 @@ export class ParserComponent implements OnInit {
   paginationService = inject(PaginationService);
   display: SafeHtml | undefined;
   isModalWindow: boolean = false;
-  listItems: { key: string, values: string[] }[] = [];
   sendLastPageUrl: string = '';
   scrollingSpeed: string = '';
   sendUrl = new FormControl('', [
@@ -66,9 +65,6 @@ export class ParserComponent implements OnInit {
     }
   }
 
-  handleListItemsChange(newListItems: any[]) {
-    this.listItems = newListItems;
-  }
   ngOnInit() {
     this.parserService.openModal$.subscribe(value => {
       this.isModalWindow = value;
@@ -82,9 +78,6 @@ export class ParserComponent implements OnInit {
           this.sendUrl.setValue(event.data.websiteUrl);
           this.display = this.sanitizer.bypassSecurityTrustHtml(cleanPage);
         })
-        // if (this.htmlFromExtension != '') {
-        //   this.display = this.sanitizer.bypassSecurityTrustHtml(event.data);
-        // }
       }
     });
   }

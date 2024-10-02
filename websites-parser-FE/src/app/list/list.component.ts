@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { SafeHtml } from '@angular/platform-browser';
 import { Website } from '../models/website.model';
 import { PaginationService } from '../pagination.service';
+import { ListService } from '../list.service';
 import { WebsiteContentComponent } from '../website-content/website-content.component';
 
 @Component({
@@ -14,13 +15,18 @@ import { WebsiteContentComponent } from '../website-content/website-content.comp
 })
 export class ListComponent {
   paginationService = inject(PaginationService);
+  listService = inject(ListService);
   @Input() display: SafeHtml | undefined;
-  @Input() listItems: { key: string, values: string[] }[] = [];
+  listItems: { key: string, values: string[] }[] = [];
 
   constructor( public website: Website, private renderer: Renderer2) {
   }
 
   ngOnInit(): void {
+    this.listService.list$.subscribe(value => {
+      this.listItems = value;
+      console.log('added new list items: ', this.listItems);
+    });
   };
 
   removeItemsGroup(itemId: number) {
@@ -37,6 +43,5 @@ export class ListComponent {
     }
     this.website.getAllPagesHtml();
   }
-
 }
 

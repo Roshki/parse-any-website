@@ -4,6 +4,7 @@ import { SafeHtml } from '@angular/platform-browser';
 import { ParserService } from '../parser.service';
 import { PaginationService } from '../pagination.service';
 import { TergetedItemService } from '../targeted-item.service';
+import { ListService } from '../list.service';
 import { Website } from '../models/website.model';
 import { ListComponent } from '../list/list.component';
 
@@ -20,9 +21,8 @@ export class WebsiteContentComponent {
   parserService = inject(ParserService);
   tergetedItemService = inject(TergetedItemService);
   paginationService = inject(PaginationService);
+  listService = inject(ListService);
 
-  listItems: { key: string, values: string[] }[] = [];
-  @Output() listItemsChange = new EventEmitter<any[]>();
 
   @Input() display: SafeHtml | undefined;
   @Input()  ifPaginationMode: boolean = false;
@@ -78,8 +78,8 @@ export class WebsiteContentComponent {
         }, 0);
       }
       this.website.setInformation(target.className + " " + this.website.getColumIndex().toString(), arr);
-      this.listItems = Array.from(this.website.getInformation()).map(([key, values]) => ({ key, values }));
-      this.listItemsChange.emit(this.listItems);
+      let listItems = Array.from(this.website.getInformation()).map(([key, values]) => ({ key, values }));
+      this.listService.updateList(listItems);
       let columnIndex = this.website.getColumIndex();
       this.website.setColumIndex(columnIndex + 1);
       console.log("added new ", this.website.getInformation());

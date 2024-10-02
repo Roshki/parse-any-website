@@ -8,6 +8,9 @@ export class TergetedItemService {
   // the algoithm checks if the chosen element has links or text attached, if yes, it also attaches links to it,
   // if not, it checks first child or parent for the info
 
+  private alreadyContainsLink: boolean = false;
+
+
   fetchInfoFromChosenItem(item: Element): string {
     const getSrcAndTextContent = (elem: Element): [string | null, string | null, string | null] => [
       elem.getAttribute('src'),
@@ -22,7 +25,7 @@ export class TergetedItemService {
     let [src, textContent, href] = getSrcAndTextContent(item);
     itemStr = this.verifyElement(src, textContent, href);
 
-    if (itemStr !== null) {
+    if (itemStr !== null && this.alreadyContainsLink == false) {
       itemStr = this.appendLinksToExistingStr(parentElement, childElement, getSrcAndTextContent(item), itemStr);
     }
 
@@ -44,16 +47,16 @@ export class TergetedItemService {
       if (src) {
         itemStr += " " + src; // Append src from parent
       }
-     else if (href) {
+      else if (href) {
         itemStr += " " + href;
       }
     }
-   else if (childElement) {
+    else if (childElement) {
 
       if (src) {
         itemStr += " " + src; // Append src from child
       }
-     else if (href) {
+      else if (href) {
         itemStr += " " + href;
       }
     }
@@ -63,15 +66,19 @@ export class TergetedItemService {
   private verifyElement(src: string | null, textContent: string | null, href: string | null): string | null {
 
     if (src !== '' && textContent !== '' && src !== null && textContent !== null && href !== null && href !== null) {
+      this.alreadyContainsLink = true;
       return `${src.trim()} ${textContent.trim()}`;
     }
     if (src !== '' && src !== null) {
+      this.alreadyContainsLink = true;
       return src.trim();
     }
     if (textContent !== '' && textContent != null) {
+      this.alreadyContainsLink = false;
       return textContent.trim();
     }
     if (href !== '' && href != null) {
+      this.alreadyContainsLink = true;
       return href.trim();
     }
     return null;

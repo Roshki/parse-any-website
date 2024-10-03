@@ -22,6 +22,7 @@ public class WebDriverConfig {
 
     private static final String userAgent = "user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36";
     private static final String userProfile = "";
+
     @Bean
     @Profile("dev")
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -29,7 +30,6 @@ public class WebDriverConfig {
         System.out.println("hello from local");
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--start-maximized");
-        //options.addArguments("--window-size=1920,1080");
         options.addArguments("--disable-web-security");
         options.addArguments("--allow-running-insecure-content");
         options.addArguments("--disable-blink-features=AutomationControlled");
@@ -46,6 +46,7 @@ public class WebDriverConfig {
 
     @Bean
     @Profile("prod")
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public WebDriver getRemoteChromeDriver(@Value("${parser.remote-chrome-1}") String chromePort1, @Value("${parser.remote-chrome-2}") String chromePort2, @Value("${parser.remote-chrome-3}") String chromePort3) {
         System.out.println("hello from remote");
         ArrayList<String> chromesList = new ArrayList<>();
@@ -59,7 +60,6 @@ public class WebDriverConfig {
             throw new RuntimeException(e);
         }
         ChromeOptions options = new ChromeOptions();
-        //options.addArguments("--start-maximized");
         options.addArguments("--window-size=1920,1080");
         options.addArguments("--disable-web-security");
         options.addArguments("--allow-running-insecure-content");

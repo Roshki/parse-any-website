@@ -31,6 +31,10 @@ export class ParserService {
 
   constructor(private http: HttpClient) {
   }
+  
+  public updateOpenModal(openModal: boolean) {
+    this.openModalSubject.next(openModal);
+  }
 
   geNotCachedWebPage(webUrl: string | null): Promise<string> {
     const httpOptions = {

@@ -1,31 +1,10 @@
 export class Website {
-  private columIndex: number = 1;
-  private allPagesHtml: string[] = [];
-  private information: Map<string, string[]> = new Map<string, string[]>();
+  public columIndex: number = 1;
+  public allPagesHtml: string[] = [];
+  public elementsOnMainPage: Map<string, NodeListOf<Element>> = new Map<string, NodeListOf<Element>>();
+  public informationToSend: Map<string, string[]> = new Map<string, string[]>();
 
-  public getAllPagesHtml(): string[] {
-    return this.allPagesHtml;
+  constructor(init?: Partial<Website>) {
+    Object.assign(this, init);
   }
-
-  public setAllPagesHtml(value: string[]): void {
-    this.allPagesHtml = value;
-  }
-
-  public getInformation(): Map<string, string[]> {
-    return this.information;
-  }
-
-  public setInformation(key: string, value: string[]): void {
-    this.information.set(key, value);
-  }
-
-
-  public getColumIndex(): number {
-    return this.columIndex;
-  }
-
-  public setColumIndex(columIndex: number): void {
-    this.columIndex = columIndex;
-  }
-
 }

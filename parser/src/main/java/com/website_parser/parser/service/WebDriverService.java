@@ -3,8 +3,6 @@ package com.website_parser.parser.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.WebDriver;
-
-import org.openqa.selenium.remote.RemoteWebDriver;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
@@ -40,44 +38,34 @@ public class WebDriverService {
     public void validateAndRecreateDrivers() {
         List<WebDriver> invalidDrivers = new ArrayList<>();
         for (WebDriver driver : driverPool) {
-            if (isDriverInvalid(driver)) {
+            if (!isDriverValid(driver)) {
                 invalidDrivers.add(driver);
             }
         }
         for (WebDriver invalidDriver : invalidDrivers) {
             driverPool.remove(invalidDriver);
-            driverPool.add(recreateWebDriver(invalidDriver));
+            driverPool.add(createAndReturnWebDriver());
         }
     }
 
     public WebDriver verifyAndGetWebDriver(WebDriver driver) {
-        try {
-            if (driver == null || isDriverInvalid(driver)) {
-                return recreateWebDriver(driver);
-            }
-        } catch (Exception e) {
-            return recreateWebDriver(driver);
+        if (driver == null || !isDriverValid(driver)) {
+            return createAndReturnWebDriver();
         }
         return driver;
     }
 
-    private boolean isDriverInvalid(WebDriver driver) {
+    private boolean isDriverValid(WebDriver driver) {
         try {
             driver.getTitle();
-            return false;
-        } catch (Exception e) {
             return true;
+        } catch (Exception e) {
+            log.warn("Driver is invalid");
+            return false;
         }
     }
 
-    private WebDriver recreateWebDriver(WebDriver driver) {
-        if (driver != null) {
-            try {
-                safelyCloseAndQuitDriver(driver);
-            } catch (Exception e) {
-                log.error("error occurred {}", e, e);
-            }
-        }
+    private WebDriver createAndReturnWebDriver() {
         return applicationContext.getBean(WebDriver.class);
     }
 
@@ -104,21 +92,20 @@ public class WebDriverService {
     }
 
     public WebDriver getDriverFromPool() {
+        validateAndRecreateDrivers();
         try {
-            validateAndRecreateDrivers();
             return driverPool.take();
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error retrieving WebDriver from pool", e);
         }
     }
 
     public void releaseDriverToThePool(WebDriver webDriver) {
+        validateAndRecreateDrivers();
         try {
-            validateAndRecreateDrivers();
             driverPool.put(webDriver);
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error releasing WebDriver to pool", e);
         }
     }
-
 }

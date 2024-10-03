@@ -13,7 +13,7 @@
         </button>
         <div class="dropdown-menu accordion p-3" style="min-width: 300px;">
           <div class="form-group ">
-            <app-dev-mode (listItemsChange)="handleListItemsChange($event)"></app-dev-mode>
+            <app-dev-mode></app-dev-mode>
           </div>
           <div class="form-group">
             <div class="dropdown-divider"></div>
@@ -52,8 +52,8 @@
     </div>
   </div>
 </nav>
-<app-list [listItems]="listItems" [display]="display"></app-list>
-<div *ngIf="!display"
+<app-list [display]="display"></app-list>
+<div id="instructions" *ngIf="!display"
   style="padding-left: 10px; padding-top: 120px; background-color: #E8EAE6; height: 100%; width: 100%;">
   <div class="container">
     <div class="row">
@@ -96,7 +96,7 @@
     </div>
   </div>
 </div>
-<app-website-content (listItemsChange)="handleListItemsChange($event)" [display]="display"
+<app-website-content [display]="display"
   [ifPaginationMode]="ifPaginationMode"
   (ifPaginationModeChanged)="onPaginationModeChanged($event)"></app-website-content>
   <!-- <app-spinner *ngIf="!display"></app-spinner> -->

@@ -5,12 +5,15 @@ import org.springframework.stereotype.Component;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 @Component
 @Getter
 @Setter
-@RequiredArgsConstructor
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Website implements Serializable {
 
     @Serial
@@ -19,17 +22,19 @@ public class Website implements Serializable {
     private String websiteUrl;
     private String initialHtml;
     private Map<String, String> pages;
-
-    public Website(String websiteUrl, String initialHtml, Map<String, String> pages) {
-        this.websiteUrl = websiteUrl;
-        this.initialHtml = initialHtml;
-        this.pages = pages;
-    }
+    private boolean withRegistration = false;
 
     public void populateWebsite(Website retrievedWebsite) {
         this.setPages(retrievedWebsite.getPages());
         this.setWebsiteUrl(retrievedWebsite.getWebsiteUrl());
         this.setInitialHtml(retrievedWebsite.getInitialHtml());
+    }
+
+    public Map<String, String> getPages() {
+        if (this.pages == null) {
+            this.pages = new HashMap<>();
+        }
+        return pages;
     }
 
 }

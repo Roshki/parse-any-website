@@ -1,8 +1,6 @@
 import { Component, inject, Renderer2, HostListener, ViewEncapsulation, OnInit } from '@angular/core';
 import { DevModeComponent } from './dev-mode/dev-mode.component';
 import { ParserService } from './parser.service';
-import { TergetedItemService } from './targeted-item.service';
-import { PaginationService } from './pagination.service';
 import { Website } from './models/website.model';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { FormsModule, Validators, FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -12,25 +10,22 @@ import { ListComponent } from './list/list.component';
 import { WebsiteContentComponent } from './website-content/website-content.component';
 import { ModuleWindowComponent } from './module-window/module-window.component';
 import { SpinnerComponent } from './spinner/spinner.component';
+import { WebsiteService } from './website.service';
 
 
 @Component({
   selector: 'app-parser',
   templateUrl: './app.html',
   styleUrl: "../styles.css",
-  imports: [FormsModule, CommonModule, DevModeComponent, ReactiveFormsModule, ListComponent, 
+  imports: [FormsModule, CommonModule, DevModeComponent, ReactiveFormsModule, ListComponent,
     WebsiteContentComponent, ModuleWindowComponent, SpinnerComponent],
   encapsulation: ViewEncapsulation.Emulated,
-  standalone: true,
-  providers: [Website],
+  standalone: true
 })
 export class ParserComponent implements OnInit {
-  parserService = inject(ParserService);
-  tergetedItemService = inject(TergetedItemService);
-  paginationService = inject(PaginationService);
+  private parserService = inject(ParserService);
   display: SafeHtml | undefined;
   isModalWindow: boolean = false;
-  listItems: { key: string, values: string[] }[] = [];
   sendLastPageUrl: string = '';
   scrollingSpeed: string = '';
   sendUrl = new FormControl('', [
@@ -39,8 +34,9 @@ export class ParserComponent implements OnInit {
   ]);
   isValidUrl: boolean = false;
   public ifPaginationMode: boolean = false;
+  private website: Website | null = null;
 
-  constructor(private sanitizer: DomSanitizer, private renderer: Renderer2, private website: Website) {
+  constructor(private sanitizer: DomSanitizer, private renderer: Renderer2, private websiteService: WebsiteService) {
 
   }
 
@@ -54,7 +50,6 @@ export class ParserComponent implements OnInit {
 
       window.addEventListener('beforeunload', function (event) {
         event.preventDefault();
-        console.log('Page navigation prevented via beforeunload');
       });
       window.history.pushState = function () {
         console.log('Navigation using pushState prevented');
@@ -62,17 +57,17 @@ export class ParserComponent implements OnInit {
       window.history.replaceState = function () {
         console.log('Navigation using replaceState prevented');
       };
-      //console.log('Navigation prevented for:', target.getAttribute('href'));
     }
   }
 
-  handleListItemsChange(newListItems: any[]) {
-    this.listItems = newListItems;
-  }
   ngOnInit() {
     this.parserService.openModal$.subscribe(value => {
       this.isModalWindow = value;
       console.log('Modal state changed in app:', this.isModalWindow);
+    });
+
+    this.websiteService.website$.subscribe((website) => {
+      this.website = website;
     });
 
     window.addEventListener('message', (event) => {
@@ -82,9 +77,6 @@ export class ParserComponent implements OnInit {
           this.sendUrl.setValue(event.data.websiteUrl);
           this.display = this.sanitizer.bypassSecurityTrustHtml(cleanPage);
         })
-        // if (this.htmlFromExtension != '') {
-        //   this.display = this.sanitizer.bypassSecurityTrustHtml(event.data);
-        // }
       }
     });
   }
@@ -93,9 +85,7 @@ export class ParserComponent implements OnInit {
   htmlOnClick(): void {
     if (this.sendUrl.valid && this.sendUrl.value) {
       this.isValidUrl = true;
-      this.website.getInformation().clear();
-      this.website.setColumIndex(1);
-      this.website.setAllPagesHtml([]);
+      this.websiteService.initWebsite();
       this.parserService.tryGetCachedWebPage(this.sendUrl.value)
         .then(cachedPage => {
           if (cachedPage != "") {
@@ -115,7 +105,7 @@ export class ParserComponent implements OnInit {
 
   InsertUrlOfLastPageOnClick(): void {
     if (this.sendLastPageUrl != null) {
-      this.website.setAllPagesHtml(this.parserService.retrieveAllPages(this.sendLastPageUrl));
+      this.websiteService.setAllPagesHtml(this.sendLastPageUrl);
     }
   }
 
@@ -150,14 +140,16 @@ export class ParserComponent implements OnInit {
   }
 
   exportBtnOnClick(): void {
-    this.parserService.sendInfo(this.website.getInformation());
-    console.log("exported:  ", this.website.getInformation());
+    if (this.website) {
+      this.parserService.sendInfo(this.website.informationToSend);
+      console.log("exported:  ", this.website.informationToSend);
+    }
   }
 
   inifiniteScrollingOnClick(): void {
     if (this.sendUrl.valid && this.sendUrl.value) {
       this.isValidUrl = true;
-      this.website.getInformation().clear();
+      this.websiteService.initWebsite();
       this.parserService.getInfiniteScrolling(this.sendUrl.value, this.scrollingSpeed)
         .then(data => {
           if (data != "") {

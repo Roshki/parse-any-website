@@ -5,29 +5,29 @@ import { TergetedItemService } from './targeted-item.service';
 })
 export class PaginationService {
 
-  private elementsOnMainPage: Element[] = [];
+
+  private elementsOnMainPageN: NodeListOf<Element> | null = null;
 
   constructor(private targetedService: TergetedItemService) { }
 
 
-  public get getElementsOnMainPage(): Element[] {
-    return this.elementsOnMainPage;
+  public get getElementsOnMainPage(): NodeListOf<Element> {
+    if (this.elementsOnMainPageN != null) {
+      return this.elementsOnMainPageN;
+    }
+    throw new Error("no elements on main page??");
   }
 
 
   getFromAllPagesInfoDevMode(tagId: string, AllPagesHtml: string[]): string[] {
     let InfoArray: string[] = [];
     let docRoot = document.querySelector("app-website-content")?.shadowRoot;
-    this.elementsOnMainPage.length = 0;
 
     if (!docRoot) {
       throw new Error("Shadow root not found");
     }
 
-    let elementsFromMainPage = this.getElementsFromPage(`[${tagId}]`, undefined, docRoot);
-    elementsFromMainPage.forEach((item: Element) => {
-      this.elementsOnMainPage.push(item);
-    });
+    this.elementsOnMainPageN = this.getElementsFromPage(`[${tagId}]`, undefined, docRoot);
 
     if (AllPagesHtml.length > 0) {
       AllPagesHtml.forEach(page => {
@@ -40,8 +40,7 @@ export class PaginationService {
       });
     }
     else {
-      let elementsFromPage = this.getElementsFromPage(`[${tagId}]`, undefined, docRoot);
-      elementsFromPage.forEach((item: Element) => {
+      this.elementsOnMainPageN.forEach((item: Element) => {
         InfoArray.push(this.targetedService.fetchInfoFromChosenItem(item));
       });
     }
@@ -52,17 +51,14 @@ export class PaginationService {
     let classSelector = target?.className.split(' ').join('.');
     let parentClassSelector = target?.parentElement?.className.split(' ').join('.');
     let InfoArray: string[] = [];
-    this.elementsOnMainPage.length = 0;
     let docRoot = document.querySelector("app-website-content")?.shadowRoot;
 
     if (!docRoot) {
       throw new Error("Shadow root not found");
     }
-    let elementsFromMainPage = this.getElementsFromPage(`.${classSelector}`, `.${parentClassSelector}`, docRoot);
-    elementsFromMainPage.forEach((item: Element) => {
-      this.elementsOnMainPage.push(item);
-    });
-    console.log(this.elementsOnMainPage.length)
+
+    this.elementsOnMainPageN = this.getElementsFromPage(`.${classSelector}`, `.${parentClassSelector}`, docRoot);
+
     if (AllPagesHtml.length > 0) {
       AllPagesHtml.forEach(page => {
         const parser = new DOMParser();
@@ -74,10 +70,13 @@ export class PaginationService {
       });
     }
     else {
-      this.elementsOnMainPage.forEach((item: Element) => {
-        InfoArray.push(this.targetedService.fetchInfoFromChosenItem(item));
+      this.elementsOnMainPageN.forEach((item: Element) => {
+        if (this.isDisplayed(item)) {
+          InfoArray.push(this.targetedService.fetchInfoFromChosenItem(item));
+        }
       });
     }
+
     return InfoArray;
 
   }
@@ -95,4 +94,10 @@ export class PaginationService {
     }
     return items;
   }
+
+  isDisplayed(element: Element): boolean {
+    const rect = element.getBoundingClientRect();
+    return rect.width > 0 && rect.height > 0;
+  }
+
 }

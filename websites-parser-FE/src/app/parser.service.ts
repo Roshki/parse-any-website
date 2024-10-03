@@ -10,7 +10,7 @@ export class ParserService {
   displayHTML = 'test';
   private parserServiceUrl = environment.parserServiceUrl;
 
-  private openModalSubject = new BehaviorSubject<boolean>(false);
+  openModalSubject = new BehaviorSubject<boolean>(false);
 
   openModal$ = this.openModalSubject.asObservable();
 

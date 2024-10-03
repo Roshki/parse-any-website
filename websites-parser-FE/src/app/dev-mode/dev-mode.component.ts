@@ -1,11 +1,9 @@
-import { Component, inject, Output, EventEmitter, Renderer2 } from '@angular/core';
+import { Component, inject, Renderer2 } from '@angular/core';
 import { AppComponent } from '../app.component';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Website } from '../models/website.model';
-import { PaginationService } from '../pagination.service';
-import { TergetedItemService } from '../targeted-item.service';
-import { ListService } from '../list.service';
+import { WebsiteService } from '../website.service';
 @Component({
   selector: 'app-dev-mode',
   standalone: true,
@@ -14,31 +12,36 @@ import { ListService } from '../list.service';
   styleUrl: '/src/styles.css'
 })
 export class DevModeComponent {
-  paginationService = inject(PaginationService);
-  verifierService = inject(TergetedItemService);
-  listService = inject(ListService);
   tagId: string = "";
+  website: Website | null = null;
 
-  constructor(private website: Website, private renderer: Renderer2) { }
-
-
-  sendTagIdOnClick() {
-    let arr: string[] = [];
-    arr = this.paginationService.getFromAllPagesInfoDevMode(this.tagId, this.website.getAllPagesHtml());
-    setTimeout(() => {
-      this.paginationService.getElementsOnMainPage.forEach(e => {
-        this.renderer.setStyle(e, 'color', 'red');
-      });
-    }, 0);
-    let columnIndex = this.website.getColumIndex();
-    this.website.setInformation(this.tagId + " " + this.website.getColumIndex().toString(), arr);
-
-    let listItems = Array.from(this.website.getInformation()).map(([key, values]) => ({ key, values }));
-    this.listService.updateList(listItems);
-    this.website.setColumIndex(columnIndex + 1);
-    console.log(this.website.getInformation(), "FROM DEV COMPONENT");
-
+  constructor(private websiteService: WebsiteService, private renderer: Renderer2) {
   }
 
+  ngOnInit(): void {
+    this.websiteService.website$.subscribe((website) => {
+      this.website = website;
+    });
+  }
 
+  sendTagIdOnClick() {
+    if (this.website && this.tagId) {
+      let key = this.tagId + " " + this.website.columIndex.toString();
+      this.websiteService.setInformationToSend(this.tagId, key);
+      setTimeout(() => {
+        this.highlightElements(key);
+      }, 100);
+      console.log(this.website.informationToSend, "FROM DEV COMPONENT");
+    }
+  }
+
+  highlightElements(key: string): void {
+    const elementsOnMainPage = this.website?.elementsOnMainPage;
+    if (elementsOnMainPage?.has(key)) {
+      const elements = elementsOnMainPage.get(key);
+      elements?.forEach(element => {
+        this.renderer.setStyle(element, 'color', 'red');
+      });
+    }
+  }
 }

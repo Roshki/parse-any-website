@@ -1,12 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, inject, Renderer2, ViewEncapsulation, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, Renderer2, ViewEncapsulation, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { SafeHtml } from '@angular/platform-browser';
-import { ParserService } from '../parser.service';
-import { PaginationService } from '../pagination.service';
-import { TergetedItemService } from '../targeted-item.service';
-import { ListService } from '../list.service';
 import { Website } from '../models/website.model';
 import { ListComponent } from '../list/list.component';
+import { WebsiteService } from '../website.service';
 
 @Component({
   selector: 'app-website-content',
@@ -18,22 +15,23 @@ import { ListComponent } from '../list/list.component';
 })
 export class WebsiteContentComponent {
 
-  parserService = inject(ParserService);
-  tergetedItemService = inject(TergetedItemService);
-  paginationService = inject(PaginationService);
-  listService = inject(ListService);
-
+  private website: Website | null = null;
 
   @Input() display: SafeHtml | undefined;
-  @Input()  ifPaginationMode: boolean = false;
+  @Input() ifPaginationMode: boolean = false;
   @Output() ifPaginationModeChanged = new EventEmitter<boolean>();
 
-  constructor(private renderer: Renderer2, private website: Website, private cd: ChangeDetectorRef) {
+  constructor(private renderer: Renderer2, private websiteService: WebsiteService, private cd: ChangeDetectorRef) {
+  }
+
+  ngOnInit(): void {
+    this.websiteService.website$.subscribe((website) => {
+      this.website = website;
+    });
   }
 
 
   onMouseOverHighliteElement(event: MouseEvent) {
-    // event.preventDefault();
     const target = event.target as HTMLElement;
     const src = target.getAttribute('src');
     const parentTarget = target?.parentElement?.className;
@@ -60,38 +58,42 @@ export class WebsiteContentComponent {
   }
 
   elementsOnClick(event: MouseEvent): void {
-    // event.preventDefault();
     if (this.ifPaginationMode == true) {
       this.paginationOnClick(event);
       this.ifPaginationModeChanged.emit(false)
     }
     else {
-      const target = event.target as HTMLElement;
-      let arr: string[] = [];
-      if (target) {
-        console.log("we have so many pages now ", this.website.getAllPagesHtml().length);
-        arr = this.paginationService.getFromAllPagesInfoTargetFlow(target, this.website.getAllPagesHtml());
-        setTimeout(() => {
-          this.paginationService.getElementsOnMainPage.forEach(e => {
-            this.renderer.setStyle(e, 'color', 'red');
-          });
-        }, 0);
+      if (this.website) {
+        const target = event.target as HTMLElement;
+        let key = target.className + " " + this.website.columIndex.toString();      
+        if (target) {
+          console.log("we have so many pages now ", this.website.allPagesHtml.length);
+          this.websiteService.setInformationToSend(target, key);
+          setTimeout(() => {
+            this.highlightElements(key);
+          }, 100);
+          console.log("added new ", this.website.informationToSend);
+        }
       }
-      this.website.setInformation(target.className + " " + this.website.getColumIndex().toString(), arr);
-      let listItems = Array.from(this.website.getInformation()).map(([key, values]) => ({ key, values }));
-      this.listService.updateList(listItems);
-      let columnIndex = this.website.getColumIndex();
-      this.website.setColumIndex(columnIndex + 1);
-      console.log("added new ", this.website.getInformation());
-
     }
   }
 
   paginationOnClick(event: MouseEvent): void {
-    // event.preventDefault();
     const target = event.target as HTMLElement;
     let hrefAttr = target.getAttribute("href");
-    this.website.setAllPagesHtml(this.parserService.retrieveAllPages(hrefAttr));
-    this.ifPaginationMode = false;
+    if (hrefAttr != null) {
+      this.websiteService.setAllPagesHtml(hrefAttr);
+      this.ifPaginationMode = false;
+    }
+  }
+
+  private highlightElements(key: string): void {
+    const elementsOnMainPage = this.website?.elementsOnMainPage;
+    if (elementsOnMainPage?.has(key)) {
+      const elements = elementsOnMainPage.get(key);
+      elements?.forEach(element => {
+        this.renderer.setStyle(element, 'color', 'red');
+      });
+    }
   }
 }

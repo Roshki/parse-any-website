@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, Renderer2, ViewEncapsulation, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, Renderer2, ViewEncapsulation, Output, EventEmitter, ChangeDetectorRef, inject } from '@angular/core';
 import { SafeHtml } from '@angular/platform-browser';
 import { Website } from '../models/website.model';
 import { ListComponent } from '../list/list.component';
 import { WebsiteService } from '../website.service';
+import { SseService } from '../sse.service';
 
 @Component({
   selector: 'app-website-content',
@@ -16,10 +17,13 @@ import { WebsiteService } from '../website.service';
 export class WebsiteContentComponent {
 
   private website: Website | null = null;
+  private sseService = inject(SseService);
 
   @Input() display: SafeHtml | undefined;
   @Input() ifPaginationMode: boolean = false;
   @Output() ifPaginationModeChanged = new EventEmitter<boolean>();
+  @Output() progressUpdated = new EventEmitter();
+
 
   constructor(private renderer: Renderer2, private websiteService: WebsiteService, private cd: ChangeDetectorRef) {
   }
@@ -65,7 +69,7 @@ export class WebsiteContentComponent {
     else {
       if (this.website) {
         const target = event.target as HTMLElement;
-        let key = target.className + " " + this.website.columIndex.toString();      
+        let key = target.className + " " + this.website.columIndex.toString();
         if (target) {
           console.log("we have so many pages now ", this.website.allPagesHtml.length);
           this.websiteService.setInformationToSend(target, key);
@@ -82,6 +86,7 @@ export class WebsiteContentComponent {
     const target = event.target as HTMLElement;
     let hrefAttr = target.getAttribute("href");
     if (hrefAttr != null) {
+      this.subscribeToSseEvent();
       this.websiteService.setAllPagesHtml(hrefAttr);
       this.ifPaginationMode = false;
     }
@@ -95,5 +100,19 @@ export class WebsiteContentComponent {
         this.renderer.setStyle(element, 'color', 'red');
       });
     }
+  }
+
+  subscribeToSseEvent() {
+    //let url = environment.parserServiceUrl + 'sse';
+    let url = '/api/sse';
+    this.sseService.getServerSentEvent(url).subscribe(
+      (message: string) => {
+        console.log(message);
+        this.progressUpdated.emit(message);
+      },
+      (error) => {
+        console.error('SSE error: ', error);
+      }
+    );
   }
 }

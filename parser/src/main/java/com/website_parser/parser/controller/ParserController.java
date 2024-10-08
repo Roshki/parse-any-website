@@ -7,23 +7,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.net.MalformedURLException;
-import java.nio.file.Paths;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 
 @RestController
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = {"${frontend.url}"})
 public class ParserController {
     private final ParserService parserService;
-    private final SavingService savingService;
     private final ApprovalService approvalService;
     private final PaginationService paginationService;
     private final ScrollingService scrollingService;
+    private final SseEmitterService sseEmitterService;
 
     @PostMapping("/send-html")
     public String getHtml(@RequestBody String url) {
@@ -31,23 +29,9 @@ public class ParserController {
         return parserService.getCachedPage(url);
     }
 
-    @PostMapping("/cached-page")
-    public String getCached(@RequestBody String url) {
-        return parserService.getCachedPage(url);
-    }
-
     @PostMapping("/last-page")
     public List<String> getAllPagesBasedOnLastPage(@RequestBody String lastPage) throws ExecutionException, InterruptedException, MalformedURLException {
         return paginationService.getHtmlOfAllPagesBasedOnLastPage(lastPage);
-    }
-
-    @PostMapping("/get-info-url")
-    public String getAllPagesBasedOnLastPage(@RequestBody Map<String, List<String>> map) {
-        System.out.println(map.size());
-        //map.forEach((key, value) -> System.out.println(key + " -> " + value));
-        System.out.println(Paths.get(System.getProperty("user.home"), "Desktop"));
-        savingService.exportMapToExcel(map, Paths.get(System.getProperty("user.home"), "Desktop") + "/data.xlsx");
-        return "success";
     }
 
     @GetMapping("/approve")
@@ -66,7 +50,7 @@ public class ParserController {
     public ResponseEntity<String> getInfiniteScrolling(@RequestBody String url, @RequestParam String speed) {
         try {
             return new ResponseEntity<>(
-                    scrollingService.getInfiniteScrolling(url, speed), HttpStatus.OK);
+                    scrollingService.getInfiniteScrolling(url, speed, 5), HttpStatus.OK);
         } catch (MalformedURLException e) {
             return new ResponseEntity<>("error occurred! " + e, HttpStatusCode.valueOf(500));
         }
@@ -81,5 +65,10 @@ public class ParserController {
     @GetMapping("/connect")
     public String test() {
         return parserService.ifWebDriverConn();
+    }
+
+    @GetMapping("/sse")
+    public SseEmitter streamSseMvc() {
+        return sseEmitterService.createEmitter();
     }
 }

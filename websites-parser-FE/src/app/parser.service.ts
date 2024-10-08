@@ -1,37 +1,38 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { environment } from '../environments/environment';
 import { lastValueFrom, BehaviorSubject } from 'rxjs';
+import { SseService } from './sse.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ParserService {
   displayHTML = 'test';
-  private parserServiceUrl = environment.parserServiceUrl;
+
+  serviceName = 'parser';
 
   openModalSubject = new BehaviorSubject<boolean>(false);
 
   openModal$ = this.openModalSubject.asObservable();
 
-  sendHtmlUrl = this.parserServiceUrl + 'send-html';
+  sseService = inject(SseService);
 
-  private lastPage = this.parserServiceUrl + 'last-page';
+  sendHtmlUrl = '/api/send-html';
 
-  private getInfoUrl = this.parserServiceUrl + 'get-info-url'
+  private lastPage = '/api/last-page';
 
-  private approveUrl = this.parserServiceUrl + 'approve'
+  private approveUrl = '/api/approve'
 
-  private noneCachedUrl = this.parserServiceUrl + 'none-cached-page'
+  private noneCachedUrl = '/api/none-cached-page'
 
-  private infiniteScrollingUrl = this.parserServiceUrl + 'infinite-scroll'
+  private infiniteScrollingUrl = '/api/infinite-scroll'
 
-  private cleanPageExtUrl = this.parserServiceUrl + 'html-page-cleanup'
+  private cleanPageExtUrl = '/api/html-page-cleanup'
 
 
   constructor(private http: HttpClient) {
   }
-  
+
   public updateOpenModal(openModal: boolean) {
     this.openModalSubject.next(openModal);
   }
@@ -91,23 +92,27 @@ export class ParserService {
     };
     console.log("this is what we've got: ", webUrl);
     this.openModalSubject.next(false);
+    this.sseService.updateIsLoading(this.serviceName, true);
     const data = lastValueFrom(this.http.post<string>(this.infiniteScrollingUrl + "?speed=" + scrollingSpeed, webUrl, httpOptions));
     return data;
   }
 
   retrieveAllPages(paginationHref: string | null): string[] {
+
     let allPagesHtml: string[] = [];
+    this.sseService.updateIsLoading(this.serviceName, true);
     this.http.post<string[]>(this.lastPage, paginationHref).subscribe({
       next: (data: string[]) => {
         data.forEach(item => allPagesHtml.push(item));
-        alert("done");
         alert(allPagesHtml.length + " length of all pages");
+        this.sseService.updateIsLoading(this.serviceName, false);
       },
       error: (error) => {
         alert(error);
         console.error('There was an error!', error);
+        this.sseService.updateIsLoading(this.serviceName, false);
       },
-    });;
+    });
     return allPagesHtml;
   }
 
@@ -128,44 +133,5 @@ export class ParserService {
     return data;
 
   }
-
-  sendInfo(map: Map<string, string[]>): void {
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'Accept': 'text/plain',
-        'Content-Type': 'application/json'
-      }),
-      responseType: 'text' as 'json'
-
-    };
-    console.log("sending this: ", map);
-    this.http.post<string>(this.getInfoUrl, Object.fromEntries(map), httpOptions).subscribe({
-      next: (data: string) => {
-
-        console.log("success");
-        alert("file is saved!")
-
-      },
-      error: (error) => {
-        console.error('There was an error!!', error);
-      },
-    });
-  }
-
-  // async chooseFolder(data: string) {
-  //   try {
-  //     // The directory picker is available in Chrome and Edge browsers
-  //     const handle = await (window as any).showDirectoryPicker();
-  //     console.log('Directory picked:', handle);
-
-  //     // Example: Creating a file inside the picked directory
-  //     const fileHandle = await handle.getFileHandle('example.xlsx', { create: true });
-  //     const writable = await fileHandle.createWritable();
-  //     await writable.write(data);
-  //     await writable.close();
-  //   } catch (error) {
-  //     console.error('Folder selection failed:', error);
-  //   }
-  // }
 
 }

@@ -6,7 +6,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.WebDriver;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -24,21 +26,22 @@ public class PaginationService {
 
     private final ParserService parserService;
     private final CacheService cacheService;
-    private final WebDriverService webDriverService;
+    private final WebDriverPoolService webDriverService;
     private final Website website;
+    private final SseEmitterService sseEmitterService;
 
     //todo improve pagination option
     public List<String> getHtmlOfAllPagesBasedOnLastPage(String lastPage) throws ExecutionException, InterruptedException, MalformedURLException {
         webDriverService.initPool();
-        AtomicInteger successfulCount = new AtomicInteger(0);
         ArrayList<String> allPageUrls = UrlUtil.predictAllUrls(UrlUtil.verifyHost(lastPage, new URL(website.getWebsiteUrl())));
+        AtomicInteger successfulCount = new AtomicInteger(0);
         List<CompletableFuture<Void>> futures = new ArrayList<>();
         CompletableFuture<List<String>> resultFuture = null;
         Map<String, String> htmlPagesMap = new HashMap<>();
         if (allPageUrls != null) {
             for (String url : allPageUrls) {
                 WebDriver driverMulti = webDriverService.getDriverFromPool();
-
+                int count = successfulCount.incrementAndGet();
                 CompletableFuture<Void> completableFuture = CompletableFuture.supplyAsync(() -> {
                     if (!parserService.isPageCached(url)) {
                         // Page is not in the cache, so we retrieve it via WebDriver
@@ -49,10 +52,8 @@ public class PaginationService {
                     }
                     return null;
                 }).thenAccept(result -> {
-                    int count = successfulCount.incrementAndGet();
                     System.out.println("success -- " + url);
                     webDriverService.releaseDriverToThePool(driverMulti);
-                    //emit sse
                 }).exceptionally(ex -> {
                     if (driverMulti != null) {
                         webDriverService.releaseDriverToThePool(driverMulti);
@@ -61,12 +62,13 @@ public class PaginationService {
                     return null;
                 });
                 futures.add(completableFuture);
+                sseEmitterService.sendSse(String.valueOf((100 * count) / allPageUrls.size()));
             }
             CompletableFuture<Void> allOf = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
             resultFuture = allOf.thenApply(v -> {
                 website.getPages().putAll(htmlPagesMap);
                 cacheService.setWebsiteCache(website.getWebsiteUrl(), website);
-               // webDriverService.closeAllPool();
+                // webDriverService.closeAllPool();
                 log.info("All tasks completed. Total successful: {}", successfulCount.get());
                 log.info("HTML list size: {}", website.getPages().entrySet().size());
                 return htmlPagesMap.values().stream().toList();

@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.*;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -23,11 +24,12 @@ import static com.website_parser.parser.util.HtmlContentUtil.*;
 @RequiredArgsConstructor
 public class ParserService {
 
-    private final WebDriverService webDriverService;
+    private final WebDriverPoolService webDriverService;
     private final CacheService cacheService;
     private final Website website;
     private final ApprovalService approvalService;
     private final ApplicationContext applicationContext;
+    private final SseEmitterService sseEmitter;
 
 
     public String getCachedPage(String url) {
@@ -67,7 +69,7 @@ public class ParserService {
                         .initialHtml(htmlContent).build());
         cacheService.setWebsiteCache(url, website);
         approvalService.reset();
-
+        webDriverService.safelyCloseAndQuitDriver(webDriver);
         return htmlContent;
     }
 

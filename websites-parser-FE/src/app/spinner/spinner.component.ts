@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 
 @Component({
   selector: 'app-spinner',
@@ -7,6 +7,12 @@ import { Component } from '@angular/core';
   templateUrl: "spinner.html",
   styleUrl: "spinner.css"
 })
-export class SpinnerComponent {
+export class SpinnerComponent implements OnInit{
+
+   @Input() progress: string="";
+
+  ngOnInit() {
+  
+  }
 
 }

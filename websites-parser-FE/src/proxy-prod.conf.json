@@ -1,7 +1,0 @@
-{
-    "/api": {
-      "target": "http://prodServer/",
-      "secure": false,
-      "changeOrigin": true
-    }
-  }

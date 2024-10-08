@@ -1,5 +1,4 @@
-import { Component, inject, Renderer2 } from '@angular/core';
-import { AppComponent } from '../app.component';
+import { Component, Renderer2 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Website } from '../models/website.model';
@@ -7,7 +6,7 @@ import { WebsiteService } from '../website.service';
 @Component({
   selector: 'app-dev-mode',
   standalone: true,
-  imports: [FormsModule, CommonModule, AppComponent],
+  imports: [FormsModule, CommonModule],
   templateUrl: './dev-mode.html',
   styleUrl: '/src/styles.css'
 })

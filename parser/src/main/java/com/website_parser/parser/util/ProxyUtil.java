@@ -8,28 +8,11 @@ import org.openqa.selenium.Proxy;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 
 @Slf4j
 public class ProxyUtil {
 
-    public static Proxy getRandomProxy() {
-        List<String> proxiesList = getProxyUrls();
-
-        Random random = new Random();
-        int randomIndex = random.nextInt(proxiesList.size());
-        String randomProxy = proxiesList.get(randomIndex);
-        Proxy proxy = new Proxy();
-        proxy.setHttpProxy(randomProxy);
-        // proxy.setSslProxy("http://162.223.90.130:80");
-
-        return proxy;
-    }
-
-    public static List<String> getProxyUrls() {
-        List<String> proxiesList = new ArrayList<>();
+    public static Proxy getProxy() {
         String json;
         try {
             json = UrlUtil.getContent("https://proxylist.geonode.com/api/proxy-list?protocols=http%2Chttps&filterUpTime=100&limit=500&page=1&sort_by=speed&sort_type=asc");
@@ -41,25 +24,27 @@ public class ProxyUtil {
                 String ip = dataObject.getString("ip");
                 String port = dataObject.getString("port");
                 JSONArray protocols = dataObject.getJSONArray("protocols");
-                String proxy = protocols.get(0) + "://" + ip + ":" + port;
-                //String proxy = ip + ":" + port;
-                isReachable(ip, Integer.parseInt(port));
-                proxiesList.add(proxy);
+                String proxyStr = protocols.get(0) + "://" + ip + ":" + port;
+                if (isReachable(ip, Integer.parseInt(port))) {
+                    System.out.println("reachable proxy is: " + proxyStr);
+                    Proxy proxy = new Proxy();
+                    proxy.setHttpProxy(proxyStr);
+                    proxy.setSslProxy(proxyStr);
+                    return proxy;
+                }
             }
         } catch (Exception e) {
-           log.warn("not possible to fetch info");
+            log.warn("not possible to fetch info");
         }
-        return proxiesList;
+        return null;
     }
 
-    public static void isReachable(String host, int port) {
-        boolean reachable = false;
+    public static boolean isReachable(String host, int port) {
         try (Socket socket = new Socket()) {
-            socket.connect(new InetSocketAddress(host, port), 1000);
-            reachable = true;
+            socket.connect(new InetSocketAddress(host, port), 100);
+            return true;
         } catch (IOException e) {
-            reachable = false;
+            return false;
         }
-        System.out.println("Is host " + host + " on port " + port + " reachable? " + reachable);
     }
 }

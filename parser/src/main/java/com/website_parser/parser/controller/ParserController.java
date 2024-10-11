@@ -8,9 +8,14 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 
 @RestController
@@ -31,7 +36,9 @@ public class ParserController {
 
     @PostMapping("/last-page")
     public List<String> getAllPagesBasedOnLastPage(@RequestBody String lastPage) throws ExecutionException, InterruptedException, MalformedURLException {
-        return paginationService.getHtmlOfAllPagesBasedOnLastPage(lastPage);
+        List<String> pages= paginationService.getHtmlOfAllPagesBasedOnLastPage(lastPage);
+        sseEmitterService.completeSse();
+        return pages;
     }
 
     @GetMapping("/approve")
@@ -69,6 +76,20 @@ public class ParserController {
 
     @GetMapping("/sse")
     public SseEmitter streamSseMvc() {
-        return sseEmitterService.createEmitter();
+        SseEmitter emitter=sseEmitterService.createEmitter();
+        ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
+
+        // Schedule a task to send heartbeat messages every 2 seconds
+        scheduledExecutor.scheduleAtFixedRate(() -> {
+            try {
+                // Send heartbeat event
+                emitter.send(SseEmitter.event().name("heartbeat").data("{\"status\": \"alive\"}"));
+            } catch (IOException e) {
+                // If sending the event fails, complete the emitter
+                emitter.completeWithError(e);
+                scheduledExecutor.shutdown();
+            }
+        }, 0, 2, TimeUnit.SECONDS);  // Send first heartbeat immediately, then every 2 seconds
+      return emitter;
     }
 }

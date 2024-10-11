@@ -52,7 +52,7 @@ public class WebDriverConfig {
 
     @Bean
     @Profile("prod")
-    //@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public WebDriver getRemoteChromeDriver(@Value("${parser.remote-chrome-1}") String chromePort1, @Value("${parser.remote-chrome-2}") String chromePort2, @Value("${parser.remote-chrome-3}") String chromePort3) throws MalformedURLException {
         System.out.println("hello from remote");
         ArrayList<String> chromesList = new ArrayList<>();

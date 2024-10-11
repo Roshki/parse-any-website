@@ -13,7 +13,6 @@ import { SpinnerComponent } from './spinner/spinner.component';
 import { WebsiteService } from './website.service';
 import { SseService } from './sse.service';
 import { FileExportService } from './file-export.service';
-import { debounceTime } from 'rxjs/operators';
 
 
 @Component({
@@ -79,6 +78,12 @@ export class ParserComponent implements OnInit {
       this.isLoading = value.isLoading;
     });
 
+    this.sseService.isProgress$.subscribe(value => {
+      this.ngZone.run(() => {
+        this.progress = value; // Update the UI-bound variable
+      });
+    });
+
     this.parserService.openModal$.subscribe(value => {
       this.isModalWindow = value;
       console.log('Modal state changed in app:', this.isModalWindow);
@@ -125,7 +130,8 @@ export class ParserComponent implements OnInit {
                 this.isLoading = false;
                 alert("error happened, please retry!");
               });
-          }})
+          }
+        })
         .catch(e => {
           this.isLoading = false;
           alert("error happened, please retry!");
@@ -138,7 +144,8 @@ export class ParserComponent implements OnInit {
 
   InsertUrlOfLastPageOnClick(): void {
     if (this.sendLastPageUrl != null) {
-      this.subscribeToSseEvent();
+      this.progress="0";
+      this.sseService.getSse();
       this.websiteService.setAllPagesHtml(this.sendLastPageUrl);
     }
   }
@@ -181,10 +188,11 @@ export class ParserComponent implements OnInit {
   }
 
   inifiniteScrollingOnClick(): void {
-    this.subscribeToSseEvent()
+    this.progress="0";
     if (this.sendUrl.valid && this.sendUrl.value) {
       this.isLoading = true;
       this.isValidUrl = true;
+      this.sseService.getSse();
       this.websiteService.initWebsite();
       this.parserService.getInfiniteScrolling(this.sendUrl.value, this.scrollingSpeed)
         .then(data => {
@@ -208,22 +216,6 @@ export class ParserComponent implements OnInit {
     }
   }
 
-  subscribeToSseEvent() {
-    this.progress = "0";
-    let url = '/api/sse';
-    this.sseService.getServerSentEvent(url).pipe(debounceTime(100)).subscribe(
-      (message: string) => {
-        console.log(message);
-        this.ngZone.run(() => {
-          this.progress = message; // Update the UI-bound variable
-        });
-      },
-      (error) => {
-        console.error('SSE error: ', error);
-        alert("error happened, please retry!");
-      }
-    );
-  }
 }
 
 @Component({
@@ -231,7 +223,7 @@ export class ParserComponent implements OnInit {
   template: `<app-parser></app-parser>`,
   standalone: true,
   imports: [ParserComponent],
-  encapsulation: ViewEncapsulation.Emulated
+  encapsulation: ViewEncapsulation.None
 })
 export class AppComponent {
   constructor() {

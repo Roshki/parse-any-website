@@ -45,6 +45,15 @@ public class HtmlContentUtil {
         return htmlContent;
     }
 
+    private static void adjustMediaTag(Element linkElement, Element styleElement, String cssContent) {
+        String mediaAttribute = linkElement.attr("media");
+        if (!mediaAttribute.isEmpty()) {
+            styleElement.appendText("@media " + mediaAttribute + " {" + cssContent + "}");
+        } else {
+            styleElement.appendText(cssContent);
+        }
+    }
+
     public static String removeTagsAndReturn(String htmlContent) {
         return htmlContent
                 .replaceAll("(?s)<header[^>]*>.*?</header>", "")

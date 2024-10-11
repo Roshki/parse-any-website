@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, Renderer2, ViewEncapsulation, Output, EventEmitter, ChangeDetectorRef, inject } from '@angular/core';
-import { SafeHtml } from '@angular/platform-browser';
+import { Component, OnChanges, SimpleChanges, Input, Renderer2, ViewEncapsulation, Output, EventEmitter, ChangeDetectorRef, inject } from '@angular/core';
+import { SafeHtml, DomSanitizer } from '@angular/platform-browser';
 import { Website } from '../models/website.model';
 import { ListComponent } from '../list/list.component';
 import { WebsiteService } from '../website.service';
@@ -12,25 +12,66 @@ import { SseService } from '../sse.service';
   imports: [CommonModule, ListComponent],
   templateUrl: './website-content.html',
   encapsulation: ViewEncapsulation.ShadowDom,
-  styles: ``
+  styleUrl: '/src/styles.css'
 })
 export class WebsiteContentComponent {
 
   private website: Website | null = null;
   private sseService = inject(SseService);
 
+  @Input() displayT: SafeHtml | undefined;
   @Input() display: SafeHtml | undefined;
   @Input() ifPaginationMode: boolean = false;
   @Output() ifPaginationModeChanged = new EventEmitter<boolean>();
   @Output() progressUpdated = new EventEmitter();
 
 
-  constructor(private renderer: Renderer2, private websiteService: WebsiteService, private cd: ChangeDetectorRef) {
+  constructor(private renderer: Renderer2, private websiteService: WebsiteService, private sanitizer: DomSanitizer, private cd: ChangeDetectorRef) {
   }
 
   ngOnInit(): void {
     this.websiteService.website$.subscribe((website) => {
       this.website = website;
+    });
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['display']) {
+      // Do something when display changes
+      console.log('Display changed:');
+      let docrRoot = document.querySelector("app-website-content") as HTMLElement;
+    const children = docrRoot.shadowRoot;
+     // this.copyStylesAndHead(children)
+
+    }
+  }
+
+  copyStylesAndHead(shadow: ShadowRoot| null) {
+    // Copy styles from the main document
+    let docrRoot = document.querySelector("app-website-content") as HTMLElement;
+    const styles = docrRoot.querySelectorAll('style, link[rel="stylesheet"]');
+
+    styles.forEach(style => {
+      // Clone the styles or links and append them to the shadow DOM
+      const clonedNode = style.cloneNode(true);
+      shadow?.appendChild(clonedNode);
+    });
+
+    // If you want to copy specific <script> tags, you can do it like this:
+    const scripts = docrRoot.querySelectorAll('script');
+    scripts.forEach(script => {
+      if (script.src) {
+        // If the script has a src, create a new script element
+        const newScript = document.createElement('script');
+        newScript.src = script.src;
+        newScript.async = script.async; // Preserve async attribute
+        shadow?.appendChild(newScript);
+      } else {
+        // If the script is inline, clone it as is
+        const inlineScript = document.createElement('script');
+        inlineScript.textContent = script.textContent;
+        shadow?.appendChild(inlineScript);
+      }
     });
   }
 
@@ -103,16 +144,6 @@ export class WebsiteContentComponent {
   }
 
   subscribeToSseEvent() {
-    //let url = environment.parserServiceUrl + 'sse';
-    let url = '/api/sse';
-    this.sseService.getServerSentEvent(url).subscribe(
-      (message: string) => {
-        console.log(message);
-        this.progressUpdated.emit(message);
-      },
-      (error) => {
-        console.error('SSE error: ', error);
+        this.progressUpdated.emit(this.sseService.getSse());
       }
-    );
-  }
 }

@@ -29,37 +29,17 @@ public class UrlUtil {
         return null;
     }
 
-    public static List<String> predictAllUrls(String url, String tagName, int startPage, int endPage) {
+    public static List<String> predictAllUrls(String url, String tagName, String startPage, String endPage) {
         List<String> updatedUrls = new ArrayList<>();
         String regex = tagName + "=\\d+";  //page=1
         Pattern pattern = Pattern.compile(regex);
-        for (int i = startPage; i <= endPage; i++) {
+        for (int i = Integer.parseInt(startPage); i <= Integer.parseInt(endPage); i++) {
             Matcher matcher = pattern.matcher(url);
             String updatedUrl = matcher.replaceAll(tagName + "=" + i);
             updatedUrls.add(updatedUrl);
         }
         return updatedUrls;
     }
-
-    public static ArrayList<String> predictAllUrlsT(String urlTemplate) {
-        ArrayList<String> urlList = new ArrayList<>();
-        //Pattern pattern = Pattern.compile("(\\d+)(?!.*\\d)");
-        Pattern pattern = Pattern.compile("\\.\\*");
-
-        // Loop through numbers 1 to 99 and substitute ".*" with the number
-        for (int i = 1; i <= 10; i++) {
-            // Create a matcher for the current URL
-            Matcher matcher = pattern.matcher(urlTemplate);
-
-            // Replace ".*" with the current number
-            String newUrl = matcher.replaceAll(String.valueOf(i));
-
-            // Print or store the new URL
-            System.out.println(newUrl);
-        }
-            return urlList;
-        }
-
 
     public static String verifyHost(String link, URL mainUrl) {
 
@@ -69,11 +49,6 @@ public class UrlUtil {
             case PROTOCOL_RELATIVE_WWW -> mainUrl.getProtocol() + ":" + link;
             case RELATIVE_WWW -> mainUrl.getProtocol() + "://" + link;
         };
-//
-//        if (!link.contains("http") && !link.contains("www.")) {
-//            return mainUrl.getProtocol() + "://" + mainUrl.getHost() + link;
-//        }
-//        return link;
     }
 
     private static UrlType getUrlType(String link) {

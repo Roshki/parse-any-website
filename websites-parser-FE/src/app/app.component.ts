@@ -13,6 +13,7 @@ import { SpinnerComponent } from './spinner/spinner.component';
 import { WebsiteService } from './website.service';
 import { SseService } from './sse.service';
 import { FileExportService } from './file-export.service';
+import { InstructionsComponent } from "./instructions/instructions.component";
 
 
 @Component({
@@ -20,7 +21,7 @@ import { FileExportService } from './file-export.service';
   templateUrl: './app.html',
   styleUrl: "../styles.css",
   imports: [FormsModule, CommonModule, DevModeComponent, ReactiveFormsModule, ListComponent,
-    WebsiteContentComponent, ModuleWindowComponent, SpinnerComponent],
+    WebsiteContentComponent, ModuleWindowComponent, SpinnerComponent, InstructionsComponent],
   encapsulation: ViewEncapsulation.Emulated,
   standalone: true
 })
@@ -32,15 +33,20 @@ export class ParserComponent implements OnInit {
   @Output() progress: string = "";
   isLoading: boolean = false;
   isModalWindow: boolean = false;
-  sendLastPageUrl: string = '';
   scrollingSpeed: string = '';
   sendUrl = new FormControl('', [
     Validators.required,
     Validators.pattern('https?://.+')
   ]);
   isValidUrl: boolean = false;
-  public ifPaginationMode: boolean = false;
   private website: Website | null = null;
+
+  paginationInfo = {
+    sendLastPageUrl: "",
+    paginationTag: "",
+    pageStart: "",
+    pageFinish: ""
+  }
 
 
   constructor(private sanitizer: DomSanitizer, private renderer: Renderer2, private ngZone: NgZone, private websiteService: WebsiteService) {
@@ -143,41 +149,9 @@ export class ParserComponent implements OnInit {
   }
 
   InsertUrlOfLastPageOnClick(): void {
-    if (this.sendLastPageUrl != null) {
-      this.progress="0";
-      this.sseService.getSse();
-      this.websiteService.setAllPagesHtml(this.sendLastPageUrl);
-    }
-  }
-
-  paginationModeOnClick(): void {
-    let docRoot = document.querySelector("app-website-content") as HTMLElement;
-    const items = docRoot.shadowRoot?.querySelectorAll('[class*="pagin"]');
-    if (this.ifPaginationMode == false) {
-      this.ifPaginationMode = true;
-      items?.forEach(element => {
-        this.renderer.setStyle(element, 'border', '2px solid gray');
-      });
-      return;
-    }
-    else {
-      this.ifPaginationMode = false;
-      items?.forEach(element => {
-        this.renderer.removeStyle(element, 'border');
-      });
-      return;
-    }
-  }
-
-  onPaginationModeChanged(newData: boolean) {
-    this.ifPaginationMode = newData;
-    console.log("ifPaginationMode " + newData)
-    let docRoot = document.querySelector("app-website-content") as HTMLElement;
-    const items = docRoot.shadowRoot?.querySelectorAll('[class*="pagin"]');
-    items?.forEach(element => {
-      this.renderer.removeStyle(element, 'border');
-    });
-    return;
+    this.progress = "0";
+    this.sseService.getSse();
+    this.websiteService.setAllPagesHtml(this.paginationInfo);
   }
 
   exportBtnOnClick(): void {
@@ -188,7 +162,7 @@ export class ParserComponent implements OnInit {
   }
 
   inifiniteScrollingOnClick(): void {
-    this.progress="0";
+    this.progress = "0";
     if (this.sendUrl.valid && this.sendUrl.value) {
       this.isLoading = true;
       this.isValidUrl = true;

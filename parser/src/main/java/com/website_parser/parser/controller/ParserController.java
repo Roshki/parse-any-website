@@ -35,8 +35,8 @@ public class ParserController {
     }
 
     @PostMapping("/last-page")
-    public List<String> getAllPagesBasedOnLastPage(@RequestBody String lastPage) throws ExecutionException, InterruptedException, MalformedURLException {
-        List<String> pages= paginationService.getHtmlOfAllPagesBasedOnLastPage(lastPage);
+    public List<String> getAllPagesBasedOnLastPage(@RequestBody String lastPage, @RequestParam String pageTag, @RequestParam String pageStart, @RequestParam String pageFinish) throws ExecutionException, InterruptedException, MalformedURLException {
+        List<String> pages = paginationService.getHtmlOfAllPagesBasedOnLastPage(lastPage, pageTag, pageStart, pageFinish);
         sseEmitterService.completeSse();
         return pages;
     }
@@ -76,20 +76,17 @@ public class ParserController {
 
     @GetMapping("/sse")
     public SseEmitter streamSseMvc() {
-        SseEmitter emitter=sseEmitterService.createEmitter();
+        SseEmitter emitter = sseEmitterService.createEmitter();
         ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
 
-        // Schedule a task to send heartbeat messages every 2 seconds
         scheduledExecutor.scheduleAtFixedRate(() -> {
             try {
-                // Send heartbeat event
                 emitter.send(SseEmitter.event().name("heartbeat").data("{\"status\": \"alive\"}"));
             } catch (IOException e) {
-                // If sending the event fails, complete the emitter
                 emitter.completeWithError(e);
                 scheduledExecutor.shutdown();
             }
-        }, 0, 2, TimeUnit.SECONDS);  // Send first heartbeat immediately, then every 2 seconds
-      return emitter;
+        }, 0, 2, TimeUnit.SECONDS);
+        return emitter;
     }
 }

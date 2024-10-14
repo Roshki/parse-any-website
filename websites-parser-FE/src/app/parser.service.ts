@@ -19,7 +19,7 @@ export class ParserService {
 
   sendHtmlUrl = '/api/send-html';
 
-  private lastPage = '/api/last-page';
+  private lastPageUrl = '/api/last-page';
 
   private approveUrl = '/api/approve'
 
@@ -97,11 +97,11 @@ export class ParserService {
     return data;
   }
 
-  retrieveAllPages(paginationHref: string | null): string[] {
+  retrieveAllPages(paginationInfo: { sendLastPageUrl: string, paginationTag: string, pageStart: string, pageFinish: string }): string[] {
 
     let allPagesHtml: string[] = [];
     this.sseService.updateIsLoading(this.serviceName, true);
-    this.http.post<string[]>(this.lastPage, paginationHref).subscribe({
+    this.http.post<string[]>(this.lastPageUrl + "?pageTag=" + paginationInfo.paginationTag + "&pageStart=" + paginationInfo.pageStart + "&pageFinish=" + paginationInfo.pageFinish, paginationInfo.sendLastPageUrl).subscribe({
       next: (data: string[]) => {
         data.forEach(item => allPagesHtml.push(item));
         alert(allPagesHtml.length + " length of all pages");

@@ -16,8 +16,8 @@ export class WebsiteService {
     private paginationService = inject(PaginationService);
     private listService = inject(ListService);
 
-    setAllPagesHtml(sendLastPageUrl: string): void {
-        let htmls = this.parserService.retrieveAllPages(sendLastPageUrl);
+    setAllPagesHtml(paginationInfo:{ sendLastPageUrl: string, paginationTag: string, pageStart: string, pageFinish: string }): void {
+        let htmls = this.parserService.retrieveAllPages(paginationInfo);
         const currentWebsite = this.websiteSubject.value;
         const updatedWebsite = { ...currentWebsite, allPagesHtml: htmls };
         this.websiteSubject.next(updatedWebsite);

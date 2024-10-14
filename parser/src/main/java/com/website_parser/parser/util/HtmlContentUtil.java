@@ -15,15 +15,15 @@ import static com.website_parser.parser.util.UrlUtil.verifyHost;
 @Slf4j
 public class HtmlContentUtil {
 
-    public static String updateHtmlAndReturn(String htmlContent, URL mainUrl) {
+    public static String updateHtmlAndReturn(String htmlContent, URL mainUrl) {;
         htmlContent = cssLinksToStyleAndReturn(htmlContent, mainUrl);
         return removeTagsAndReturn(htmlContent);
     }
 
-    public static String cssLinksToStyleAndReturn(String htmlContent, URL mainUrl) {
+    private static String cssLinksToStyleAndReturn(String htmlContent, URL mainUrl) {
         Document doc = Jsoup.parse(htmlContent);
         Elements linkElements = doc.select("link[rel=stylesheet]");
-        linkElements.addAll(doc.select("link[rel=preload]"));
+//        linkElements.addAll(doc.select("link[rel=preload]"));
         for (Element linkElement : linkElements) {
             String cssUrl = linkElement.attr("href");
             String verifiedHost = verifyHost(cssUrl, mainUrl);
@@ -41,18 +41,9 @@ public class HtmlContentUtil {
             }
             htmlContent = doc.html();
         }
-
         return htmlContent;
     }
 
-    private static void adjustMediaTag(Element linkElement, Element styleElement, String cssContent) {
-        String mediaAttribute = linkElement.attr("media");
-        if (!mediaAttribute.isEmpty()) {
-            styleElement.appendText("@media " + mediaAttribute + " {" + cssContent + "}");
-        } else {
-            styleElement.appendText(cssContent);
-        }
-    }
 
     public static String removeTagsAndReturn(String htmlContent) {
         return htmlContent

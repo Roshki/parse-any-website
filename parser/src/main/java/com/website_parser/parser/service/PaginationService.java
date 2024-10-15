@@ -48,7 +48,6 @@ public class PaginationService {
             }).thenAccept(result -> {
                 System.out.println("success -- " + url);
                 webDriverService.releaseDriverToThePool(driverMulti);
-                sseEmitterService.sendSse(String.valueOf((100 * count) / allPageUrls.size()));
             }).exceptionally(ex -> {
                 if (driverMulti != null) {
                     webDriverService.releaseDriverToThePool(driverMulti);
@@ -57,6 +56,7 @@ public class PaginationService {
                 return null;
             });
             futures.add(completableFuture);
+            sseEmitterService.sendSse(String.valueOf((100 * count) / allPageUrls.size()));
         }
         CompletableFuture<Void> allOf = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
         resultFuture = allOf.thenApply(v -> {

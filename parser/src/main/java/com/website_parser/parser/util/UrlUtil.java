@@ -31,11 +31,11 @@ public class UrlUtil {
 
     public static List<String> predictAllUrls(String url, String tagName, String startPage, String endPage) {
         List<String> updatedUrls = new ArrayList<>();
-        String regex = tagName + "=\\d+";  //page=1
+        String regex = tagName + "\\d+";  //page=1
         Pattern pattern = Pattern.compile(regex);
         for (int i = Integer.parseInt(startPage); i <= Integer.parseInt(endPage); i++) {
             Matcher matcher = pattern.matcher(url);
-            String updatedUrl = matcher.replaceAll(tagName + "=" + i);
+            String updatedUrl = matcher.replaceAll(tagName + i);
             updatedUrls.add(updatedUrl);
         }
         return updatedUrls;

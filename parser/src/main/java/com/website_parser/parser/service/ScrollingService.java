@@ -61,7 +61,7 @@ public class ScrollingService {
             long newHeight = (long) jsExecutor.executeScript(returnPageHeightScript);
             System.out.println(lastHeight[0] + " - " + newHeight);
             //newHeight == lastHeight[0] || -in if statement
-            if (timesOfScrolling == amount) {
+            if (newHeight == lastHeight[0] || timesOfScrolling == amount) {
                 System.out.println("Scroll limit reached: " + timesOfScrolling);
                 break;
             }

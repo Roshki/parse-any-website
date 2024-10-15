@@ -1,5 +1,6 @@
 package com.website_parser.parser.service;
 
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.WebDriver;
 import org.springframework.context.ApplicationContext;
@@ -22,6 +23,7 @@ public class WebDriverPoolService extends WebDriverService {
         super(applicationContext);
     }
 
+    @PostConstruct
     public void initPool() {
         if (driverPool.size() < MAX_WEBDRIVERS) {
             for (int i = 0; i < MAX_WEBDRIVERS; i++) {

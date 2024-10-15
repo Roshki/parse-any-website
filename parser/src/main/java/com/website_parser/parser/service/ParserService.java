@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.*;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -45,8 +44,8 @@ public class ParserService {
 
     public String getNotCachedPage(String url) throws MalformedURLException {
         String htmlContent;
-        WebDriver initialDriver = webDriverService.verifyInitialDriver();
-        WebDriver webDriver = verifyDriver(url, initialDriver);
+        WebDriver initialDriver = webDriverService.getDriverFromPool();
+        WebDriver navigatedDriver = navigateToUrl(url, initialDriver);
         try {
             long startTime = System.nanoTime();
             System.out.println("tries to approve");
@@ -60,16 +59,21 @@ public class ParserService {
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new RuntimeException(e);
         }
+        finally {
+            webDriverService.releaseDriverToThePool(initialDriver);
+            approvalService.reset();
+        }
         System.out.println("Approved!!!");
-        String driverPageSource = retrievePage(webDriver);
+        String driverPageSource = retrievePage(navigatedDriver);
         htmlContent = updateHtmlAndReturn(driverPageSource, new URL(url));
         website.populateWebsite(
                 Website.builder()
                         .websiteUrl(url)
                         .initialHtml(htmlContent).build());
         cacheService.setWebsiteCache(url, website);
-        approvalService.reset();
-        webDriverService.safelyCloseAndQuitDriver(webDriver);
+//        webDriverService.releaseDriverToThePool(initialDriver);
+//        approvalService.reset();
+        //webDriverService.safelyCloseAndQuitDriver(initialDriver);
         return htmlContent;
     }
 
@@ -84,7 +88,7 @@ public class ParserService {
         return driver.getPageSource();
     }
 
-    public WebDriver verifyDriver(String url, WebDriver driver) {
+    public WebDriver navigateToUrl(String url, WebDriver driver) {
         try {
             driver = webDriverService.verifyAndGetWebDriver(driver);
             driver.get(url);

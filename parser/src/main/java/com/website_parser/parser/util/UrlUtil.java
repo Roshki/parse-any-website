@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,6 +29,17 @@ public class UrlUtil {
         return null;
     }
 
+    public static List<String> predictAllUrls(String url, String tagName, String startPage, String endPage) {
+        List<String> updatedUrls = new ArrayList<>();
+        String regex = tagName + "\\d+";  //page=1
+        Pattern pattern = Pattern.compile(regex);
+        for (int i = Integer.parseInt(startPage); i <= Integer.parseInt(endPage); i++) {
+            Matcher matcher = pattern.matcher(url);
+            String updatedUrl = matcher.replaceAll(tagName + i);
+            updatedUrls.add(updatedUrl);
+        }
+        return updatedUrls;
+    }
 
     public static String verifyHost(String link, URL mainUrl) {
 
@@ -37,11 +49,6 @@ public class UrlUtil {
             case PROTOCOL_RELATIVE_WWW -> mainUrl.getProtocol() + ":" + link;
             case RELATIVE_WWW -> mainUrl.getProtocol() + "://" + link;
         };
-//
-//        if (!link.contains("http") && !link.contains("www.")) {
-//            return mainUrl.getProtocol() + "://" + mainUrl.getHost() + link;
-//        }
-//        return link;
     }
 
     private static UrlType getUrlType(String link) {

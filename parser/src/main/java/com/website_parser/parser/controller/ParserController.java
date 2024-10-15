@@ -8,9 +8,14 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 
 @RestController
@@ -30,8 +35,10 @@ public class ParserController {
     }
 
     @PostMapping("/last-page")
-    public List<String> getAllPagesBasedOnLastPage(@RequestBody String lastPage) throws ExecutionException, InterruptedException, MalformedURLException {
-        return paginationService.getHtmlOfAllPagesBasedOnLastPage(lastPage);
+    public List<String> getAllPagesBasedOnLastPage(@RequestBody String lastPage, @RequestParam String pageTag, @RequestParam String pageStart, @RequestParam String pageFinish) throws ExecutionException, InterruptedException, MalformedURLException {
+        List<String> pages = paginationService.getHtmlOfAllPagesBasedOnLastPage(lastPage, pageTag, pageStart, pageFinish);
+        sseEmitterService.completeSse();
+        return pages;
     }
 
     @GetMapping("/approve")
@@ -50,7 +57,7 @@ public class ParserController {
     public ResponseEntity<String> getInfiniteScrolling(@RequestBody String url, @RequestParam String speed) {
         try {
             return new ResponseEntity<>(
-                    scrollingService.getInfiniteScrolling(url, speed, 5), HttpStatus.OK);
+                    scrollingService.getInfiniteScrolling(url, speed, 10), HttpStatus.OK);
         } catch (MalformedURLException e) {
             return new ResponseEntity<>("error occurred! " + e, HttpStatusCode.valueOf(500));
         }
@@ -69,6 +76,17 @@ public class ParserController {
 
     @GetMapping("/sse")
     public SseEmitter streamSseMvc() {
-        return sseEmitterService.createEmitter();
+        SseEmitter emitter = sseEmitterService.createEmitter();
+        ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
+
+        scheduledExecutor.scheduleAtFixedRate(() -> {
+            try {
+                emitter.send(SseEmitter.event().name("heartbeat").data("{\"status\": \"alive\"}"));
+            } catch (IOException e) {
+                emitter.completeWithError(e);
+                scheduledExecutor.shutdown();
+            }
+        }, 0, 2, TimeUnit.SECONDS);
+        return emitter;
     }
 }

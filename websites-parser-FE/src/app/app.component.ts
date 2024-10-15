@@ -13,7 +13,7 @@ import { SpinnerComponent } from './spinner/spinner.component';
 import { WebsiteService } from './website.service';
 import { SseService } from './sse.service';
 import { FileExportService } from './file-export.service';
-import { debounceTime } from 'rxjs/operators';
+import { InstructionsComponent } from "./instructions/instructions.component";
 
 
 @Component({
@@ -21,7 +21,7 @@ import { debounceTime } from 'rxjs/operators';
   templateUrl: './app.html',
   styleUrl: "../styles.css",
   imports: [FormsModule, CommonModule, DevModeComponent, ReactiveFormsModule, ListComponent,
-    WebsiteContentComponent, ModuleWindowComponent, SpinnerComponent],
+    WebsiteContentComponent, ModuleWindowComponent, SpinnerComponent, InstructionsComponent],
   encapsulation: ViewEncapsulation.Emulated,
   standalone: true
 })
@@ -33,15 +33,20 @@ export class ParserComponent implements OnInit {
   @Output() progress: string = "";
   isLoading: boolean = false;
   isModalWindow: boolean = false;
-  sendLastPageUrl: string = '';
   scrollingSpeed: string = '';
   sendUrl = new FormControl('', [
     Validators.required,
     Validators.pattern('https?://.+')
   ]);
   isValidUrl: boolean = false;
-  public ifPaginationMode: boolean = false;
   private website: Website | null = null;
+
+  paginationInfo = {
+    sendLastPageUrl: "",
+    paginationTag: "",
+    pageStart: "",
+    pageFinish: ""
+  }
 
 
   constructor(private sanitizer: DomSanitizer, private renderer: Renderer2, private ngZone: NgZone, private websiteService: WebsiteService) {
@@ -77,6 +82,12 @@ export class ParserComponent implements OnInit {
   ngOnInit() {
     this.sseService.isLoading$.subscribe(value => {
       this.isLoading = value.isLoading;
+    });
+
+    this.sseService.isProgress$.subscribe(value => {
+      this.ngZone.run(() => {
+        this.progress = value; // Update the UI-bound variable
+      });
     });
 
     this.parserService.openModal$.subscribe(value => {
@@ -125,7 +136,8 @@ export class ParserComponent implements OnInit {
                 this.isLoading = false;
                 alert("error happened, please retry!");
               });
-          }})
+          }
+        })
         .catch(e => {
           this.isLoading = false;
           alert("error happened, please retry!");
@@ -137,40 +149,9 @@ export class ParserComponent implements OnInit {
   }
 
   InsertUrlOfLastPageOnClick(): void {
-    if (this.sendLastPageUrl != null) {
-      this.subscribeToSseEvent();
-      this.websiteService.setAllPagesHtml(this.sendLastPageUrl);
-    }
-  }
-
-  paginationModeOnClick(): void {
-    let docRoot = document.querySelector("app-website-content") as HTMLElement;
-    const items = docRoot.shadowRoot?.querySelectorAll('[class*="pagin"]');
-    if (this.ifPaginationMode == false) {
-      this.ifPaginationMode = true;
-      items?.forEach(element => {
-        this.renderer.setStyle(element, 'border', '2px solid gray');
-      });
-      return;
-    }
-    else {
-      this.ifPaginationMode = false;
-      items?.forEach(element => {
-        this.renderer.removeStyle(element, 'border');
-      });
-      return;
-    }
-  }
-
-  onPaginationModeChanged(newData: boolean) {
-    this.ifPaginationMode = newData;
-    console.log("ifPaginationMode " + newData)
-    let docRoot = document.querySelector("app-website-content") as HTMLElement;
-    const items = docRoot.shadowRoot?.querySelectorAll('[class*="pagin"]');
-    items?.forEach(element => {
-      this.renderer.removeStyle(element, 'border');
-    });
-    return;
+    this.progress = "0";
+    this.sseService.getSse();
+    this.websiteService.setAllPagesHtml(this.paginationInfo);
   }
 
   exportBtnOnClick(): void {
@@ -181,10 +162,11 @@ export class ParserComponent implements OnInit {
   }
 
   inifiniteScrollingOnClick(): void {
-    this.subscribeToSseEvent()
+    this.progress = "0";
     if (this.sendUrl.valid && this.sendUrl.value) {
       this.isLoading = true;
       this.isValidUrl = true;
+      this.sseService.getSse();
       this.websiteService.initWebsite();
       this.parserService.getInfiniteScrolling(this.sendUrl.value, this.scrollingSpeed)
         .then(data => {
@@ -208,22 +190,6 @@ export class ParserComponent implements OnInit {
     }
   }
 
-  subscribeToSseEvent() {
-    this.progress = "0";
-    let url = '/api/sse';
-    this.sseService.getServerSentEvent(url).pipe(debounceTime(100)).subscribe(
-      (message: string) => {
-        console.log(message);
-        this.ngZone.run(() => {
-          this.progress = message; // Update the UI-bound variable
-        });
-      },
-      (error) => {
-        console.error('SSE error: ', error);
-        alert("error happened, please retry!");
-      }
-    );
-  }
 }
 
 @Component({
@@ -231,7 +197,7 @@ export class ParserComponent implements OnInit {
   template: `<app-parser></app-parser>`,
   standalone: true,
   imports: [ParserComponent],
-  encapsulation: ViewEncapsulation.Emulated
+  encapsulation: ViewEncapsulation.None
 })
 export class AppComponent {
   constructor() {

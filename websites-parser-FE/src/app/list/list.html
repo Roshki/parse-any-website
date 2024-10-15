@@ -2,7 +2,8 @@
 <div  class="container">
   <div class="row">
     <div class="col-12">
-      <div class="accordion sticky-right-middle ms-auto" id="accordionExample" style="width: 300px;">
+      <div class="accordion sticky-right-middle ms-auto" id="accordionExample" style="width: 300px; max-height: 500px;
+  overflow-y: auto;">
         <div class="accordion-item" *ngFor="let item of listItems; let i = index">
           <h2 class="accordion-header"  attr.id="heading{{i}}">
             <button class="accordion-button collapsed btn-outline-success me-2" type="button" data-bs-toggle="collapse"

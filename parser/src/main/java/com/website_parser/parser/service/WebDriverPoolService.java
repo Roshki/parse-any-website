@@ -1,6 +1,7 @@
 package com.website_parser.parser.service;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.WebDriver;
 import org.springframework.context.ApplicationContext;
@@ -37,36 +38,42 @@ public class WebDriverPoolService extends WebDriverService {
         }
     }
 
-    public void validateAndRecreateDrivers() {
-        List<WebDriver> invalidDrivers = new ArrayList<>();
-        for (WebDriver driver : driverPool) {
-            if (!isDriverValid(driver)) {
-                invalidDrivers.add(driver);
-            }
-        }
-        for (WebDriver invalidDriver : invalidDrivers) {
-            driverPool.remove(invalidDriver);
-            safelyCloseAndQuitDriver(invalidDriver);
-            System.out.println("removed invalid driver");
-            driverPool.add(createAndReturnWebDriver());
-        }
+    @PreDestroy
+    public void destroyPool() {
+        driverPool.forEach(this::safelyCloseAndQuitDriver);
     }
 
-    public WebDriver getDriverFromPool() {
-        validateAndRecreateDrivers();
-        try {
-            return driverPool.take();
-        } catch (InterruptedException e) {
-            throw new RuntimeException("Error retrieving WebDriver from pool", e);
-        }
-    }
 
-    public void releaseDriverToThePool(WebDriver webDriver) {
-        validateAndRecreateDrivers();
-        try {
-            driverPool.put(webDriver);
-        } catch (InterruptedException e) {
-            throw new RuntimeException("Error releasing WebDriver to pool", e);
+public void validateAndRecreateDrivers() {
+    List<WebDriver> invalidDrivers = new ArrayList<>();
+    for (WebDriver driver : driverPool) {
+        if (!isDriverValid(driver)) {
+            invalidDrivers.add(driver);
         }
     }
+    for (WebDriver invalidDriver : invalidDrivers) {
+        driverPool.remove(invalidDriver);
+        safelyCloseAndQuitDriver(invalidDriver);
+        System.out.println("removed invalid driver");
+        driverPool.add(createAndReturnWebDriver());
+    }
+}
+
+public WebDriver getDriverFromPool() {
+    validateAndRecreateDrivers();
+    try {
+        return driverPool.take();
+    } catch (InterruptedException e) {
+        throw new RuntimeException("Error retrieving WebDriver from pool", e);
+    }
+}
+
+public void releaseDriverToThePool(WebDriver webDriver) {
+    validateAndRecreateDrivers();
+    try {
+        driverPool.put(webDriver);
+    } catch (InterruptedException e) {
+        throw new RuntimeException("Error releasing WebDriver to pool", e);
+    }
+}
 }

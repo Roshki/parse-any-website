@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, SimpleChanges, Input, Renderer2, ViewEncapsulation, Output, EventEmitter, ElementRef } from '@angular/core';
+import { Component, SimpleChanges, Input, Renderer2, ViewEncapsulation, Output, EventEmitter} from '@angular/core';
 import { SafeHtml } from '@angular/platform-browser';
 import { Website } from '../models/website.model';
 import { ListComponent } from '../list/list.component';
@@ -21,12 +21,10 @@ export class WebsiteContentComponent {
   shadowRoot: any;
 
 
-  constructor(private renderer: Renderer2, private websiteService: WebsiteService, private el: ElementRef) {
+  constructor(private renderer: Renderer2, private websiteService: WebsiteService) {
   }
 
   ngOnInit(): void {
-
-    //  this.shadowRoot = this.el.nativeElement.attachShadow({mode:'open'});
 
 
     this.websiteService.website$.subscribe((website) => {
@@ -37,9 +35,6 @@ export class WebsiteContentComponent {
   ngOnChanges(changes: SimpleChanges) {
     if (changes['display']) {
       console.log('Display changed:');
-      // let docrRoot = document.querySelector("app-website-content") as HTMLElement;
-      // const children = docrRoot.shadowRoot;
-      // this.copyStylesAndHead(children)
 
     }
   }

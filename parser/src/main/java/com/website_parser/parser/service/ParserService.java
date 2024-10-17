@@ -65,7 +65,7 @@ public class ParserService {
         }
         System.out.println("Approved!!!");
         String driverPageSource = retrievePage(navigatedDriver);
-        htmlContent = updateHtmlAndReturn(driverPageSource, new URL(url));
+        htmlContent = updateHtmlAndReturn(driverPageSource);
         website.populateWebsite(
                 Website.builder()
                         .websiteUrl(url)
@@ -111,12 +111,12 @@ public class ParserService {
         return "OK!";
     }
 
-    public String getCleanHtml(Website website) throws MalformedURLException {
+    public String getCleanHtml(Website website) {
         //cacheService.setWebsiteCache(website.getWebsiteUrl().toString(), website);
         this.website.populateWebsite(
                 Website.builder()
                         .websiteUrl(website.getWebsiteUrl())
                         .initialHtml(website.getInitialHtml()).build());
-        return updateHtmlAndReturn(website.getInitialHtml(), new URL(website.getWebsiteUrl()));
+        return updateHtmlAndReturn(website.getInitialHtml());
     }
 }

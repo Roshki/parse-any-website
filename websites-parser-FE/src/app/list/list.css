@@ -1,3 +1,5 @@
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css");
+
 .sticky-right-middle {
   position: fixed;
   right: 0;
@@ -54,7 +56,6 @@
 }
 
 .accordion {
-  max-width: 20%; 
   transition: max-width 0.3s ease-in-out;
   width: 100%;
   min-height: 10%;
@@ -62,9 +63,6 @@
   overflow-y: auto;
 }
 
-.accordion {
-  max-width: 20%; 
-  transition: max-width 0.3s ease-in-out;
-  width: 100%;
+.itemDropdowns {
+  transform: translateX(-100%);
 }
-

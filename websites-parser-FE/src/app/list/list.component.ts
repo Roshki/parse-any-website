@@ -25,7 +25,7 @@ export class ListComponent {
   isOpen: { [key: number]: boolean } = {}; 
   accordionOpenState: { [key: number]: boolean } = {};
 
-  // Toggles the dropdown for the specified index
+
   toggleDropdown(index: number) {
     this.isOpen[index] = !this.isOpen[index];
   }
@@ -53,6 +53,7 @@ export class ListComponent {
     });
   };
 
+  
   removeItemsGroup(itemId: number) {
     if (this.website) {
       const itemKey = this.listItems[itemId]?.key;

@@ -23,7 +23,7 @@
               </button>
 
               <!-- Dropdown Menu -->
-              <ul class="dropdown-menu" [ngClass]="{'show': isOpen[i]}"
+              <ul class="dropdown-menu itemDropdowns" [ngClass]="{'show': isOpen[i]}"
                 [attr.aria-labelledby]="'dropdownMenuButton' + i">
                 <li><button (click)="removeItemsGroup(i)" class="dropdown-item">Delete</button></li>
               </ul>

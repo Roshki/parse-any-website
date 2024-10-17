@@ -1,80 +1,80 @@
-<nav id="navbar" class="navbar navbar-expand-lg navbar-light bg-light" style=" position: fixed; z-index: 3000; width: 100%;">
+<nav id="navbar" class="navbar navbar-expand-lg navbar-light bg-light"
+  style=" position: fixed; z-index: 3000; width: 100%;">
   <a href="" class="pull-left"><img src="../assets/img/parsley.png" style="max-height: 40px; margin-right: 10px;"></a>
   <div class="offset-md">
     <div class="d-flex align-items-center">
       <input class="form-control me-2" [ngClass]="{'ng-invalid-url': !isValidUrl}" type="text" placeholder="URL"
         [formControl]="sendUrl" style="width: 300px; margin-left: 2px;" id="sendUrlInput">
-      <button id="openWebsiteBtn" class="btn btn-outline-success me-2" type="submit" (click)="htmlOnClick()">Open
-        Website</button>
-        <button [disabled]="!display" [class.show]="isDropdownOpen" (click)="toggleDropdown()" type="button" class="btn btn-me-2 btn-success dropdown-toggle"
-          data-bs-toggle="dropdown" data-bs-auto-close="outside">
-          Tools <span class="caret"></span>
-        </button>
-        <div class="dropdown-menu accordion p-4" [class.show]="isDropdownOpen" style="max-width: 350px; background-color: #f8f9fa;">
-          <!-- Dev Mode Section -->
-          <div class="form-group p-4 border rounded bg-white shadow-sm">
-            <app-dev-mode></app-dev-mode>
-          </div>
-          <div class="dropdown-divider mb-3"></div>
-          <!-- Pagination Section -->
-          <div class="form-group p-4 border rounded bg-white shadow-sm">
-            <h6 class="mb-3 text-success">Pagination</h6>
-            <div class="row mb-3">
-              <!-- URL of last page -->
-              <div class="col-12 col-md-6 mb-3">
-                <input class="form-control form-control-sm" [(ngModel)]="paginationInfo.sendLastPageUrl"
-                  placeholder="URL of Last Page" style="width: 130px;" />
-              </div>
-              <!-- Pagination Tag -->
-              <div class="col-12 col-md-6 mb-3">
-                <input class="form-control form-control-sm" [(ngModel)]="paginationInfo.paginationTag"
-                  placeholder="Pagination Tag" style="width: 130px;" />
-              </div>
-              <!-- Page Start -->
-              <div class="col-6 col-md-6 mb-3">
-                <input id="openWebsiteBtn2" class="form-control form-control-sm" [(ngModel)]="paginationInfo.pageStart" type="number" min="0"
-                  placeholder="Start Page" style="width: 130px;" />
-              </div>
-              <!-- Page Finish -->
-              <div class="col-6 col-md-6 mb-3">
-                <input class="form-control form-control-sm" [(ngModel)]="paginationInfo.pageFinish" type="number"
-                  min="0" placeholder="Finish Page" style="width: 130px;" />
-              </div>
+      <button id="openWebsiteBtn" class="btn btn-outline-success me-2" type="submit" (click)="htmlOnClick()">Open Website</button>
+      <button [disabled]="!display" [class.show]="isDropdownOpen" (click)="toggleDropdown()" type="button"
+        class="btn btn-me-2 btn-success dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+        Tools <span class="caret"></span>
+      </button>
+      <div class="dropdown-menu accordion p-4" id="toolsDropdown" [class.show]="isDropdownOpen"
+        style="max-width: 350px; background-color: #f8f9fa;">
+
+        <!-- Dev Mode Section -->
+        <div class="form-group p-4 border rounded bg-white shadow-sm">
+          <app-dev-mode></app-dev-mode>
+        </div>
+        <div class="dropdown-divider mb-3"></div>
+
+        <!-- Pagination Section -->
+        <div class="form-group p-4 border rounded bg-white shadow-sm">
+          <h6 class="mb-3 text-success">Pagination</h6>
+          <div class="row mb-3">
+
+            <div class="col-12 col-md-6 mb-3">
+              <input class="form-control form-control-sm" [(ngModel)]="paginationInfo.sendLastPageUrl"
+                placeholder="URL of Last Page" style="width: 130px;" />
             </div>
+            <div class="col-12 col-md-6 mb-3">
+              <input class="form-control form-control-sm" [(ngModel)]="paginationInfo.paginationTag"
+                placeholder="Pagination Tag" style="width: 130px;" />
+            </div>
+            <div class="col-6 col-md-6 mb-3">
+              <input id="openWebsiteBtn2" class="form-control form-control-sm" [(ngModel)]="paginationInfo.pageStart"
+                type="number" min="0" placeholder="Start Page" style="width: 130px;" />
+            </div>
+            <div class="col-6 col-md-6 mb-3">
+              <input class="form-control form-control-sm" [(ngModel)]="paginationInfo.pageFinish" type="number" min="0"
+                placeholder="Finish Page" style="width: 130px;" />
+            </div>
+          </div>
+          <div class="d-flex justify-content-end">
+            <button class="btn btn-success btn-sm" (click)="InsertUrlOfLastPageOnClick()">OK</button>
+          </div>
+        </div>
+
+        <!-- Infinite Scrolling Section -->
+        <div class="dropdown-divider my-4"></div>
+        <div class="form-group p-4 border rounded bg-white shadow-sm">
+          <h6 class="mb-3 text-success">Infinite Scrolling</h6>
+          <div class="d-flex align-items-center mb-3">
+            <select [(ngModel)]="scrollingSpeed" class="form-select form-select-sm me-2">
+              <option selected value="2000">500</option>
+              <option value="1000">1000</option>
+              <option value="500">2000</option>
+            </select>
             <div class="d-flex justify-content-end">
-              <button class="btn btn-success btn-sm" (click)="InsertUrlOfLastPageOnClick()">OK</button>
+              <button class="btn btn-success btn-sm" (click)="inifiniteScrollingOnClick()">OK</button>
             </div>
           </div>
-          <!-- Infinite Scrolling Section -->
-          <div class="dropdown-divider my-4"></div>
-          <div class="form-group p-4 border rounded bg-white shadow-sm">
-            <h6 class="mb-3 text-success">Infinite Scrolling</h6>
-            <div class="d-flex align-items-center mb-3">
-              <select [(ngModel)]="scrollingSpeed" class="form-select form-select-sm me-2">
-                <option selected value="2000">500</option>
-                <option value="1000">1000</option>
-                <option value="500">2000</option>
-              </select>
-              <div class="d-flex justify-content-end">
-                <button class="btn btn-success btn-sm" (click)="inifiniteScrollingOnClick()">OK</button>
-              </div>
-            </div>
-          </div>
-          <!-- Export Button Section -->
-          <div class="dropdown-divider my-4"></div>
-          <div class="form-group text-center">
-            <button class="btn btn-success btn-sm w-100" (click)="exportBtnOnClick()">Export All</button>
-          </div>
+        </div>
+
+        <!-- Export Button Section -->
+        <div class="dropdown-divider my-4"></div>
+        <div class="form-group text-center">
+          <button class="btn btn-success btn-sm w-100" (click)="exportBtnOnClick()">Export All</button>
         </div>
       </div>
     </div>
+  </div>
 </nav>
 <app-list [display]="display"></app-list>
 <div id="instructions" *ngIf="!display"
   style="padding-left: 10px; padding-top: 120px; background-color: #E8EAE6; height: 100%; width: 100%;">
   <app-instructions></app-instructions>
 </div>
-<!-- <app-website-content [display]="display" (progressUpdated)="updateProgress($event)"></app-website-content> -->
 <app-spinner *ngIf="isLoading" [progress]="progress"></app-spinner>
-<!-- modal show -->
 <app-module-window *ngIf="isModalWindow" class="custom-modal modal fade show"></app-module-window>

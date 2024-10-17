@@ -24,7 +24,7 @@ import static com.website_parser.parser.util.HtmlContentUtil.updateHtmlAndReturn
 @RequiredArgsConstructor
 public class ScrollingService {
 
-    private final WebDriverService driverPool;
+    private final WebDriverPoolService driverPool;
     private final SseEmitterService sseEmitterService;
 
     private static final String returnPageHeightScript = "return document.body.scrollHeight";
@@ -32,7 +32,7 @@ public class ScrollingService {
     // @TODO parameters: speed, pauses, amount of scrolls
     public String getInfiniteScrolling(String url, String speed, int amount) throws MalformedURLException {
         int timesOfScrolling = 0;
-        WebDriver driver = driverPool.verifyInitialDriver();
+        WebDriver driver = driverPool.getDriverFromPool();
         driver.get(url);
         //List<String> seenButtons = getElementIdentifiers(driver.findElements(By.cssSelector("button")));
         JavascriptExecutor jsExecutor = (JavascriptExecutor) driver;

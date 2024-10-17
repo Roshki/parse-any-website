@@ -1,4 +1,4 @@
-import { Component, Input, inject, Renderer2 } from '@angular/core';
+import { Component, Input, inject, Renderer2, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SafeHtml } from '@angular/platform-browser';
 import { Website } from '../models/website.model';
@@ -21,6 +21,26 @@ export class ListComponent {
 
   constructor(private renderer: Renderer2, private websiteService: WebsiteService) {
   }
+
+  isOpen: { [key: number]: boolean } = {}; 
+  accordionOpenState: { [key: number]: boolean } = {};
+
+  // Toggles the dropdown for the specified index
+  toggleDropdown(index: number) {
+    this.isOpen[index] = !this.isOpen[index];
+  }
+  toggleAccordion(index: number) {
+    this.accordionOpenState[index] = !this.accordionOpenState[index];
+  }
+
+  @HostListener('document:click', ['$event'])
+  onClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.dropdown')) {
+      this.isOpen = {}; 
+    }
+  }
+
 
   ngOnInit(): void {
     this.listService.list$.subscribe(value => {

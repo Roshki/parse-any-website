@@ -2,7 +2,6 @@
   position: fixed;
   right: 0;
   top: 20%;
-  /* transform: translateY(50%); */
   z-index: 7777;
 }
 
@@ -53,3 +52,19 @@
   display: flex;
   align-items: center;
 }
+
+.accordion {
+  max-width: 20%; 
+  transition: max-width 0.3s ease-in-out;
+  width: 100%;
+  min-height: 10%;
+  max-width: 20%;
+  overflow-y: auto;
+}
+
+.accordion {
+  max-width: 20%; 
+  transition: max-width 0.3s ease-in-out;
+  width: 100%;
+}
+

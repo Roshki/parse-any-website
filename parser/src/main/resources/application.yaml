@@ -3,3 +3,5 @@ spring:
     active: dev
 frontend:
   url: http://localhost:4200/
+parser:
+  threads-amnt: 1

@@ -26,7 +26,7 @@ public class PaginationService {
     private final SseEmitterService sseEmitterService;
 
 
-    public List<String> getHtmlOfAllPagesBasedOnLastPage(String lastPage, String pageTageName, String pageStart, String pageFinish) throws ExecutionException, InterruptedException, MalformedURLException {
+    public List<String> getHtmlOfAllPagesBasedOnLastPage(String lastPage, String pageTageName, String pageStart, String pageFinish) throws ExecutionException, InterruptedException {
         List<String> allPageUrls = UrlUtil.predictAllUrls(lastPage, pageTageName, pageStart, pageFinish);
 
         AtomicInteger successfulCount = new AtomicInteger(0);

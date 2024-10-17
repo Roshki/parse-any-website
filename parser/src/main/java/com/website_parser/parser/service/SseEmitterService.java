@@ -17,15 +17,12 @@ public class SseEmitterService {
 
     public SseEmitter createEmitter() {
         emitter = new SseEmitter(0L);
-        emitter.onCompletion(() -> {
-            log.info("Received onCompletion request");
-        });
+        emitter.onCompletion(() -> log.info("Received onCompletion request"));
         return emitter;
     }
 
 
     public void sendSse(String data)  {
-
 
             System.out.println("sending");
         try {

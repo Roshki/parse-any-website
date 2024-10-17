@@ -21,13 +21,8 @@ export class PaginationService {
 
   getFromAllPagesInfoDevMode(tagId: string, AllPagesHtml: string[]): string[] {
     let InfoArray: string[] = [];
-    let docRoot = document.querySelector("app-website-content")?.shadowRoot;
 
-    if (!docRoot) {
-      throw new Error("Shadow root not found");
-    }
-
-    this.elementsOnMainPageN = this.getElementsFromPage(`[${tagId}]`, undefined, docRoot);
+    this.elementsOnMainPageN = this.getElementsFromPage(`[${tagId}]`, undefined, document);
 
     if (AllPagesHtml.length > 0) {
       AllPagesHtml.forEach(page => {
@@ -51,13 +46,8 @@ export class PaginationService {
     let classSelector = target?.className.split(' ').join('.');
     let parentClassSelector = target?.parentElement?.className.split(' ').join('.');
     let InfoArray: string[] = [];
-    let docRoot = document.querySelector("app-website-content")?.shadowRoot;
 
-    if (!docRoot) {
-      throw new Error("Shadow root not found");
-    }
-
-    this.elementsOnMainPageN = this.getElementsFromPage(`.${classSelector}`, `.${parentClassSelector}`, docRoot);
+    this.elementsOnMainPageN = this.getElementsFromPage(`.${classSelector}`, `.${parentClassSelector}`, document);
 
     if (AllPagesHtml.length > 0) {
       AllPagesHtml.forEach(page => {
@@ -81,7 +71,7 @@ export class PaginationService {
 
   }
 
-  private getElementsFromPage(selector: string, parentClassSelector: string | undefined, div: Document | ShadowRoot): NodeListOf<Element> {
+  private getElementsFromPage(selector: string, parentClassSelector: string | undefined, div: Document): NodeListOf<Element> {
     let items;
     try {
       items = div.querySelectorAll(selector);

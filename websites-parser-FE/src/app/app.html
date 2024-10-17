@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light" style=" position: fixed; z-index: 3000; width: 100%;">
+<nav id="navbar" class="navbar navbar-expand-lg navbar-light bg-light" style=" position: fixed; z-index: 3000; width: 100%;">
   <a href="" class="pull-left"><img src="../assets/img/parsley.png" style="max-height: 40px; margin-right: 10px;"></a>
   <div class="offset-md">
     <div class="d-flex align-items-center">
@@ -6,12 +6,11 @@
         [formControl]="sendUrl" style="width: 300px; margin-left: 2px;" id="sendUrlInput">
       <button id="openWebsiteBtn" class="btn btn-outline-success me-2" type="submit" (click)="htmlOnClick()">Open
         Website</button>
-      <div class="dropdown">
-        <button [disabled]="!display" type="button" class="btn btn-me-2 btn-success dropdown-toggle"
+        <button [disabled]="!display" [class.show]="isDropdownOpen" (click)="toggleDropdown()" type="button" class="btn btn-me-2 btn-success dropdown-toggle"
           data-bs-toggle="dropdown" data-bs-auto-close="outside">
           Tools <span class="caret"></span>
         </button>
-        <div class="dropdown-menu accordion p-4" style="min-width: 350px; background-color: #f8f9fa;">
+        <div class="dropdown-menu accordion p-4" [class.show]="isDropdownOpen" style="max-width: 350px; background-color: #f8f9fa;">
           <!-- Dev Mode Section -->
           <div class="form-group p-4 border rounded bg-white shadow-sm">
             <app-dev-mode></app-dev-mode>
@@ -23,30 +22,27 @@
             <div class="row mb-3">
               <!-- URL of last page -->
               <div class="col-12 col-md-6 mb-3">
-                <input class="form-control form-control-sm"
-                  [(ngModel)]="paginationInfo.sendLastPageUrl" placeholder="URL of Last Page" style="width: 130px;" />
+                <input class="form-control form-control-sm" [(ngModel)]="paginationInfo.sendLastPageUrl"
+                  placeholder="URL of Last Page" style="width: 130px;" />
               </div>
               <!-- Pagination Tag -->
               <div class="col-12 col-md-6 mb-3">
-                <input class="form-control form-control-sm"
-                  [(ngModel)]="paginationInfo.paginationTag" placeholder="Pagination Tag" style="width: 130px;" />
+                <input class="form-control form-control-sm" [(ngModel)]="paginationInfo.paginationTag"
+                  placeholder="Pagination Tag" style="width: 130px;" />
               </div>
               <!-- Page Start -->
               <div class="col-6 col-md-6 mb-3">
-                <input  class="form-control form-control-sm"
-                  [(ngModel)]="paginationInfo.pageStart" type="number" min="0" placeholder="Start Page"
-                  style="width: 130px;" />
+                <input id="openWebsiteBtn2" class="form-control form-control-sm" [(ngModel)]="paginationInfo.pageStart" type="number" min="0"
+                  placeholder="Start Page" style="width: 130px;" />
               </div>
               <!-- Page Finish -->
               <div class="col-6 col-md-6 mb-3">
-                <input class="form-control form-control-sm"
-                  [(ngModel)]="paginationInfo.pageFinish" type="number" min="0" placeholder="Finish Page"
-                  style="width: 130px;" />
+                <input class="form-control form-control-sm" [(ngModel)]="paginationInfo.pageFinish" type="number"
+                  min="0" placeholder="Finish Page" style="width: 130px;" />
               </div>
             </div>
             <div class="d-flex justify-content-end">
-              <button class="btn btn-success btn-sm"
-                (click)="InsertUrlOfLastPageOnClick()">OK</button>
+              <button class="btn btn-success btn-sm" (click)="InsertUrlOfLastPageOnClick()">OK</button>
             </div>
           </div>
           <!-- Infinite Scrolling Section -->
@@ -60,8 +56,7 @@
                 <option value="500">2000</option>
               </select>
               <div class="d-flex justify-content-end">
-                <button class="btn btn-success btn-sm"
-                  (click)="inifiniteScrollingOnClick()">OK</button>
+                <button class="btn btn-success btn-sm" (click)="inifiniteScrollingOnClick()">OK</button>
               </div>
             </div>
           </div>
@@ -73,14 +68,13 @@
         </div>
       </div>
     </div>
-  </div>
 </nav>
 <app-list [display]="display"></app-list>
 <div id="instructions" *ngIf="!display"
   style="padding-left: 10px; padding-top: 120px; background-color: #E8EAE6; height: 100%; width: 100%;">
   <app-instructions></app-instructions>
 </div>
-<app-website-content [display]="display" (progressUpdated)="updateProgress($event)"></app-website-content>
+<!-- <app-website-content [display]="display" (progressUpdated)="updateProgress($event)"></app-website-content> -->
 <app-spinner *ngIf="isLoading" [progress]="progress"></app-spinner>
 <!-- modal show -->
 <app-module-window *ngIf="isModalWindow" class="custom-modal modal fade show"></app-module-window>

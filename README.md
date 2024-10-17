@@ -4,8 +4,10 @@
   - on the first tab use command:
     
     ```
-    mvn clean install && mvn spring-boot:run
+    mvn clean install &&  mvn spring-boot:run -Dspring-boot.run.arguments="--parser.threads-amnt=1"
     ```
+    where "parser.threads-amnt" is amount of threads which will process pages of a website.
+    
   - on the second tab use command:
     
       ```

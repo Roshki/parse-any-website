@@ -54,7 +54,7 @@ public class ScrollingService {
                 sseEmitterService.sendSse("Page could load only " + timesOfScrolling + " times for now. Page could be blocked or try to use another speed");
                 String pageSource = driver.getPageSource();
                 driverPool.safelyCloseAndQuitDriver(driver);
-                return updateHtmlAndReturn(pageSource, new URL(url));
+                return updateHtmlAndReturn(pageSource);
                 // throw new RuntimeException("couldn't load the content! try another speed");
                 //pressButtonIfPreventsScrolling(driver, seenButtons);
             }
@@ -72,7 +72,7 @@ public class ScrollingService {
         }
         String pageSource = driver.getPageSource();
         driverPool.safelyCloseAndQuitDriver(driver);
-        return updateHtmlAndReturn(pageSource, new URL(url));
+        return updateHtmlAndReturn(pageSource);
     }
 
     //todo: needs improvement

@@ -1,4 +1,4 @@
-import { Component, inject, Renderer2, HostListener, ViewEncapsulation, OnInit, Output, NgZone } from '@angular/core';
+import { Component, inject, EventEmitter, HostListener, ViewEncapsulation, OnInit, Output, NgZone } from '@angular/core';
 import { DevModeComponent } from './dev-mode/dev-mode.component';
 import { ParserService } from './parser.service';
 import { Website } from './models/website.model';
@@ -15,14 +15,13 @@ import { SseService } from './sse.service';
 import { FileExportService } from './file-export.service';
 import { InstructionsComponent } from "./instructions/instructions.component";
 
-
 @Component({
   selector: 'app-parser',
   templateUrl: './app.html',
   styleUrl: "../styles.css",
   imports: [FormsModule, CommonModule, DevModeComponent, ReactiveFormsModule, ListComponent,
     WebsiteContentComponent, ModuleWindowComponent, SpinnerComponent, InstructionsComponent],
-  encapsulation: ViewEncapsulation.Emulated,
+  encapsulation: ViewEncapsulation.ShadowDom,
   standalone: true
 })
 export class ParserComponent implements OnInit {
@@ -48,9 +47,41 @@ export class ParserComponent implements OnInit {
     pageFinish: ""
   }
 
+  @Output() displayEmitter = new EventEmitter<SafeHtml>();
 
-  constructor(private sanitizer: DomSanitizer, private renderer: Renderer2, private ngZone: NgZone, private websiteService: WebsiteService) {
+  constructor(private sanitizer: DomSanitizer, private ngZone: NgZone, private websiteService: WebsiteService) {
+    let docrRoot = document.querySelector("app-parser") as HTMLElement;
+    let shadowR = docrRoot.shadowRoot;
+    if (shadowR)
+      this.copyStylesToShadowDom(shadowR);
+  }
 
+  copyStylesToShadowDom(shadowRoot: ShadowRoot) {
+    const headStyles = document.querySelectorAll('style, link');
+
+    headStyles.forEach(styleElement => {
+      const clonedStyle = styleElement.cloneNode(true) as HTMLElement;
+      shadowRoot.appendChild(clonedStyle);
+    });
+  }
+
+  isDropdownOpen = false;
+
+  toggleDropdown() {
+    this.isDropdownOpen = !this.isDropdownOpen;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.dropdown')) {
+      this.isDropdownOpen = false;
+    }
+  }
+
+
+  sendDisplay() {
+    this.displayEmitter.emit(this.display); // Emit the data
   }
 
   updateProgress(newProgress: string) {
@@ -125,12 +156,14 @@ export class ParserComponent implements OnInit {
           if (cachedPage != "") {
             this.isLoading = false;
             this.display = this.sanitizer.bypassSecurityTrustHtml(cachedPage);
+            this.sendDisplay();
           }
           else {
             this.parserService.geNotCachedWebPage(this.sendUrl.value)
               .then(nonCachedPage => {
                 this.isLoading = false;
                 this.display = this.sanitizer.bypassSecurityTrustHtml(nonCachedPage);
+                this.sendDisplay();
               })
               .catch(e => {
                 this.isLoading = false;
@@ -194,12 +227,19 @@ export class ParserComponent implements OnInit {
 
 @Component({
   selector: 'app-root',
-  template: `<app-parser></app-parser>`,
+  template: `<app-parser (displayEmitter)="receiveData($event)"></app-parser><app-website-content [display]="display"></app-website-content>`,
   standalone: true,
-  imports: [ParserComponent],
-  encapsulation: ViewEncapsulation.None
+  imports: [ParserComponent, WebsiteContentComponent],
+  encapsulation: ViewEncapsulation.Emulated
 })
 export class AppComponent {
+
+  display: SafeHtml | undefined;
+
+  receiveData(data: SafeHtml) {
+    this.display = data;
+  }
+
   constructor() {
     console.log(environment.production + " - " + environment.apiUrl);
   }

@@ -4,6 +4,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.WebDriver;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
@@ -17,8 +18,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 @Service
 public class WebDriverPoolService extends WebDriverService {
 
-    private static final int MAX_WEBDRIVERS = 3;
-    private final BlockingQueue<WebDriver> driverPool = new LinkedBlockingQueue<>(MAX_WEBDRIVERS);
+    @Value("${parser.threads-amnt}")
+    private int MAX_WEBDRIVERS;
+
+    private BlockingQueue<WebDriver> driverPool;
 
     public WebDriverPoolService(ApplicationContext applicationContext) {
         super(applicationContext);
@@ -26,6 +29,7 @@ public class WebDriverPoolService extends WebDriverService {
 
     @PostConstruct
     public void initPool() {
+        driverPool = new LinkedBlockingQueue<>(MAX_WEBDRIVERS);
         if (driverPool.size() < MAX_WEBDRIVERS) {
             for (int i = 0; i < MAX_WEBDRIVERS; i++) {
                 try {

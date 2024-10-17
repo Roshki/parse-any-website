@@ -5,7 +5,6 @@ import com.website_parser.parser.model.Website;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.*;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import java.net.MalformedURLException;
@@ -27,8 +26,6 @@ public class ParserService {
     private final CacheService cacheService;
     private final Website website;
     private final ApprovalService approvalService;
-    private final ApplicationContext applicationContext;
-    private final SseEmitterService sseEmitter;
 
 
     public String getCachedPage(String url) {
@@ -45,7 +42,7 @@ public class ParserService {
     public String getNotCachedPage(String url) throws MalformedURLException {
         String htmlContent;
         WebDriver initialDriver = webDriverService.getDriverFromPool();
-        WebDriver navigatedDriver = navigateToUrl(url, initialDriver);
+        initialDriver.get(url);
         try {
             long startTime = System.nanoTime();
             System.out.println("tries to approve");
@@ -58,22 +55,18 @@ public class ParserService {
 
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new RuntimeException(e);
-        }
-        finally {
+        } finally {
             webDriverService.releaseDriverToThePool(initialDriver);
             approvalService.reset();
         }
         System.out.println("Approved!!!");
-        String driverPageSource = retrievePage(navigatedDriver);
-        htmlContent = updateHtmlAndReturn(driverPageSource);
+        String driverPageSource = retrievePage(initialDriver);
+        htmlContent = updateHtmlAndReturn(driverPageSource, new URL(url));
         website.populateWebsite(
                 Website.builder()
                         .websiteUrl(url)
                         .initialHtml(htmlContent).build());
         cacheService.setWebsiteCache(url, website);
-//        webDriverService.releaseDriverToThePool(initialDriver);
-//        approvalService.reset();
-        //webDriverService.safelyCloseAndQuitDriver(initialDriver);
         return htmlContent;
     }
 
@@ -88,18 +81,6 @@ public class ParserService {
         return driver.getPageSource();
     }
 
-    public WebDriver navigateToUrl(String url, WebDriver driver) {
-        try {
-            driver = webDriverService.verifyAndGetWebDriver(driver);
-            driver.get(url);
-        } catch (Exception e) {
-            //webDriverService.safelyCloseAndQuitDriver(driver);
-            driver = applicationContext.getBean(WebDriver.class);
-            driver.get(url);
-        }
-        return driver;
-    }
-
     public String ifWebDriverConn() {
         try {
             WebDriver w = webDriverService.getDriverFromPool();
@@ -111,12 +92,11 @@ public class ParserService {
         return "OK!";
     }
 
-    public String getCleanHtml(Website website) {
-        //cacheService.setWebsiteCache(website.getWebsiteUrl().toString(), website);
+    public String getCleanHtml(Website website) throws MalformedURLException {
         this.website.populateWebsite(
                 Website.builder()
                         .websiteUrl(website.getWebsiteUrl())
                         .initialHtml(website.getInitialHtml()).build());
-        return updateHtmlAndReturn(website.getInitialHtml());
+        return updateHtmlAndReturn(website.getInitialHtml(), new URL(website.getWebsiteUrl()));
     }
 }

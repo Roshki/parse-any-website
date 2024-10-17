@@ -18,7 +18,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 @Service
 public class WebDriverPoolService extends WebDriverService {
 
-    @Value("${parser.threads-amnt}")
+    @Value("${parser.threads-amnt:1}")
     private int MAX_WEBDRIVERS;
 
     private BlockingQueue<WebDriver> driverPool;

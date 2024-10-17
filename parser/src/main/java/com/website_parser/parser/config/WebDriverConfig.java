@@ -17,10 +17,12 @@ import org.springframework.context.annotation.Scope;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 @Configuration
 @Slf4j
@@ -69,7 +71,7 @@ public class WebDriverConfig {
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--disable-browser-side-navigation");
         options.addArguments("--disable-gpu");
-        options.addArguments("--headless");
+        options.addArguments("--headless=new");
         options.addArguments("--disable-extensions");
         options.addArguments("--mute-audio");
         options.addArguments("--incognito");
@@ -92,6 +94,7 @@ public class WebDriverConfig {
 
     private WebDriver createRemoteWebDriver(URL url, ChromeOptions options) throws TimeoutException {
         RemoteWebDriver driver = new RemoteWebDriver(url, options, false);
+        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(260));
         if (driver.getSessionId() != null) {
             log.info("Connected to Remote WebDriver successfully. Session ID: {}", driver.getSessionId());
         } else {

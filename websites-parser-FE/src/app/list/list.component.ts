@@ -1,6 +1,5 @@
 import { Component, Input, inject, Renderer2, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SafeHtml } from '@angular/platform-browser';
 import { Website } from '../models/website.model';
 import { ListService } from '../list.service';
 import { WebsiteContentComponent } from '../website-content/website-content.component';
@@ -15,21 +14,34 @@ import { WebsiteService } from '../website.service';
 })
 export class ListComponent {
   private listService = inject(ListService);
-  @Input() display: SafeHtml | undefined;
+
   listItems: { key: string, values: string[] }[] = [];
+
   private website: Website | null = null;
 
   constructor(private renderer: Renderer2, private websiteService: WebsiteService) {
   }
 
-  isOpen: { [key: number]: boolean } = {}; 
+  dropdownOpenState: { [key: number]: boolean } = {};
   accordionOpenState: { [key: number]: boolean } = {};
 
 
   toggleDropdown(index: number) {
-    this.isOpen[index] = !this.isOpen[index];
+    Object.keys(this.dropdownOpenState).forEach(key => {
+      if (Number(key) != index) {
+        this.dropdownOpenState[Number(key)] = false;
+      }
+    });
+    this.dropdownOpenState[index] = !this.dropdownOpenState[index];
   }
+
   toggleAccordion(index: number) {
+    Object.keys(this.accordionOpenState).forEach(key => {
+      if (Number(key) != index) {
+        this.accordionOpenState[Number(key)] = false;
+      }
+    });
+
     this.accordionOpenState[index] = !this.accordionOpenState[index];
   }
 
@@ -37,7 +49,7 @@ export class ListComponent {
   onClick(event: MouseEvent) {
     const target = event.target as HTMLElement;
     if (!target.closest('.dropdown')) {
-      this.isOpen = {}; 
+      this.dropdownOpenState = {};
     }
   }
 
@@ -53,8 +65,20 @@ export class ListComponent {
     });
   };
 
-  
+
   removeItemsGroup(itemId: number) {
+    if (this.website) {
+      const itemKey = this.listItems[itemId]?.key;
+      this.listItems.splice(itemId, 1);
+      if (itemKey) {
+        console.log(this.listItems);
+        this.deselectElements(itemKey);
+        this.websiteService.deleteInformationItem(itemKey);
+      }
+    }
+  }
+
+  sendRegex(itemId: number) {
     if (this.website) {
       const itemKey = this.listItems[itemId]?.key;
       this.listItems.splice(itemId, 1);

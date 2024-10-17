@@ -7,8 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.WebDriver;
 import org.springframework.stereotype.Service;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -39,7 +37,8 @@ public class PaginationService {
             CompletableFuture<Void> completableFuture = CompletableFuture.supplyAsync(() -> {
                 if (!parserService.isPageCached(url)) {
                     // Page is not in the cache, so we retrieve it via WebDriver
-                    String htmlPage = parserService.navigateToUrl(url, driverMulti).getPageSource();
+                    driverMulti.get(url);
+                    String htmlPage = driverMulti.getPageSource();
                     htmlPagesMap.put(url, htmlPage);
                 } else {
                     htmlPagesMap.put(url, website.getPages().get(url));
@@ -53,6 +52,7 @@ public class PaginationService {
                     webDriverService.releaseDriverToThePool(driverMulti);
                 }
                 log.error("error! -- {}", url, ex.getCause());
+                sseEmitterService.completeSseWithError(ex);
                 return null;
             });
             futures.add(completableFuture);

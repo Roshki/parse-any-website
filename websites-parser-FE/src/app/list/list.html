@@ -1,7 +1,7 @@
 <div class="container">
   <div class="row">
     <div class="col-12">
-      <div class="accordion sticky-right-middle ms-auto" id="accordionExample">
+      <div class="accordion sticky-right-middle ms-auto" id="accordionExample" style="min-height:300px">
 
         <!-- Accordion Items -->
         <div class="accordion-item" *ngFor="let item of listItems; let i = index" style="position: relative;">
@@ -23,9 +23,10 @@
               </button>
 
               <!-- Dropdown Menu -->
-              <ul class="dropdown-menu itemDropdowns" [ngClass]="{'show': isOpen[i]}"
+              <ul class="dropdown-menu itemDropdowns" [ngClass]="{'show': dropdownOpenState[i]}"
                 [attr.aria-labelledby]="'dropdownMenuButton' + i">
                 <li><button (click)="removeItemsGroup(i)" class="dropdown-item">Delete</button></li>
+                <li><button (click)="removeItemsGroup(i)" class="dropdown-item">Regex</button></li>
               </ul>
             </div>
 

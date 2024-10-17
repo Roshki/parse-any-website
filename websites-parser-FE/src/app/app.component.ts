@@ -139,6 +139,7 @@ export class ParserComponent implements OnInit {
           this.sendUrl.setValue(event.data.websiteUrl);
           this.isLoading = false;
           this.display = this.sanitizer.bypassSecurityTrustHtml(cleanPage);
+          this.sendDisplay()
         })
       }
     });
@@ -207,6 +208,7 @@ export class ParserComponent implements OnInit {
           if (data != "") {
             console.log("this.isModalWindow from infiniteScroll" + this.isModalWindow)
             this.display = this.sanitizer.bypassSecurityTrustHtml(data);
+            this.sendDisplay()
             if (this.progress.length > 4) {
               alert(this.progress);
             }

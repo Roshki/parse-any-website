@@ -54,13 +54,12 @@ public class ScrollingService {
                 sseEmitterService.sendSse("Page could load only " + timesOfScrolling + " times for now. Page could be blocked or try to use another speed");
                 String pageSource = driver.getPageSource();
                 driverPool.safelyCloseAndQuitDriver(driver);
-                return updateHtmlAndReturn(pageSource);
+                return updateHtmlAndReturn(pageSource, new URL(url));
                 // throw new RuntimeException("couldn't load the content! try another speed");
                 //pressButtonIfPreventsScrolling(driver, seenButtons);
             }
             long newHeight = (long) jsExecutor.executeScript(returnPageHeightScript);
             System.out.println(lastHeight[0] + " - " + newHeight);
-            //newHeight == lastHeight[0] || -in if statement
             if (newHeight == lastHeight[0] || timesOfScrolling == amount) {
                 System.out.println("Scroll limit reached: " + timesOfScrolling);
                 break;
@@ -71,8 +70,8 @@ public class ScrollingService {
             sseEmitterService.sendSse(String.valueOf(((90L * timesOfScrolling) / amount) + 10));
         }
         String pageSource = driver.getPageSource();
-        driverPool.safelyCloseAndQuitDriver(driver);
-        return updateHtmlAndReturn(pageSource);
+        driverPool.releaseDriverToThePool(driver);
+        return updateHtmlAndReturn(pageSource, new URL(url));
     }
 
     //todo: needs improvement

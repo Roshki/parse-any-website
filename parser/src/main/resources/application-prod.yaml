@@ -3,7 +3,7 @@ spring:
     async:
       request-timeout: 300000
 parser:
-  threads-amnt: 3
+  threads-amnt: ${threads-amnt}
   remote-chrome-1: ${CHROME_1}
   remote-chrome-2: ${CHROME_2}
   remote-chrome-3: ${CHROME_3}

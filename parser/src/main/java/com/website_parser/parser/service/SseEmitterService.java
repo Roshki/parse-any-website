@@ -18,13 +18,14 @@ public class SseEmitterService {
     public SseEmitter createEmitter() {
         emitter = new SseEmitter(0L);
         emitter.onCompletion(() -> log.info("Received onCompletion request"));
+        emitter.onError((Throwable t) -> emitter.completeWithError(t));
         return emitter;
     }
 
 
-    public void sendSse(String data)  {
+    public void sendSse(String data) {
 
-            System.out.println("sending");
+        System.out.println("sending");
         try {
             emitter.send(SseEmitter.event().name("test").data(data));
         } catch (IOException e) {
@@ -32,10 +33,13 @@ public class SseEmitterService {
         }
 
     }
-
     public void completeSse() {
+        emitter.complete();
+    }
 
-            emitter.complete();
+    public void completeSseWithError(Throwable e) {
+
+        emitter.completeWithError(e);
 
     }
 }

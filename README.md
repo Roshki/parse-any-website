@@ -11,7 +11,7 @@
   - on the second tab use command:
     
       ```
-      ng serve
+      npm install && ng serve
       ```
 2. go to [http://localhost:4200](http://localhost:4200)
 3. follow instructions on the screen.

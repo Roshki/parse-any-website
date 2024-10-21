@@ -35,36 +35,36 @@ public class ParserController {
     }
 
     @PostMapping("/last-page")
-    public List<String> getAllPagesBasedOnLastPage(@RequestBody String lastPage, @RequestParam String pageTag, @RequestParam String pageStart, @RequestParam String pageFinish) throws ExecutionException, InterruptedException, MalformedURLException {
-        List<String> pages = paginationService.getHtmlOfAllPagesBasedOnLastPage(lastPage, pageTag, pageStart, pageFinish);
-        sseEmitterService.completeSse();
+    public List<String> getAllPagesBasedOnLastPage(@RequestBody String lastPage, @RequestParam String pageTag, @RequestParam String pageStart, @RequestParam String pageFinish, @RequestParam String userGuid) throws ExecutionException, InterruptedException, MalformedURLException {
+        List<String> pages = paginationService.getHtmlOfAllPagesBasedOnLastPage(lastPage, pageTag, pageStart, pageFinish, userGuid);
+        sseEmitterService.completeSse(userGuid);
         return pages;
     }
 
     @GetMapping("/approve")
-    public String approve() {
-        approvalService.approve();
+    public String approve(@RequestParam String userGuid) {
+        approvalService.approve(userGuid);
         return "Approved!";
     }
 
     @PostMapping("/none-cached-page")
-    public String getNotCached(@RequestBody String url) throws Exception {
+    public String getNotCached(@RequestBody String url, @RequestParam String userGuid) throws Exception {
         System.out.println(url);
-        return parserService.getNotCachedPage(url);
+        return parserService.getNotCachedPage(url, userGuid);
     }
 
     @PostMapping("/infinite-scroll")
-    public ResponseEntity<String> getInfiniteScrolling(@RequestBody String url, @RequestParam String speed) {
+    public ResponseEntity<String> getInfiniteScrolling(@RequestBody String url, @RequestParam String speed, @RequestParam String userGuid) {
         try {
             return new ResponseEntity<>(
-                    scrollingService.getInfiniteScrolling(url, speed, 10), HttpStatus.OK);
+                    scrollingService.getInfiniteScrolling(url, speed, 100, userGuid), HttpStatus.OK);
         } catch (MalformedURLException e) {
             return new ResponseEntity<>("error occurred! " + e, HttpStatusCode.valueOf(500));
         }
     }
 
     @PostMapping("/html-page-cleanup")
-    public String getNotCached(@RequestBody Website website) throws MalformedURLException {
+    public String getCleanHtml(@RequestBody Website website) throws MalformedURLException {
         // approvalService.approve();
         return parserService.getCleanHtml(website);
     }
@@ -75,8 +75,8 @@ public class ParserController {
     }
 
     @GetMapping("/sse")
-    public SseEmitter streamSseMvc() {
-        SseEmitter emitter = sseEmitterService.createEmitter();
+    public SseEmitter streamSseMvc(@RequestParam String userGuid) {
+        SseEmitter emitter = sseEmitterService.createEmitter(userGuid);
         ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
 
         scheduledExecutor.scheduleAtFixedRate(() -> {

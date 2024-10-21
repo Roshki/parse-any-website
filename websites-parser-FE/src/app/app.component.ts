@@ -1,4 +1,4 @@
-import { Component, inject, EventEmitter, HostListener, ViewEncapsulation, OnInit, Output, NgZone } from '@angular/core';
+import { Component, inject, EventEmitter, SecurityContext, HostListener, ViewEncapsulation, OnInit, Output, NgZone } from '@angular/core';
 import { DevModeComponent } from './dev-mode/dev-mode.component';
 import { ParserService } from './parser.service';
 import { Website } from './models/website.model';
@@ -136,6 +136,7 @@ export class ParserComponent implements OnInit {
         this.isLoading = true;
         console.log(event.data);
         this.parserService.getCleanPageFromExt(event.data.websiteUrl, event.data.initialHtml).then(cleanPage => {
+          this.websiteService.initWebsite();
           this.sendUrl.setValue(event.data.websiteUrl);
           this.isLoading = false;
           this.display = this.sanitizer.bypassSecurityTrustHtml(cleanPage);
@@ -160,16 +161,18 @@ export class ParserComponent implements OnInit {
             this.sendDisplay();
           }
           else {
-            this.parserService.geNotCachedWebPage(this.sendUrl.value)
-              .then(nonCachedPage => {
-                this.isLoading = false;
-                this.display = this.sanitizer.bypassSecurityTrustHtml(nonCachedPage);
-                this.sendDisplay();
-              })
-              .catch(e => {
-                this.isLoading = false;
-                alert("error happened, please retry!");
-              });
+            if (this.website) {
+              this.parserService.geNotCachedWebPage(this.sendUrl.value, this.website.userGuid)
+                .then(nonCachedPage => {
+                  this.isLoading = false;
+                  this.display = this.sanitizer.bypassSecurityTrustHtml(nonCachedPage);
+                  this.sendDisplay();
+                })
+                .catch(e => {
+                  this.isLoading = false;
+                  alert("error happened, please retry!");
+                });
+            }
           }
         })
         .catch(e => {
@@ -183,9 +186,11 @@ export class ParserComponent implements OnInit {
   }
 
   InsertUrlOfLastPageOnClick(): void {
-    this.progress = "0";
-    this.sseService.getSse();
-    this.websiteService.setAllPagesHtml(this.paginationInfo);
+    if (this.website) {
+      this.progress = "0";
+      this.sseService.getSse(this.website.userGuid);
+      this.websiteService.setAllPagesHtml(this.paginationInfo, this.website.userGuid);
+    }
   }
 
   exportBtnOnClick(): void {
@@ -197,12 +202,11 @@ export class ParserComponent implements OnInit {
 
   inifiniteScrollingOnClick(): void {
     this.progress = "0";
-    if (this.sendUrl.valid && this.sendUrl.value) {
+    if (this.sendUrl.valid && this.sendUrl.value && this.website) {
       this.isLoading = true;
       this.isValidUrl = true;
-      this.sseService.getSse();
-      this.websiteService.initWebsite();
-      this.parserService.getInfiniteScrolling(this.sendUrl.value, this.scrollingSpeed)
+      this.sseService.getSse(this.website.userGuid);
+      this.parserService.getInfiniteScrolling(this.sendUrl.value, this.scrollingSpeed, this.website.userGuid)
         .then(data => {
           this.isLoading = false;
           if (data != "") {

@@ -10,9 +10,6 @@ import org.springframework.stereotype.Service;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import static com.website_parser.parser.util.HtmlContentUtil.*;
 
@@ -39,25 +36,14 @@ public class ParserService {
         }
     }
 
-    public String getNotCachedPage(String url) throws MalformedURLException {
+    public String getNotCachedPage(String url, String userGuid) throws MalformedURLException {
         String htmlContent;
         WebDriver initialDriver = webDriverService.getDriverFromPool();
         initialDriver.get(url);
         try {
-            long startTime = System.nanoTime();
-            System.out.println("tries to approve");
-            approvalService.getApprovalFuture().get(300, TimeUnit.SECONDS);
-            long endTime = System.nanoTime();
-            System.out.println("approves");
-            long elapsedTime = endTime - startTime;
-            double elapsedTimeInSeconds = elapsedTime / 1_000_000_000.0;
-            System.out.printf("Time taken: %.3f seconds%n", elapsedTimeInSeconds);
-
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            throw new RuntimeException(e);
+            approvalService.approveOrTimeout(300, userGuid);
         } finally {
             webDriverService.releaseDriverToThePool(initialDriver);
-            approvalService.reset();
         }
         System.out.println("Approved!!!");
         String driverPageSource = retrievePage(initialDriver);

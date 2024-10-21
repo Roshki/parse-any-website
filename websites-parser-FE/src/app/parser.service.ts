@@ -37,7 +37,7 @@ export class ParserService {
     this.openModalSubject.next(openModal);
   }
 
-  geNotCachedWebPage(webUrl: string | null): Promise<string> {
+  geNotCachedWebPage(webUrl: string | null, userGuid: string): Promise<string> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Accept': 'text/plain',
@@ -46,7 +46,7 @@ export class ParserService {
       responseType: 'text' as 'json'
     };
     this.openModalSubject.next(true);
-    const data = lastValueFrom(this.http.post<string>(this.noneCachedUrl, webUrl, httpOptions));
+    const data = lastValueFrom(this.http.post<string>(this.noneCachedUrl + "?userGuid=" + userGuid, webUrl, httpOptions));
     return data;
 
   }
@@ -63,7 +63,7 @@ export class ParserService {
     return lastValueFrom(this.http.post<string>(this.sendHtmlUrl, webUrl, httpOptions));
   }
 
-  approved(): void {
+  approved(userGuid: string): void {
     const httpOptions = {
       headers: new HttpHeaders({
         'Accept': 'text/plain',
@@ -71,7 +71,7 @@ export class ParserService {
       }),
       responseType: 'text' as 'json'
     };
-    this.http.get<string>(this.approveUrl, httpOptions).subscribe({
+    this.http.get<string>(this.approveUrl + "?userGuid=" + userGuid, httpOptions).subscribe({
       next: (data: string) => {
         console.log(data);
       },
@@ -82,7 +82,7 @@ export class ParserService {
     });
   }
 
-  getInfiniteScrolling(webUrl: string, scrollingSpeed: string): Promise<string> {
+  getInfiniteScrolling(webUrl: string, scrollingSpeed: string, userGuid: string): Promise<string> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Accept': 'text/plain',
@@ -93,15 +93,15 @@ export class ParserService {
     console.log("this is what we've got: ", webUrl);
     this.openModalSubject.next(false);
     this.sseService.updateIsLoading(this.serviceName, true);
-    const data = lastValueFrom(this.http.post<string>(this.infiniteScrollingUrl + "?speed=" + scrollingSpeed, webUrl, httpOptions));
+    const data = lastValueFrom(this.http.post<string>(this.infiniteScrollingUrl + "?speed=" + scrollingSpeed + "&userGuid=" + userGuid, webUrl, httpOptions));
     return data;
   }
 
-  retrieveAllPages(paginationInfo: { sendLastPageUrl: string, paginationTag: string, pageStart: string, pageFinish: string }): string[] {
+  retrieveAllPages(paginationInfo: { sendLastPageUrl: string, paginationTag: string, pageStart: string, pageFinish: string }, userGuid: string): string[] {
 
     let allPagesHtml: string[] = [];
     this.sseService.updateIsLoading(this.serviceName, true);
-    this.http.post<string[]>(this.lastPageUrl + "?pageTag=" + paginationInfo.paginationTag + "&pageStart=" + paginationInfo.pageStart + "&pageFinish=" + paginationInfo.pageFinish, paginationInfo.sendLastPageUrl).subscribe({
+    this.http.post<string[]>(this.lastPageUrl + "?pageTag=" + paginationInfo.paginationTag + "&pageStart=" + paginationInfo.pageStart + "&pageFinish=" + paginationInfo.pageFinish + "&userGuid=" + userGuid, paginationInfo.sendLastPageUrl).subscribe({
       next: (data: string[]) => {
         data.forEach(item => allPagesHtml.push(item));
         alert(allPagesHtml.length + " length of all pages");

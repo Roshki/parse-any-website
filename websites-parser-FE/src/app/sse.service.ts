@@ -32,12 +32,13 @@ export class SseService {
   }
 
 
-  getSse() {
-    let url = '/api/sse';
+  getSse(userGuid:string) {
+    let url = '/api/sse?userGuid='+userGuid;
     const eventSource = new EventSource(url);
     eventSource.addEventListener("test", (event) => {
       console.log(event.data);
       this.updateProgress(event.data);
+      console.log("got event for:::", userGuid)
     });
 
     eventSource.addEventListener("heartbeat", (event) => {

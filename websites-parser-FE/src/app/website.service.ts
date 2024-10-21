@@ -4,6 +4,7 @@ import { Website } from './models/website.model';
 import { ParserService } from './parser.service';
 import { PaginationService } from './pagination.service';
 import { ListService } from './list.service';
+import { Guid } from 'guid-typescript';
 
 @Injectable({
     providedIn: 'root',
@@ -16,8 +17,8 @@ export class WebsiteService {
     private paginationService = inject(PaginationService);
     private listService = inject(ListService);
 
-    setAllPagesHtml(paginationInfo:{ sendLastPageUrl: string, paginationTag: string, pageStart: string, pageFinish: string }): void {
-        let htmls = this.parserService.retrieveAllPages(paginationInfo);
+    setAllPagesHtml(paginationInfo: { sendLastPageUrl: string, paginationTag: string, pageStart: string, pageFinish: string }, userGuid: string): void {
+        let htmls = this.parserService.retrieveAllPages(paginationInfo, userGuid);
         const currentWebsite = this.websiteSubject.value;
         const updatedWebsite = { ...currentWebsite, allPagesHtml: htmls };
         this.websiteSubject.next(updatedWebsite);
@@ -76,6 +77,8 @@ export class WebsiteService {
 
     initWebsite(): void {
         const newWebsite = new Website();
+        newWebsite.userGuid = Guid.create().toString();
+        console.log("init website::: with guid::: "+newWebsite.userGuid )
         this.websiteSubject.next(newWebsite);
     }
 

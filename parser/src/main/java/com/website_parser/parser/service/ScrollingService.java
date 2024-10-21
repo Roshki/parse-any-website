@@ -28,21 +28,19 @@ public class ScrollingService {
     private final SseEmitterService sseEmitterService;
 
     private static final String returnPageHeightScript = "return document.body.scrollHeight";
+    private final static String topic="test";
 
-    // @TODO parameters: speed, pauses, amount of scrolls
-    public String getInfiniteScrolling(String url, String speed, int amount) throws MalformedURLException {
+    public String getInfiniteScrolling(String url, String speed, int amount, String guid) throws MalformedURLException {
         int timesOfScrolling = 0;
         WebDriver driver = driverPool.getDriverFromPool();
         driver.get(url);
-        //List<String> seenButtons = getElementIdentifiers(driver.findElements(By.cssSelector("button")));
         JavascriptExecutor jsExecutor = (JavascriptExecutor) driver;
         final long[] lastHeight = {(long) jsExecutor.executeScript(returnPageHeightScript)};
         handleBannerIfPresent(driver);
-        sseEmitterService.sendSse("10");
+        sseEmitterService.sendSse("10", guid, topic);
         while (true) {
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(40));
             try {
-                // wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(By.id("sp_message_iframe_1177873")));
                 wait.until(driver1 -> {
                     jsExecutor.executeScript("window.scrollTo(0, document.body.scrollHeight-" + speed + ");");
                     long newHeight = (long) jsExecutor.executeScript(returnPageHeightScript);
@@ -51,12 +49,10 @@ public class ScrollingService {
                 });
             } catch (Exception e) {
                 log.warn("Page could load only {} times for now.", timesOfScrolling);
-                sseEmitterService.sendSse("Page could load only " + timesOfScrolling + " times for now. Page could be blocked or try to use another speed");
+                sseEmitterService.sendSse("Page could load only " + timesOfScrolling + " times for now. Page could be blocked or try to use another speed", guid, topic);
                 String pageSource = driver.getPageSource();
-                driverPool.safelyCloseAndQuitDriver(driver);
+                driverPool.releaseDriverToThePool(driver);
                 return updateHtmlAndReturn(pageSource, new URL(url));
-                // throw new RuntimeException("couldn't load the content! try another speed");
-                //pressButtonIfPreventsScrolling(driver, seenButtons);
             }
             long newHeight = (long) jsExecutor.executeScript(returnPageHeightScript);
             System.out.println(lastHeight[0] + " - " + newHeight);
@@ -67,7 +63,7 @@ public class ScrollingService {
             lastHeight[0] = newHeight;
 
             timesOfScrolling++;
-            sseEmitterService.sendSse(String.valueOf(((90L * timesOfScrolling) / amount) + 10));
+            sseEmitterService.sendSse(String.valueOf(((90L * timesOfScrolling) / amount) + 10), guid, topic);
         }
         String pageSource = driver.getPageSource();
         driverPool.releaseDriverToThePool(driver);

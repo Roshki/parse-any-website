@@ -23,8 +23,10 @@ public class PaginationService {
     private final Website website;
     private final SseEmitterService sseEmitterService;
 
+    private static final String topic = "test";
 
-    public List<String> getHtmlOfAllPagesBasedOnLastPage(String lastPage, String pageTageName, String pageStart, String pageFinish) throws ExecutionException, InterruptedException {
+
+    public List<String> getHtmlOfAllPagesBasedOnLastPage(String lastPage, String pageTageName, String pageStart, String pageFinish, String guid) throws ExecutionException, InterruptedException {
         List<String> allPageUrls = UrlUtil.predictAllUrls(lastPage, pageTageName, pageStart, pageFinish);
 
         AtomicInteger successfulCount = new AtomicInteger(0);
@@ -52,11 +54,11 @@ public class PaginationService {
                     webDriverService.releaseDriverToThePool(driverMulti);
                 }
                 log.error("error! -- {}", url, ex.getCause());
-                sseEmitterService.completeSseWithError(ex);
+                sseEmitterService.completeSseWithError(ex, guid);
                 return null;
             });
             futures.add(completableFuture);
-            sseEmitterService.sendSse(String.valueOf((100 * count) / allPageUrls.size()));
+            sseEmitterService.sendSse(String.valueOf((100 * count) / allPageUrls.size()), guid, topic);
         }
         CompletableFuture<Void> allOf = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
         resultFuture = allOf.thenApply(v -> {

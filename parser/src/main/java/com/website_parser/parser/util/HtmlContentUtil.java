@@ -6,7 +6,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import static com.website_parser.parser.util.UrlUtil.getContent;
@@ -25,7 +24,6 @@ public class HtmlContentUtil {
         Elements linkElements = doc.select("link[rel=stylesheet]");
 //        linkElements.addAll(doc.select("link[rel=preload]"));
         for (Element linkElement : linkElements) {
-            if(!linkElement.hasAttr("media")){
             String cssUrl = linkElement.attr("href");
             String verifiedHost = verifyHost(cssUrl, mainUrl);
             String cssContent = null;
@@ -41,7 +39,7 @@ public class HtmlContentUtil {
                 System.out.println("Substituted CSS link with inline style: " + linkElement);
             }
             htmlContent = doc.html();
-        }}
+        }
         return htmlContent;
     }
 

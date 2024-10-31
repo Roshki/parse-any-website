@@ -22,13 +22,13 @@ public class PaginationService {
     private final WebDriverPoolService webDriverService;
     private final Website website;
     private final SseEmitterService sseEmitterService;
+    private final UserService userService;
 
     private static final String topic = "test";
 
 
     public List<String> getHtmlOfAllPagesBasedOnLastPage(String lastPage, String pageTageName, String pageStart, String pageFinish, String guid) throws ExecutionException, InterruptedException {
         List<String> allPageUrls = UrlUtil.predictAllUrls(lastPage, pageTageName, pageStart, pageFinish);
-
         AtomicInteger successfulCount = new AtomicInteger(0);
         List<CompletableFuture<Void>> futures = new ArrayList<>();
         CompletableFuture<List<String>> resultFuture;
@@ -54,11 +54,12 @@ public class PaginationService {
                     webDriverService.releaseDriverToThePool(driverMulti);
                 }
                 log.error("error! -- {}", url, ex.getCause());
-                sseEmitterService.completeSseWithError(ex, guid);
+                sseEmitterService.completeSseWithError(ex, "progress" + guid);
+                userService.processByGuidInQueue(guid);
                 return null;
             });
             futures.add(completableFuture);
-            sseEmitterService.sendSse(String.valueOf((100 * count) / allPageUrls.size()), guid, topic);
+            sseEmitterService.sendSse(String.valueOf((100 * count) / allPageUrls.size()), "progress" + guid);
         }
         CompletableFuture<Void> allOf = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
         resultFuture = allOf.thenApply(v -> {
@@ -67,6 +68,7 @@ public class PaginationService {
             // webDriverService.closeAllPool();
             log.info("All tasks completed. Total successful: {}", successfulCount.get());
             log.info("HTML list size: {}", website.getPages().entrySet().size());
+            userService.processFirstInQueue();
             return htmlPagesMap.values().stream().toList();
         });
         return resultFuture != null ? resultFuture.get() : null;

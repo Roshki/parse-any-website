@@ -4,4 +4,4 @@ spring:
 frontend:
   url: http://localhost:4200/
 parser:
-  threads-amnt: 1
+  threads-amnt: 3

@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { lastValueFrom, BehaviorSubject } from 'rxjs';
 import { SseService } from './sse.service';
+import { ModuleWindowService } from './module-window.service';
 
 @Injectable({
   providedIn: 'root',
@@ -11,9 +12,7 @@ export class ParserService {
 
   serviceName = 'parser';
 
-  openModalSubject = new BehaviorSubject<boolean>(false);
-
-  openModal$ = this.openModalSubject.asObservable();
+  moduleWindowService = inject(ModuleWindowService);
 
   sseService = inject(SseService);
 
@@ -33,9 +32,6 @@ export class ParserService {
   constructor(private http: HttpClient) {
   }
 
-  public updateOpenModal(openModal: boolean) {
-    this.openModalSubject.next(openModal);
-  }
 
   geNotCachedWebPage(webUrl: string | null, userGuid: string): Promise<string> {
     const httpOptions = {
@@ -45,7 +41,6 @@ export class ParserService {
       }),
       responseType: 'text' as 'json'
     };
-    this.openModalSubject.next(true);
     const data = lastValueFrom(this.http.post<string>(this.noneCachedUrl + "?userGuid=" + userGuid, webUrl, httpOptions));
     return data;
 
@@ -59,7 +54,7 @@ export class ParserService {
       }),
       responseType: 'text' as 'json'
     };
-    this.openModalSubject.next(false);
+    this.moduleWindowService.updateOpenModal(false);
     return lastValueFrom(this.http.post<string>(this.sendHtmlUrl, webUrl, httpOptions));
   }
 
@@ -91,7 +86,7 @@ export class ParserService {
       responseType: 'text' as 'json'
     };
     console.log("this is what we've got: ", webUrl);
-    this.openModalSubject.next(false);
+    this.moduleWindowService.updateOpenModal(false);
     this.sseService.updateIsLoading(this.serviceName, true);
     const data = lastValueFrom(this.http.post<string>(this.infiniteScrollingUrl + "?speed=" + scrollingSpeed + "&userGuid=" + userGuid, webUrl, httpOptions));
     return data;
@@ -128,7 +123,6 @@ export class ParserService {
       websiteUrl: url,
       initialHtml: html
     }
-    this.openModalSubject.next(false);
     const data = lastValueFrom(this.http.post<any>(this.cleanPageExtUrl, website, httpOptions));
     return data;
 

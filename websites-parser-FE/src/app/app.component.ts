@@ -1,4 +1,4 @@
-import { Component, inject, EventEmitter, SecurityContext, HostListener, ViewEncapsulation, OnInit, Output, NgZone } from '@angular/core';
+import { Component, inject, EventEmitter, HostListener, ViewEncapsulation, OnInit, Output, NgZone } from '@angular/core';
 import { DevModeComponent } from './dev-mode/dev-mode.component';
 import { ParserService } from './parser.service';
 import { Website } from './models/website.model';
@@ -14,6 +14,7 @@ import { WebsiteService } from './website.service';
 import { SseService } from './sse.service';
 import { FileExportService } from './file-export.service';
 import { InstructionsComponent } from "./instructions/instructions.component";
+import { ModuleWindowService } from './module-window.service';
 
 @Component({
   selector: 'app-parser',
@@ -28,6 +29,7 @@ export class ParserComponent implements OnInit {
   private parserService = inject(ParserService);
   sseService = inject(SseService);
   private fileExportService = inject(FileExportService);
+  moduleWindowService = inject(ModuleWindowService);
   display: SafeHtml | undefined;
   @Output() progress: string = "";
   isLoading: boolean = false;
@@ -112,7 +114,9 @@ export class ParserComponent implements OnInit {
 
   ngOnInit() {
     this.sseService.isLoading$.subscribe(value => {
-      this.isLoading = value.isLoading;
+      this.ngZone.run(() => {
+        this.isLoading = value.isLoading;
+      });
     });
 
     this.sseService.isProgress$.subscribe(value => {
@@ -121,7 +125,7 @@ export class ParserComponent implements OnInit {
       });
     });
 
-    this.parserService.openModal$.subscribe(value => {
+    this.moduleWindowService.openModal$.subscribe(value => {
       this.isModalWindow = value;
       console.log('Modal state changed in app:', this.isModalWindow);
     });
@@ -162,16 +166,22 @@ export class ParserComponent implements OnInit {
           }
           else {
             if (this.website) {
-              this.parserService.geNotCachedWebPage(this.sendUrl.value, this.website.userGuid)
-                .then(nonCachedPage => {
-                  this.isLoading = false;
-                  this.display = this.sanitizer.bypassSecurityTrustHtml(nonCachedPage);
-                  this.sendDisplay();
-                })
-                .catch(e => {
-                  this.isLoading = false;
-                  alert("error happened, please retry!");
-                });
+              this.sseService.getQueueSse(this.website.userGuid, "html").subscribe(() => {
+                if (this.website) {
+                  this.parserService.geNotCachedWebPage(this.sendUrl.value, this.website.userGuid)
+                    .then(nonCachedPage => {
+                      this.ngZone.run(() => {
+                        this.isLoading = false;
+                        this.display = this.sanitizer.bypassSecurityTrustHtml(nonCachedPage);
+                        this.sendDisplay();
+                      });
+                    })
+                    .catch(e => {
+                      this.isLoading = false;
+                      alert("error happened, please retry!");
+                    });
+                }
+              });
             }
           }
         })
@@ -187,9 +197,15 @@ export class ParserComponent implements OnInit {
 
   InsertUrlOfLastPageOnClick(): void {
     if (this.website) {
-      this.progress = "0";
-      this.sseService.getSse(this.website.userGuid);
-      this.websiteService.setAllPagesHtml(this.paginationInfo, this.website.userGuid);
+      this.isLoading = true;
+      this.progress = "";
+      this.sseService.getQueueSse(this.website.userGuid, "pagination").subscribe(() => {
+        if (this.website) {
+          this.progress = "0";
+          this.sseService.getSse(this.website.userGuid);
+          this.websiteService.setAllPagesHtml(this.paginationInfo, this.website.userGuid);
+        }
+      });
     }
   }
 

@@ -26,9 +26,11 @@ public class ScrollingService {
 
     private final WebDriverPoolService driverPool;
     private final SseEmitterService sseEmitterService;
+    private final UserService userService;
 
     private static final String returnPageHeightScript = "return document.body.scrollHeight";
-    private final static String topic="test";
+    private final static String topic = "test";
+    private static final String reasonForMessage = "progress";
 
     public String getInfiniteScrolling(String url, String speed, int amount, String guid) throws MalformedURLException {
         int timesOfScrolling = 0;
@@ -37,7 +39,7 @@ public class ScrollingService {
         JavascriptExecutor jsExecutor = (JavascriptExecutor) driver;
         final long[] lastHeight = {(long) jsExecutor.executeScript(returnPageHeightScript)};
         handleBannerIfPresent(driver);
-        sseEmitterService.sendSse("10", guid, topic);
+        sseEmitterService.sendSse("10", reasonForMessage + guid);
         while (true) {
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(40));
             try {
@@ -49,9 +51,10 @@ public class ScrollingService {
                 });
             } catch (Exception e) {
                 log.warn("Page could load only {} times for now.", timesOfScrolling);
-                sseEmitterService.sendSse("Page could load only " + timesOfScrolling + " times for now. Page could be blocked or try to use another speed", guid, topic);
+                sseEmitterService.sendSse("Page could load only " + timesOfScrolling + " times for now. Page could be blocked or try to use another speed", reasonForMessage + guid);
                 String pageSource = driver.getPageSource();
                 driverPool.releaseDriverToThePool(driver);
+                userService.processByGuidInQueue(guid);
                 return updateHtmlAndReturn(pageSource, new URL(url));
             }
             long newHeight = (long) jsExecutor.executeScript(returnPageHeightScript);
@@ -63,10 +66,11 @@ public class ScrollingService {
             lastHeight[0] = newHeight;
 
             timesOfScrolling++;
-            sseEmitterService.sendSse(String.valueOf(((90L * timesOfScrolling) / amount) + 10), guid, topic);
+            sseEmitterService.sendSse(String.valueOf(((90L * timesOfScrolling) / amount) + 10), reasonForMessage + guid);
         }
         String pageSource = driver.getPageSource();
         driverPool.releaseDriverToThePool(driver);
+        userService.processFirstInQueue();
         return updateHtmlAndReturn(pageSource, new URL(url));
     }
 

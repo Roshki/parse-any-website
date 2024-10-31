@@ -9,13 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 
 @RestController
@@ -27,6 +23,8 @@ public class ParserController {
     private final PaginationService paginationService;
     private final ScrollingService scrollingService;
     private final SseEmitterService sseEmitterService;
+    private final UserService userService;
+    private final WebDriverPoolService webDriverPoolService;
 
     @PostMapping("/send-html")
     public String getHtml(@RequestBody String url) {
@@ -36,9 +34,9 @@ public class ParserController {
 
     @PostMapping("/last-page")
     public List<String> getAllPagesBasedOnLastPage(@RequestBody String lastPage, @RequestParam String pageTag, @RequestParam String pageStart, @RequestParam String pageFinish, @RequestParam String userGuid) throws ExecutionException, InterruptedException, MalformedURLException {
-        List<String> pages = paginationService.getHtmlOfAllPagesBasedOnLastPage(lastPage, pageTag, pageStart, pageFinish, userGuid);
-        sseEmitterService.completeSse(userGuid);
-        return pages;
+        //userService.putToQueue(userGuid);
+        // userService.waitForQueuePositionToBeFirst(userGuid);
+        return paginationService.getHtmlOfAllPagesBasedOnLastPage(lastPage, pageTag, pageStart, pageFinish, userGuid);
     }
 
     @GetMapping("/approve")
@@ -48,16 +46,23 @@ public class ParserController {
     }
 
     @PostMapping("/none-cached-page")
-    public String getNotCached(@RequestBody String url, @RequestParam String userGuid) throws Exception {
+    public String getNotCached(@RequestBody String url, @RequestParam String userGuid) {
         System.out.println(url);
-        return parserService.getNotCachedPage(url, userGuid);
+        //   userService.putToQueue(userGuid);
+        try {
+            return parserService.getNotCachedPage(url, userGuid);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @PostMapping("/infinite-scroll")
     public ResponseEntity<String> getInfiniteScrolling(@RequestBody String url, @RequestParam String speed, @RequestParam String userGuid) {
         try {
+            // userService.putToQueue(userGuid);
+            userService.waitForQueuePositionToBeFirst(userGuid);
             return new ResponseEntity<>(
-                    scrollingService.getInfiniteScrolling(url, speed, 100, userGuid), HttpStatus.OK);
+                    scrollingService.getInfiniteScrolling(url, speed, 20, userGuid), HttpStatus.OK);
         } catch (MalformedURLException e) {
             return new ResponseEntity<>("error occurred! " + e, HttpStatusCode.valueOf(500));
         }
@@ -65,7 +70,6 @@ public class ParserController {
 
     @PostMapping("/html-page-cleanup")
     public String getCleanHtml(@RequestBody Website website) throws MalformedURLException {
-        // approvalService.approve();
         return parserService.getCleanHtml(website);
     }
 
@@ -76,17 +80,19 @@ public class ParserController {
 
     @GetMapping("/sse")
     public SseEmitter streamSseMvc(@RequestParam String userGuid) {
-        SseEmitter emitter = sseEmitterService.createEmitter(userGuid);
-        ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
+        return sseEmitterService.createEmitter("progress" + userGuid);
+    }
 
-        scheduledExecutor.scheduleAtFixedRate(() -> {
-            try {
-                emitter.send(SseEmitter.event().name("heartbeat").data("{\"status\": \"alive\"}"));
-            } catch (IOException e) {
-                emitter.completeWithError(e);
-                scheduledExecutor.shutdown();
-            }
-        }, 0, 2, TimeUnit.SECONDS);
+    @GetMapping("/sse/queue")
+    public SseEmitter streamQueueSse(@RequestParam String userGuid, @RequestParam String purpose) {
+        userService.putToQueue(userGuid);
+        SseEmitter emitter = sseEmitterService.createEmitter("queue" + userGuid);
+        ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(5);
+
+        scheduledExecutor.scheduleAtFixedRate(() ->
+                userService.notifyQueuePosition(userGuid, purpose), 2, 5, TimeUnit.SECONDS);
+        emitter.onCompletion(scheduledExecutor::shutdownNow);
         return emitter;
     }
+
 }

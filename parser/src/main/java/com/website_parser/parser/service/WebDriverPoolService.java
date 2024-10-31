@@ -80,4 +80,14 @@ public void releaseDriverToThePool(WebDriver webDriver) {
         throw new RuntimeException("Error releasing WebDriver to pool", e);
     }
 }
+public boolean ifAvailableDriver(){
+    if (!driverPool.isEmpty()) {
+        log.info("There are free drivers available.");
+        return true;
+    } else {
+        log.info("No free drivers available.");
+        return false;
+    }
+}
+
 }

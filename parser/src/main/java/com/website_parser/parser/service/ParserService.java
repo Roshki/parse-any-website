@@ -40,15 +40,12 @@ public class ParserService {
 
     public String getNotCachedPage(String url, String userGuid) throws MalformedURLException {
         String htmlContent;
-        if (!webDriverService.ifAvailableDriver()) {
-            userService.putToQueue(userGuid);
-            userService.notifyQueuePosition(userGuid, "html");
-        }
         WebDriver initialDriver = webDriverService.getDriverFromPool();
         initialDriver.get(url);
         try {
-            userService.notifyQueuePosition(userGuid, "approval");
-            sseEmitterService.completeSse("queue" + userGuid);
+            if (userService.getQueuePosition(userGuid) == 1) {
+                userService.notifyQueuePosition(userGuid, "approval");
+            }
             approvalService.approveOrTimeout(300, userGuid);
         } catch (Exception e) {
             userService.processByGuidInQueue(userGuid);

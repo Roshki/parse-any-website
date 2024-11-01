@@ -2,6 +2,7 @@ package com.website_parser.parser.controller;
 
 import com.website_parser.parser.model.Website;
 import com.website_parser.parser.service.*;
+import com.website_parser.parser.util.AddFeaturesUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -34,8 +35,6 @@ public class ParserController {
 
     @PostMapping("/last-page")
     public List<String> getAllPagesBasedOnLastPage(@RequestBody String lastPage, @RequestParam String pageTag, @RequestParam String pageStart, @RequestParam String pageFinish, @RequestParam String userGuid) throws ExecutionException, InterruptedException, MalformedURLException {
-        //userService.putToQueue(userGuid);
-        // userService.waitForQueuePositionToBeFirst(userGuid);
         return paginationService.getHtmlOfAllPagesBasedOnLastPage(lastPage, pageTag, pageStart, pageFinish, userGuid);
     }
 
@@ -48,7 +47,6 @@ public class ParserController {
     @PostMapping("/none-cached-page")
     public String getNotCached(@RequestBody String url, @RequestParam String userGuid) {
         System.out.println(url);
-        //   userService.putToQueue(userGuid);
         try {
             return parserService.getNotCachedPage(url, userGuid);
         } catch (MalformedURLException e) {
@@ -59,8 +57,6 @@ public class ParserController {
     @PostMapping("/infinite-scroll")
     public ResponseEntity<String> getInfiniteScrolling(@RequestBody String url, @RequestParam String speed, @RequestParam String userGuid) {
         try {
-            // userService.putToQueue(userGuid);
-            userService.waitForQueuePositionToBeFirst(userGuid);
             return new ResponseEntity<>(
                     scrollingService.getInfiniteScrolling(url, speed, 20, userGuid), HttpStatus.OK);
         } catch (MalformedURLException e) {
@@ -85,14 +81,24 @@ public class ParserController {
 
     @GetMapping("/sse/queue")
     public SseEmitter streamQueueSse(@RequestParam String userGuid, @RequestParam String purpose) {
-        userService.putToQueue(userGuid);
         SseEmitter emitter = sseEmitterService.createEmitter("queue" + userGuid);
-        ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(5);
+        if (!webDriverPoolService.ifAvailableDriver()) {
+            userService.putToQueue(userGuid);
+            ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(5);
 
-        scheduledExecutor.scheduleAtFixedRate(() ->
-                userService.notifyQueuePosition(userGuid, purpose), 2, 5, TimeUnit.SECONDS);
-        emitter.onCompletion(scheduledExecutor::shutdownNow);
+            scheduledExecutor.scheduleAtFixedRate(() ->
+                    userService.notifyQueuePosition(userGuid, purpose), 2, 5, TimeUnit.SECONDS);
+            emitter.onCompletion(scheduledExecutor::shutdownNow);
+        } else {
+            sseEmitterService.sendSse("you are next", "queue" + userGuid);
+        }
         return emitter;
+    }
+
+    @PostMapping("/regex")
+    public List<String> applyRegex(@RequestBody List<String> strings, @RequestParam String regex) {
+        return AddFeaturesUtil.getRegex(strings, regex);
+
     }
 
 }

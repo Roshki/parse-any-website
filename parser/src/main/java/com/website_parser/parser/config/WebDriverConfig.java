@@ -18,11 +18,7 @@ import org.springframework.context.annotation.Scope;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
 
 @Configuration
 @Slf4j
@@ -30,7 +26,7 @@ public class WebDriverConfig {
 
     private static final String userAgent = "user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36";
     private static final String userProfile = "";
-
+    private final HashMap<String, Integer> usageHashmap = new HashMap<>();
 
     @Bean
     @Profile("dev")
@@ -59,7 +55,11 @@ public class WebDriverConfig {
         System.out.println("hello from remote");
         ArrayList<String> chromesList = new ArrayList<>();
         Collections.addAll(chromesList, chromePort1, chromePort3, chromePort2);
-        URL serverurl = new URL(chromesList.get(new Random().nextInt(chromesList.size())));
+        //String randomChrome = chromesList.get(new Random().nextInt(chromesList.size()));
+        chromesList.forEach(c -> usageHashmap.put(c, 0));
+        String driverWithLowestUsage = getChromeWithLowestUsage();
+        usageHashmap.put(driverWithLowestUsage, usageHashmap.get(driverWithLowestUsage) + 1);
+        URL serverurl = new URL(getChromeWithLowestUsage());
         System.out.println(serverurl + " serverurl");
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--window-size=1920,1080");
@@ -90,6 +90,14 @@ public class WebDriverConfig {
             options.setProxy(proxy);
             options.setCapability("proxy", proxy);
         }
+    }
+
+    public String getChromeWithLowestUsage() {
+        return usageHashmap.entrySet()
+                .stream()
+                .min(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse(null);
     }
 
     private WebDriver createRemoteWebDriver(URL url, ChromeOptions options) throws TimeoutException {

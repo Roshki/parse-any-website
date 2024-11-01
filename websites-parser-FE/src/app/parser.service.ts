@@ -28,6 +28,8 @@ export class ParserService {
 
   private cleanPageExtUrl = '/api/html-page-cleanup'
 
+  private applyRegexUrl = '/api/regex'
+
 
   constructor(private http: HttpClient) {
   }
@@ -125,6 +127,25 @@ export class ParserService {
     }
     const data = lastValueFrom(this.http.post<any>(this.cleanPageExtUrl, website, httpOptions));
     return data;
+
+  }
+
+  applyRegex(list: string[], regex: string): string[] {
+    let updatedList: string[] = [];
+    this.sseService.updateIsLoading(this.serviceName, true);
+    const encodedRegex = encodeURIComponent(regex);
+    this.http.post<string[]>(this.applyRegexUrl + "?regex=" + encodedRegex, list).subscribe({
+      next: (data: string[]) => {
+        this.sseService.updateIsLoading(this.serviceName, false);
+        data.forEach(item => updatedList.push(item));
+      },
+      error: (error) => {
+        alert(error);
+        console.error('There was an error!', error);
+        this.sseService.updateIsLoading(this.serviceName, false);
+      },
+    });
+    return updatedList;
 
   }
 

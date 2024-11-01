@@ -37,7 +37,9 @@ public class UserService {
     }
 
     public void putToQueue(String userGuid) {
-        waitingQueue.put(userGuid, waitingQueue.size() + 1);
+        if (!waitingQueue.containsKey(userGuid)) {
+            waitingQueue.put(userGuid, waitingQueue.size() + 1);
+        }
     }
 
 
@@ -59,29 +61,4 @@ public class UserService {
         waitingQueue.forEach((key, value) -> waitingQueue.put(key, value - 1));
     }
 
-    public int getQueuePosition(String userGuid) {
-        int position = 0;
-        if (!waitingQueue.isEmpty() && waitingQueue.containsKey(userGuid)) {
-            position = waitingQueue.get(userGuid);
-        }
-        return position;
-    }
-
-    public void waitForQueuePositionToBeFirst(String userGuid) {
-        CountDownLatch latch = new CountDownLatch(1);
-        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-        scheduler.scheduleAtFixedRate(() -> {
-            if (getQueuePosition(userGuid) == 1) {
-                latch.countDown();
-                scheduler.shutdown();
-            }
-        }, 1, 3, TimeUnit.SECONDS);
-
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        System.out.println("User has reached the front of the queue.");
-    }
 }

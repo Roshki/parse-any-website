@@ -152,7 +152,7 @@ export class ParserComponent implements OnInit {
 
 
   htmlOnClick(): void {
-    if (this.sendUrl.valid && this.sendUrl.value) {
+    if (this.sendUrl.valid && this.sendUrl.value && this.website) {
       this.isLoading = true;
       this.isValidUrl = true;
       this.progress = "";
@@ -165,23 +165,15 @@ export class ParserComponent implements OnInit {
             this.sendDisplay();
           }
           else {
-            if (this.website) {
-              this.sseService.getQueueSse(this.website.userGuid, "html").subscribe(() => {
-                if (this.website) {
-                  this.parserService.geNotCachedWebPage(this.sendUrl.value, this.website.userGuid)
-                    .then(nonCachedPage => {
-                      this.ngZone.run(() => {
-                        this.isLoading = false;
-                        this.display = this.sanitizer.bypassSecurityTrustHtml(nonCachedPage);
-                        this.sendDisplay();
-                      });
-                    })
-                    .catch(e => {
-                      this.isLoading = false;
-                      alert("error happened, please retry!");
-                    });
-                }
-              });
+            const website = this.website;
+            if (website) {
+              this.sseService.getQueueSse(website.userGuid, "html").subscribe(() => {
+                this.parserService.geNotCachedWebPage(this.sendUrl.value, website.userGuid)
+                  .then(nonCachedPage => {
+                    this.updateDisplay(nonCachedPage);
+                  })
+              }
+              );
             }
           }
         })
@@ -217,33 +209,37 @@ export class ParserComponent implements OnInit {
   }
 
   inifiniteScrollingOnClick(): void {
-    this.progress = "0";
-    if (this.sendUrl.valid && this.sendUrl.value && this.website) {
+    const website = this.website;
+    const sendUrlV = this.sendUrl.value;
+    this.progress = "";
+    if (sendUrlV && website) {
       this.isLoading = true;
       this.isValidUrl = true;
-      this.sseService.getSse(this.website.userGuid);
-      this.parserService.getInfiniteScrolling(this.sendUrl.value, this.scrollingSpeed, this.website.userGuid)
-        .then(data => {
-          this.isLoading = false;
-          if (data != "") {
-            console.log("this.isModalWindow from infiniteScroll" + this.isModalWindow)
-            this.display = this.sanitizer.bypassSecurityTrustHtml(data);
-            this.sendDisplay()
-            if (this.progress.length > 4) {
-              alert(this.progress);
-            }
-          }
-          else {
-          }
-        }).catch(e => {
-          this.isLoading = false;
-          alert("error happened, please retry!");
-        });
+
+      this.sseService.getQueueSse(website.userGuid, "scrolling").subscribe(() => {
+        this.sseService.getSse(website.userGuid);
+        this.parserService.getInfiniteScrolling(sendUrlV, this.scrollingSpeed, website.userGuid)
+          .then(data => {
+            this.updateDisplay(data);
+          }).catch(e => {
+            this.isLoading = false;
+            alert("error happened, please retry!");
+          });
+      });
     }
     else {
       this.isValidUrl = false;
     }
   }
+
+  private updateDisplay(data: string) {
+    this.ngZone.run(() => {
+      this.isLoading = false;
+      this.display = this.sanitizer.bypassSecurityTrustHtml(data);
+      this.sendDisplay();
+    });
+  }
+
 
 }
 

@@ -43,9 +43,8 @@ public class ParserService {
         WebDriver initialDriver = webDriverService.getDriverFromPool();
         initialDriver.get(url);
         try {
-            if (userService.getQueuePosition(userGuid) == 1) {
-                userService.notifyQueuePosition(userGuid, "approval");
-            }
+            sseEmitterService.sendSse("approve", "queue"+userGuid);
+            sseEmitterService.completeSse("queue" + userGuid);
             approvalService.approveOrTimeout(300, userGuid);
         } catch (Exception e) {
             userService.processByGuidInQueue(userGuid);

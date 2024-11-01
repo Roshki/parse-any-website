@@ -2,7 +2,6 @@
   <div class="row">
     <div class="col-12">
       <div class="accordion sticky-right-middle ms-auto" id="accordionExample" style="min-height:300px">
-
         <!-- Accordion Items -->
         <div class="accordion-item" *ngFor="let item of listItems; let i = index" style="position: relative;">
 
@@ -26,10 +25,12 @@
               <ul class="dropdown-menu itemDropdowns" [ngClass]="{'show': dropdownOpenState[i]}"
                 [attr.aria-labelledby]="'dropdownMenuButton' + i">
                 <li><button (click)="removeItemsGroup(i)" class="dropdown-item">Delete</button></li>
-                <li><button (click)="removeItemsGroup(i)" class="dropdown-item">Regex</button></li>
+                <li>
+                    <input class="form-control form-control-sm" [(ngModel)]="regex"
+                      placeholder="Regex" (keyup.enter)="sendRegex(i)" />
+                </li>
               </ul>
             </div>
-
           </h2>
 
           <!-- Accordion Content -->

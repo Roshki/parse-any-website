@@ -56,7 +56,7 @@ export class SseService {
       eventSource.onmessage = (event) => {
         console.log("got event:::", event.data);
 
-        if (event.data == "Your position is: 1" && purpose != "html") {
+        if (event.data == "you are next" && purpose != "html") {
           observer.next();
           observer.complete();
           this.unsubscribeFromSse(eventSource);
@@ -65,12 +65,6 @@ export class SseService {
           this.updateProgress("");
           this.moduleWindowService.updateOpenModal(true);
           this.unsubscribeFromSse(eventSource);
-        }
-        if (event.data == "Your position is: 1") {
-          // Emit to the observer when "Your position is: 1" is received
-          observer.next();
-          observer.complete();  // Complete the observable to prevent further emissions
-          // this.unsubscribeFromSse(eventSource);  // Close the SSE connection
         }
         if (event.data == "you are next") {
           observer.next();

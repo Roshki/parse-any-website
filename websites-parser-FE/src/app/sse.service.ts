@@ -20,7 +20,7 @@ export class SseService {
   isLoading$ = this.isLoadingSubject.asObservable();
 
 
-  private progressSubject = new BehaviorSubject<string>("0");
+  private progressSubject = new BehaviorSubject<string>("");
 
   isProgress$ = this.progressSubject.asObservable();
 

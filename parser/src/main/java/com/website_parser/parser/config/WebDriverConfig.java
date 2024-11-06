@@ -26,7 +26,6 @@ public class WebDriverConfig {
 
     private static final String userAgent = "user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36";
     private static final String userProfile = "";
-    private final HashMap<String, Integer> usageHashmap = new HashMap<>();
 
     @Bean
     @Profile("dev")
@@ -54,24 +53,20 @@ public class WebDriverConfig {
     public WebDriver getRemoteChromeDriver(@Value("${parser.remote-chrome-1}") String chromePort1, @Value("${parser.remote-chrome-2}") String chromePort2, @Value("${parser.remote-chrome-3}") String chromePort3) throws MalformedURLException {
         System.out.println("hello from remote");
         ArrayList<String> chromesList = new ArrayList<>();
-        Collections.addAll(chromesList, chromePort1, chromePort3, chromePort2);
-        //String randomChrome = chromesList.get(new Random().nextInt(chromesList.size()));
-        chromesList.forEach(c -> usageHashmap.put(c, 0));
-        String driverWithLowestUsage = getChromeWithLowestUsage();
-        usageHashmap.put(driverWithLowestUsage, usageHashmap.get(driverWithLowestUsage) + 1);
-        URL serverurl = new URL(getChromeWithLowestUsage());
+        Collections.addAll(chromesList, chromePort3, chromePort2);
+        URL serverurl = new URL(chromePort1);
         System.out.println(serverurl + " serverurl");
         ChromeOptions options = new ChromeOptions();
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--window-size=1920,1080");
         options.addArguments("--disable-web-security");
         options.addArguments("--allow-running-insecure-content");
         options.addArguments("--disable-blink-features=AutomationControlled");
         options.addArguments("--disable-search-engine-choice-screen");
-        options.addArguments("--no-sandbox");
-        options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--disable-browser-side-navigation");
         options.addArguments("--disable-gpu");
-        options.addArguments("--headless=new");
+        options.addArguments("--headless");
         options.addArguments("--disable-extensions");
         options.addArguments("--mute-audio");
         options.addArguments("--incognito");
@@ -90,14 +85,6 @@ public class WebDriverConfig {
             options.setProxy(proxy);
             options.setCapability("proxy", proxy);
         }
-    }
-
-    public String getChromeWithLowestUsage() {
-        return usageHashmap.entrySet()
-                .stream()
-                .min(Map.Entry.comparingByValue())
-                .map(Map.Entry::getKey)
-                .orElse(null);
     }
 
     private WebDriver createRemoteWebDriver(URL url, ChromeOptions options) throws TimeoutException {

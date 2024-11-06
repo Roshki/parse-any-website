@@ -13,23 +13,22 @@ import org.springframework.stereotype.Service;
 @Primary
 public class WebDriverService {
 
-    private WebDriver initialDriver;
     protected final ApplicationContext applicationContext;
 
     public WebDriver verifyAndGetWebDriver(WebDriver driver) {
-        if (driver == null || !isDriverValid(driver)) {
+        if (driver == null || isDriverInvalid(driver)) {
             return createAndReturnWebDriver();
         }
         return driver;
     }
 
-    protected boolean isDriverValid(WebDriver driver) {
+    protected boolean isDriverInvalid(WebDriver driver) {
         try {
             driver.getTitle();
-            return true;
+            return false;
         } catch (Exception e) {
             log.warn("Driver is invalid");
-            return false;
+            return true;
         }
     }
 
@@ -37,11 +36,6 @@ public class WebDriverService {
         return applicationContext.getBean(WebDriver.class);
     }
 
-
-    public WebDriver verifyInitialDriver() {
-        initialDriver = verifyAndGetWebDriver(initialDriver);
-        return initialDriver;
-    }
 
     public void safelyCloseAndQuitDriver(WebDriver driver) {
         try {

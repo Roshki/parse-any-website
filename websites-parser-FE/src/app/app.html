@@ -5,7 +5,8 @@
     <div class="d-flex align-items-center">
       <input class="form-control me-2" [ngClass]="{'ng-invalid-url': !isValidUrl}" type="text" placeholder="URL"
         [formControl]="sendUrl" style="width: 300px; margin-left: 2px;" id="sendUrlInput">
-      <button id="openWebsiteBtn" class="btn btn-outline-success me-2" type="submit" (click)="htmlOnClick()">Open Website</button>
+      <button id="openWebsiteBtn" class="btn btn-outline-success me-2" type="submit" (click)="htmlOnClick()">Open
+        Website</button>
       <button [disabled]="!display" [class.show]="isDropdownOpen" (click)="toggleDropdown()" type="button"
         class="btn btn-me-2 btn-success dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="outside">
         Tools <span class="caret"></span>
@@ -51,11 +52,13 @@
         <div class="form-group p-4 border rounded bg-white shadow-sm">
           <h6 class="mb-3 text-success">Infinite Scrolling</h6>
           <div class="d-flex align-items-center mb-3">
-            <select [(ngModel)]="scrollingSpeed" class="form-select form-select-sm me-2">
-              <option selected value="2000">500</option>
-              <option value="1000">1000</option>
+            <select [(ngModel)]="scrollingSpeed" class="form-select form-select-sm me-2" placeholder="Speed">
+              <option value="2000">500</option>
+              <option selected value="1000">1000</option>
               <option value="500">2000</option>
             </select>
+            <input class="form-control form-control-sm me-2" [(ngModel)]="scrollingAmount" type="number" min="0"
+              placeholder="amount" />
             <div class="d-flex justify-content-end">
               <button class="btn btn-success btn-sm" (click)="inifiniteScrollingOnClick()">OK</button>
             </div>

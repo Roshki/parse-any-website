@@ -4,6 +4,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -48,46 +49,63 @@ public class WebDriverPoolService extends WebDriverService {
     }
 
 
-public void validateAndRecreateDrivers() {
-    List<WebDriver> invalidDrivers = new ArrayList<>();
-    for (WebDriver driver : driverPool) {
-        if (!isDriverValid(driver)) {
-            invalidDrivers.add(driver);
+    public void validateAndRecreateDrivers() {
+        List<WebDriver> invalidDrivers = new ArrayList<>();
+        for (WebDriver driver : driverPool) {
+            if (isDriverInvalid(driver)) {
+                invalidDrivers.add(driver);
+            }
+        }
+        for (WebDriver invalidDriver : invalidDrivers) {
+            driverPool.remove(invalidDriver);
+            safelyCloseAndQuitDriver(invalidDriver);
+            System.out.println("removed invalid driver");
+            driverPool.add(createAndReturnWebDriver());
         }
     }
-    for (WebDriver invalidDriver : invalidDrivers) {
-        driverPool.remove(invalidDriver);
-        safelyCloseAndQuitDriver(invalidDriver);
-        System.out.println("removed invalid driver");
-        driverPool.add(createAndReturnWebDriver());
-    }
-}
 
-public WebDriver getDriverFromPool() {
-    validateAndRecreateDrivers();
-    try {
-        return driverPool.take();
-    } catch (InterruptedException e) {
-        throw new RuntimeException("Error retrieving WebDriver from pool", e);
+    public WebDriver getDriverFromPool() {
+        validateAndRecreateDrivers();
+        try {
+            return driverPool.take();
+        } catch (InterruptedException e) {
+            throw new RuntimeException("Error retrieving WebDriver from pool", e);
+        }
     }
-}
 
-public void releaseDriverToThePool(WebDriver webDriver) {
-    validateAndRecreateDrivers();
-    try {
-        driverPool.put(webDriver);
-    } catch (InterruptedException e) {
-        throw new RuntimeException("Error releasing WebDriver to pool", e);
+    public void releaseDriverToThePool(WebDriver webDriver) {
+        validateAndRecreateDrivers();
+        try {
+            driverPool.put(webDriver);
+        } catch (InterruptedException e) {
+            throw new RuntimeException("Error releasing WebDriver to pool", e);
+        }
     }
-}
-public boolean ifAvailableDriver(){
-    if (!driverPool.isEmpty()) {
-        log.info("There are free drivers available.");
-        return true;
-    } else {
-        log.info("No free drivers available.");
-        return false;
+
+    public boolean ifAvailableDriver() {
+        if (!driverPool.isEmpty()) {
+            log.info("There are free drivers available.");
+            return true;
+        } else {
+            log.info("No free drivers available.");
+            return false;
+        }
     }
-}
+
+    public String tryGetPage(WebDriver driver, String url) {
+        int retryCount = 5;
+        for (int i = 0; i < retryCount; i++) {
+            try {
+                driver = verifyAndGetWebDriver(driver);
+                driver.get(url);
+                String s = driver.getPageSource();
+                releaseDriverToThePool(driver);
+                return s;
+            } catch (WebDriverException e) {
+                log.warn("Attempt {} failed due to session crash, retrying...", i + 1);
+            }
+        }
+        throw new WebDriverException();
+    }
 
 }

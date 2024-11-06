@@ -55,10 +55,10 @@ public class ParserController {
     }
 
     @PostMapping("/infinite-scroll")
-    public ResponseEntity<String> getInfiniteScrolling(@RequestBody String url, @RequestParam String speed, @RequestParam String userGuid) {
+    public ResponseEntity<String> getInfiniteScrolling(@RequestBody String url, @RequestParam String speed, @RequestParam String amount, @RequestParam String userGuid) {
         try {
             return new ResponseEntity<>(
-                    scrollingService.getInfiniteScrolling(url, speed, 20, userGuid), HttpStatus.OK);
+                    scrollingService.getInfiniteScrolling(url, speed, Integer.parseInt(amount), userGuid), HttpStatus.OK);
         } catch (MalformedURLException e) {
             return new ResponseEntity<>("error occurred! " + e, HttpStatusCode.valueOf(500));
         }

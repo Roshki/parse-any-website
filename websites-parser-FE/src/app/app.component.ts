@@ -35,6 +35,7 @@ export class ParserComponent implements OnInit {
   isLoading: boolean = false;
   isModalWindow: boolean = false;
   scrollingSpeed: string = '';
+  scrollingAmount: string = '';
   sendUrl = new FormControl('', [
     Validators.required,
     Validators.pattern('https?://.+')
@@ -218,7 +219,7 @@ export class ParserComponent implements OnInit {
 
       this.sseService.getQueueSse(website.userGuid, "scrolling").subscribe(() => {
         this.sseService.getSse(website.userGuid);
-        this.parserService.getInfiniteScrolling(sendUrlV, this.scrollingSpeed, website.userGuid)
+        this.parserService.getInfiniteScrolling(sendUrlV, this.scrollingSpeed, website.userGuid, this.scrollingAmount)
           .then(data => {
             this.updateDisplay(data);
           }).catch(e => {

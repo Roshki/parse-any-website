@@ -17,8 +17,6 @@ public class AddFeaturesUtil {
                 updatedUrl.append(matcher.group()).append(" ");
             }
             updatedUrls.add(updatedUrl.toString().trim());
-            System.out.println(reg);
-            updatedUrls.forEach(System.out::println);
         }
         return updatedUrls;
     }

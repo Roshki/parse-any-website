@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
 
 @Component
@@ -29,12 +28,4 @@ public class Website implements Serializable {
         this.setWebsiteUrl(retrievedWebsite.getWebsiteUrl());
         this.setInitialHtml(retrievedWebsite.getInitialHtml());
     }
-
-    public Map<String, String> getPages() {
-        if (this.pages == null) {
-            this.pages = new HashMap<>();
-        }
-        return pages;
-    }
-
 }

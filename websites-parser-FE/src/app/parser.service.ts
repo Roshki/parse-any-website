@@ -79,7 +79,7 @@ export class ParserService {
     });
   }
 
-  getInfiniteScrolling(webUrl: string, scrollingSpeed: string, userGuid: string): Promise<string> {
+  getInfiniteScrolling(webUrl: string, scrollingSpeed: string, userGuid: string, amount: string): Promise<string> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Accept': 'text/plain',
@@ -90,7 +90,7 @@ export class ParserService {
     console.log("this is what we've got: ", webUrl);
     this.moduleWindowService.updateOpenModal(false);
     this.sseService.updateIsLoading(this.serviceName, true);
-    const data = lastValueFrom(this.http.post<string>(this.infiniteScrollingUrl + "?speed=" + scrollingSpeed + "&userGuid=" + userGuid, webUrl, httpOptions));
+    const data = lastValueFrom(this.http.post<string>(this.infiniteScrollingUrl + "?speed=" + scrollingSpeed + "&userGuid=" + userGuid+ "&amount=" + amount, webUrl, httpOptions));
     return data;
   }
 

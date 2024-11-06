@@ -41,7 +41,7 @@ public class ParserService {
     public String getNotCachedPage(String url, String userGuid) throws MalformedURLException {
         String htmlContent;
         WebDriver initialDriver = webDriverService.getDriverFromPool();
-        initialDriver.get(url);
+        webDriverService.verifyAndGetWebDriver(initialDriver).get(url);
         try {
             sseEmitterService.sendSse("approve", "queue"+userGuid);
             sseEmitterService.completeSse("queue" + userGuid);
@@ -57,6 +57,7 @@ public class ParserService {
         website.populateWebsite(
                 Website.builder()
                         .websiteUrl(url)
+                        .pages(Collections.emptyMap())
                         .initialHtml(htmlContent).build());
         cacheService.setWebsiteCache(url, website);
         userService.processFirstInQueue();

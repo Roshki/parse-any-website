@@ -58,7 +58,11 @@ public class UserService {
 
     public void processByGuidInQueue(String guid) {
         waitingQueue.remove(guid);
-        waitingQueue.forEach((key, value) -> waitingQueue.put(key, value - 1));
+        waitingQueue.forEach((key, value) -> {
+                    if (value > 1) {
+                        waitingQueue.put(key, value - 1);
+                    } else sseEmitterService.sendSse("you are next", "queue" + key);
+                }
+        );
     }
-
 }

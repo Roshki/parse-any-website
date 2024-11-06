@@ -24,8 +24,6 @@ public class PaginationService {
     private final SseEmitterService sseEmitterService;
     private final UserService userService;
 
-    private static final String topic = "test";
-
 
     public List<String> getHtmlOfAllPagesBasedOnLastPage(String lastPage, String pageTageName, String pageStart, String pageFinish, String guid) throws ExecutionException, InterruptedException {
         List<String> allPageUrls = UrlUtil.predictAllUrls(lastPage, pageTageName, pageStart, pageFinish);
@@ -39,8 +37,7 @@ public class PaginationService {
             CompletableFuture<Void> completableFuture = CompletableFuture.supplyAsync(() -> {
                 if (!parserService.isPageCached(url)) {
                     // Page is not in the cache, so we retrieve it via WebDriver
-                    driverMulti.get(url);
-                    String htmlPage = driverMulti.getPageSource();
+                    String htmlPage = webDriverService.tryGetPage(driverMulti, url);
                     htmlPagesMap.put(url, htmlPage);
                 } else {
                     htmlPagesMap.put(url, website.getPages().get(url));
@@ -48,14 +45,13 @@ public class PaginationService {
                 return null;
             }).thenAccept(result -> {
                 System.out.println("success -- " + url);
-                webDriverService.releaseDriverToThePool(driverMulti);
+                 webDriverService.releaseDriverToThePool(driverMulti);
             }).exceptionally(ex -> {
-                if (driverMulti != null) {
-                    webDriverService.releaseDriverToThePool(driverMulti);
-                }
                 log.error("error! -- {}", url, ex.getCause());
-                sseEmitterService.completeSseWithError(ex, "progress" + guid);
+                webDriverService.safelyCloseAndQuitDriver(driverMulti);
+                webDriverService.initPool();
                 userService.processByGuidInQueue(guid);
+                sseEmitterService.sendSse("error", "progress" + guid);
                 return null;
             });
             futures.add(completableFuture);
@@ -63,9 +59,8 @@ public class PaginationService {
         }
         CompletableFuture<Void> allOf = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
         resultFuture = allOf.thenApply(v -> {
-            website.getPages().putAll(htmlPagesMap);
+            website.setPages(htmlPagesMap);
             cacheService.setWebsiteCache(website.getWebsiteUrl(), website);
-            // webDriverService.closeAllPool();
             log.info("All tasks completed. Total successful: {}", successfulCount.get());
             log.info("HTML list size: {}", website.getPages().entrySet().size());
             userService.processFirstInQueue();

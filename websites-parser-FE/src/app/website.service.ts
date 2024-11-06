@@ -67,6 +67,19 @@ export class WebsiteService {
         this.websiteSubject.next(updatedWebsite);
     }
 
+    updateInformationList(key: string, list: string[], regex: string): string[] {
+        const currentWebsite = this.websiteSubject.getValue();
+        let updatedList = this.parserService.applyRegex(list, regex);
+        const updatedInformationToSend = new Map(currentWebsite.informationToSend).set(key, updatedList);
+        console.log(updatedList);
+        const updatedWebsite = {
+            ...currentWebsite,
+            informationToSend: updatedInformationToSend
+        };
+        this.websiteSubject.next(updatedWebsite);
+        return updatedList;
+    }
+
 
     deleteInformationItem(key: string): void {
         const currentWebsite = this.websiteSubject.getValue();
@@ -78,7 +91,7 @@ export class WebsiteService {
     initWebsite(): void {
         const newWebsite = new Website();
         newWebsite.userGuid = Guid.create().toString();
-        console.log("init website::: with guid::: "+newWebsite.userGuid )
+        console.log("init website::: with guid::: " + newWebsite.userGuid)
         this.websiteSubject.next(newWebsite);
     }
 

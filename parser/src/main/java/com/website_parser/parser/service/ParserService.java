@@ -23,6 +23,8 @@ public class ParserService {
     private final CacheService cacheService;
     private final Website website;
     private final ApprovalService approvalService;
+    private final UserService userService;
+    private final SseEmitterService sseEmitterService;
 
 
     public String getCachedPage(String url) {
@@ -39,20 +41,26 @@ public class ParserService {
     public String getNotCachedPage(String url, String userGuid) throws MalformedURLException {
         String htmlContent;
         WebDriver initialDriver = webDriverService.getDriverFromPool();
-        initialDriver.get(url);
+        webDriverService.verifyAndGetWebDriver(initialDriver).get(url);
         try {
+            sseEmitterService.sendSse("approve", "queue"+userGuid);
+            sseEmitterService.completeSse("queue" + userGuid);
             approvalService.approveOrTimeout(300, userGuid);
-        } finally {
-            webDriverService.releaseDriverToThePool(initialDriver);
+        } catch (Exception e) {
+            userService.processByGuidInQueue(userGuid);
+            throw e;
         }
         System.out.println("Approved!!!");
         String driverPageSource = retrievePage(initialDriver);
         htmlContent = updateHtmlAndReturn(driverPageSource, new URL(url));
+        webDriverService.releaseDriverToThePool(initialDriver);
         website.populateWebsite(
                 Website.builder()
                         .websiteUrl(url)
+                        .pages(Collections.emptyMap())
                         .initialHtml(htmlContent).build());
         cacheService.setWebsiteCache(url, website);
+        userService.processFirstInQueue();
         return htmlContent;
     }
 

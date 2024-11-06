@@ -22,13 +22,11 @@ public class PaginationService {
     private final WebDriverPoolService webDriverService;
     private final Website website;
     private final SseEmitterService sseEmitterService;
-
-    private static final String topic = "test";
+    private final UserService userService;
 
 
     public List<String> getHtmlOfAllPagesBasedOnLastPage(String lastPage, String pageTageName, String pageStart, String pageFinish, String guid) throws ExecutionException, InterruptedException {
         List<String> allPageUrls = UrlUtil.predictAllUrls(lastPage, pageTageName, pageStart, pageFinish);
-
         AtomicInteger successfulCount = new AtomicInteger(0);
         List<CompletableFuture<Void>> futures = new ArrayList<>();
         CompletableFuture<List<String>> resultFuture;
@@ -39,8 +37,7 @@ public class PaginationService {
             CompletableFuture<Void> completableFuture = CompletableFuture.supplyAsync(() -> {
                 if (!parserService.isPageCached(url)) {
                     // Page is not in the cache, so we retrieve it via WebDriver
-                    driverMulti.get(url);
-                    String htmlPage = driverMulti.getPageSource();
+                    String htmlPage = webDriverService.tryGetPage(driverMulti, url);
                     htmlPagesMap.put(url, htmlPage);
                 } else {
                     htmlPagesMap.put(url, website.getPages().get(url));
@@ -48,25 +45,25 @@ public class PaginationService {
                 return null;
             }).thenAccept(result -> {
                 System.out.println("success -- " + url);
-                webDriverService.releaseDriverToThePool(driverMulti);
+                 webDriverService.releaseDriverToThePool(driverMulti);
             }).exceptionally(ex -> {
-                if (driverMulti != null) {
-                    webDriverService.releaseDriverToThePool(driverMulti);
-                }
                 log.error("error! -- {}", url, ex.getCause());
-                sseEmitterService.completeSseWithError(ex, guid);
+                webDriverService.safelyCloseAndQuitDriver(driverMulti);
+                webDriverService.initPool();
+                userService.processByGuidInQueue(guid);
+                sseEmitterService.sendSse("error", "progress" + guid);
                 return null;
             });
             futures.add(completableFuture);
-            sseEmitterService.sendSse(String.valueOf((100 * count) / allPageUrls.size()), guid, topic);
+            sseEmitterService.sendSse(String.valueOf((100 * count) / allPageUrls.size()), "progress" + guid);
         }
         CompletableFuture<Void> allOf = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
         resultFuture = allOf.thenApply(v -> {
-            website.getPages().putAll(htmlPagesMap);
+            website.setPages(htmlPagesMap);
             cacheService.setWebsiteCache(website.getWebsiteUrl(), website);
-            // webDriverService.closeAllPool();
             log.info("All tasks completed. Total successful: {}", successfulCount.get());
             log.info("HTML list size: {}", website.getPages().entrySet().size());
+            userService.processFirstInQueue();
             return htmlPagesMap.values().stream().toList();
         });
         return resultFuture != null ? resultFuture.get() : null;

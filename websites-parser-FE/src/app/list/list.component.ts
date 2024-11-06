@@ -1,14 +1,15 @@
-import { Component, Input, inject, Renderer2, HostListener } from '@angular/core';
+import { Component, inject, Renderer2, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Website } from '../models/website.model';
 import { ListService } from '../list.service';
 import { WebsiteContentComponent } from '../website-content/website-content.component';
 import { WebsiteService } from '../website.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-list',
   standalone: true,
-  imports: [CommonModule, WebsiteContentComponent],
+  imports: [CommonModule, WebsiteContentComponent, FormsModule],
   templateUrl: './list.html',
   styleUrl: './list.css'
 })
@@ -18,6 +19,7 @@ export class ListComponent {
   listItems: { key: string, values: string[] }[] = [];
 
   private website: Website | null = null;
+  regex: string = "";
 
   constructor(private renderer: Renderer2, private websiteService: WebsiteService) {
   }
@@ -81,11 +83,12 @@ export class ListComponent {
   sendRegex(itemId: number) {
     if (this.website) {
       const itemKey = this.listItems[itemId]?.key;
-      this.listItems.splice(itemId, 1);
-      if (itemKey) {
+      const listItems = this.listItems.find(item => item.key === itemKey);
+      if (listItems) {
+        console.log("regex????---" + this.regex)
+        listItems.values = this.websiteService.updateInformationList(itemKey, listItems.values, this.regex);
         console.log(this.listItems);
-        this.deselectElements(itemKey);
-        this.websiteService.deleteInformationItem(itemKey);
+        this.listItems.push
       }
     }
   }

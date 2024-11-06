@@ -18,11 +18,7 @@ import org.springframework.context.annotation.Scope;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
 
 @Configuration
 @Slf4j
@@ -30,7 +26,6 @@ public class WebDriverConfig {
 
     private static final String userAgent = "user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36";
     private static final String userProfile = "";
-
 
     @Bean
     @Profile("dev")
@@ -58,20 +53,20 @@ public class WebDriverConfig {
     public WebDriver getRemoteChromeDriver(@Value("${parser.remote-chrome-1}") String chromePort1, @Value("${parser.remote-chrome-2}") String chromePort2, @Value("${parser.remote-chrome-3}") String chromePort3) throws MalformedURLException {
         System.out.println("hello from remote");
         ArrayList<String> chromesList = new ArrayList<>();
-        Collections.addAll(chromesList, chromePort1, chromePort3, chromePort2);
-        URL serverurl = new URL(chromesList.get(new Random().nextInt(chromesList.size())));
+        Collections.addAll(chromesList, chromePort3, chromePort2);
+        URL serverurl = new URL(chromePort1);
         System.out.println(serverurl + " serverurl");
         ChromeOptions options = new ChromeOptions();
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--window-size=1920,1080");
         options.addArguments("--disable-web-security");
         options.addArguments("--allow-running-insecure-content");
         options.addArguments("--disable-blink-features=AutomationControlled");
         options.addArguments("--disable-search-engine-choice-screen");
-        options.addArguments("--no-sandbox");
-        options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--disable-browser-side-navigation");
         options.addArguments("--disable-gpu");
-        options.addArguments("--headless=new");
+        options.addArguments("--headless");
         options.addArguments("--disable-extensions");
         options.addArguments("--mute-audio");
         options.addArguments("--incognito");

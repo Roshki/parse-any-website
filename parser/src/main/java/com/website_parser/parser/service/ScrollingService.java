@@ -68,10 +68,10 @@ public class ScrollingService {
             timesOfScrolling++;
             sseEmitterService.sendSse(String.valueOf(((90L * timesOfScrolling) / amount) + 10), reasonForMessage + guid);
         }
-        String pageSource = driver.getPageSource();
-        driverPool.releaseDriverToThePool(driver);
+        String pageHtml = updateHtmlAndReturn(driver.getPageSource(), new URL(url));
         userService.processFirstInQueue();
-        return updateHtmlAndReturn(pageSource, new URL(url));
+        driverPool.releaseDriverToThePool(driver);
+        return pageHtml;
     }
 
     private void pressButtonIfPreventsScrolling(WebDriver driver, List<String> seenButtons) {

@@ -179,7 +179,7 @@ export class ParserComponent implements OnInit {
           }
         })
         .catch(e => {
-          this.isLoading = false;
+          this.updateLoading();
           alert("error happened, please retry!");
         });
     }
@@ -223,7 +223,7 @@ export class ParserComponent implements OnInit {
           .then(data => {
             this.updateDisplay(data);
           }).catch(e => {
-            this.isLoading = false;
+            this.updateLoading();
             alert("error happened, please retry!");
           });
       });
@@ -241,6 +241,11 @@ export class ParserComponent implements OnInit {
     });
   }
 
+  private updateLoading() {
+    this.ngZone.run(() => {
+      this.isLoading = false;
+    });
+  }
 
 }
 

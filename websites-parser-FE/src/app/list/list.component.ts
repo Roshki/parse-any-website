@@ -2,14 +2,13 @@ import { Component, inject, Renderer2, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Website } from '../models/website.model';
 import { ListService } from '../list.service';
-import { WebsiteContentComponent } from '../website-content/website-content.component';
 import { WebsiteService } from '../website.service';
 import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-list',
   standalone: true,
-  imports: [CommonModule, WebsiteContentComponent, FormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './list.html',
   styleUrl: './list.css'
 })

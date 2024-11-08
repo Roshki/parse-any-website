@@ -48,7 +48,6 @@ public class WebDriverPoolService extends WebDriverService {
         driverPool.forEach(this::safelyCloseAndQuitDriver);
     }
 
-
     public void validateAndRecreateDrivers() {
         List<WebDriver> invalidDrivers = new ArrayList<>();
         for (WebDriver driver : driverPool) {
@@ -91,21 +90,4 @@ public class WebDriverPoolService extends WebDriverService {
             return false;
         }
     }
-
-    public String tryGetPage(WebDriver driver, String url) {
-        int retryCount = 5;
-        for (int i = 0; i < retryCount; i++) {
-            try {
-                driver = verifyAndGetWebDriver(driver);
-                driver.get(url);
-                String s = driver.getPageSource();
-                releaseDriverToThePool(driver);
-                return s;
-            } catch (WebDriverException e) {
-                log.warn("Attempt {} failed due to session crash, retrying...", i + 1);
-            }
-        }
-        throw new WebDriverException();
-    }
-
 }

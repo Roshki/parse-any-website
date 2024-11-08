@@ -34,13 +34,13 @@ public class ParserController {
     }
 
     @PostMapping("/last-page")
-    public List<String> getAllPagesBasedOnLastPage(@RequestBody String lastPage, @RequestParam String pageTag, @RequestParam String pageStart, @RequestParam String pageFinish, @RequestParam String userGuid) throws ExecutionException, InterruptedException, MalformedURLException {
+    public List<String> getAllPagesBasedOnLastPage(@RequestBody String lastPage, @RequestParam String pageTag, @RequestParam String pageStart, @RequestParam String pageFinish, @RequestParam String userGuid) throws ExecutionException, InterruptedException {
         return paginationService.getHtmlOfAllPagesBasedOnLastPage(lastPage, pageTag, pageStart, pageFinish, userGuid);
     }
 
     @GetMapping("/approve")
     public String approve(@RequestParam String userGuid) {
-        approvalService.approve(userGuid);
+        approvalService.completeApproval(userGuid);
         return "Approved!";
     }
 

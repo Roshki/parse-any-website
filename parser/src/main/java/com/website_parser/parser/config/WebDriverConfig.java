@@ -66,7 +66,7 @@ public class WebDriverConfig {
         options.addArguments("--disable-search-engine-choice-screen");
         options.addArguments("--disable-browser-side-navigation");
         options.addArguments("--disable-gpu");
-        options.addArguments("--headless");
+        options.addArguments("--headless=new");
         options.addArguments("--disable-extensions");
         options.addArguments("--mute-audio");
         options.addArguments("--incognito");

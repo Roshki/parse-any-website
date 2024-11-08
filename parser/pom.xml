@@ -74,12 +74,12 @@
 			<artifactId>poi-ooxml-schemas</artifactId>
 			<version>4.1.2</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-devtools-v128 -->
-		<dependency>
-			<groupId>org.seleniumhq.selenium</groupId>
-			<artifactId>selenium-devtools-v128</artifactId>
-			<version>4.24.0</version>
-		</dependency>
+<!--		&lt;!&ndash; https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-devtools-v128 &ndash;&gt;-->
+<!--		<dependency>-->
+<!--			<groupId>org.seleniumhq.selenium</groupId>-->
+<!--			<artifactId>selenium-devtools-v128</artifactId>-->
+<!--			<version>4.24.0</version>-->
+<!--		</dependency>-->
 
 		<dependency>
 			<groupId>org.apache.commons</groupId>

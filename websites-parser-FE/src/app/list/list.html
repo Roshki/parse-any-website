@@ -26,7 +26,7 @@
                 [attr.aria-labelledby]="'dropdownMenuButton' + i">
                 <li><button (click)="removeItemsGroup(i)" class="dropdown-item">Delete</button></li>
                 <li>
-                    <input class="form-control form-control-sm" [(ngModel)]="regex"
+                    <input class="dropdown-item form-control form-control-sm" [(ngModel)]="regex"
                       placeholder="Regex" (keyup.enter)="sendRegex(i)" />
                 </li>
               </ul>

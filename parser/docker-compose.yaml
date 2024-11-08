@@ -1,0 +1,46 @@
+networks:
+  app-network:
+    driver: bridge
+services:
+  selenium:
+      container_name: selenium
+      image: seleniarm/standalone-chromium:latest
+      shm_size: 2g
+      environment:
+        - SE_DRAIN_AFTER_SESSION_COUNT=0
+        - SE_NODE_MAX_SESSIONS=1000
+        - SE_NODE_OVERRIDE_MAX_SESSIONS=true
+      ports:
+        - "4444:4444"
+      networks:
+        - app-network
+      restart: always
+  frontend:
+    container_name: frontend
+    image: roshki/frontend-local:1.2
+    environment:
+      - API=http://backend:8080
+      - API_HOST=backend:8080
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    restart: always
+  backend:
+    container_name: backend
+    image: roshki/backend-local:1.2
+    environment:
+      - THREADS_AMNT=3
+      - CHROME_1=http://selenium:4444
+      - CHROME_2=http://selenium:4444
+      - CHROME_3=http://selenium:4444
+      - FE_URL=http://localhost:4200/
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+    depends_on:
+      - selenium
+    restart: always

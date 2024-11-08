@@ -37,7 +37,8 @@ public class PaginationService {
             CompletableFuture<Void> completableFuture = CompletableFuture.supplyAsync(() -> {
                 if (!parserService.isPageCached(url)) {
                     // Page is not in the cache, so we retrieve it via WebDriver
-                    String htmlPage = webDriverService.tryGetPage(driverMulti, url);
+                    driverMulti.get(url);
+                    String htmlPage = driverMulti.getPageSource();
                     htmlPagesMap.put(url, htmlPage);
                 } else {
                     htmlPagesMap.put(url, website.getPages().get(url));
@@ -45,13 +46,15 @@ public class PaginationService {
                 return null;
             }).thenAccept(result -> {
                 System.out.println("success -- " + url);
-                 webDriverService.releaseDriverToThePool(driverMulti);
+                webDriverService.releaseDriverToThePool(driverMulti);
             }).exceptionally(ex -> {
+                if (driverMulti != null) {
+                    webDriverService.releaseDriverToThePool(driverMulti);
+                }
                 log.error("error! -- {}", url, ex.getCause());
                 webDriverService.safelyCloseAndQuitDriver(driverMulti);
-                webDriverService.initPool();
                 userService.processByGuidInQueue(guid);
-                sseEmitterService.sendSse("error", "progress" + guid);
+                sseEmitterService.completeSseWithError(ex, guid);
                 return null;
             });
             futures.add(completableFuture);

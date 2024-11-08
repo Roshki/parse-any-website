@@ -43,9 +43,10 @@ public class ParserService {
         WebDriver initialDriver = webDriverService.getDriverFromPool();
         webDriverService.verifyAndGetWebDriver(initialDriver).get(url);
         try {
-            sseEmitterService.sendSse("approve", "queue"+userGuid);
+            sseEmitterService.sendSse("approve", "queue" + userGuid);
             sseEmitterService.completeSse("queue" + userGuid);
-            approvalService.approveOrTimeout(300, userGuid);
+            String futureId = approvalService.createApprovalFuture(userGuid);
+            approvalService.waitForApproval(300, futureId);
         } catch (Exception e) {
             userService.processByGuidInQueue(userGuid);
             throw e;

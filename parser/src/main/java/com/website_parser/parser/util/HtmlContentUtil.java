@@ -5,8 +5,10 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.openqa.selenium.WebElement;
 
 import java.net.URL;
+import java.util.ArrayList;
 
 import static com.website_parser.parser.util.UrlUtil.getContent;
 import static com.website_parser.parser.util.UrlUtil.verifyHost;
@@ -14,7 +16,8 @@ import static com.website_parser.parser.util.UrlUtil.verifyHost;
 @Slf4j
 public class HtmlContentUtil {
 
-    public static String updateHtmlAndReturn(String htmlContent, URL mainUrl) {;
+    public static String updateHtmlAndReturn(String htmlContent, URL mainUrl) {
+        ;
         htmlContent = cssLinksToStyleAndReturn(htmlContent, mainUrl);
         return removeTagsAndReturn(htmlContent);
     }
@@ -49,6 +52,19 @@ public class HtmlContentUtil {
                 .replaceAll("(?s)<header[^>]*>.*?</header>", "")
                 .replaceAll("(?s)<nav[^>]*>.*?</nav>", "")
                 .replaceAll("(?s)position: sticky;", "");
+    }
+
+    public static ArrayList<String> retrieveInfoHtml(String html, String attrName) {
+        ArrayList<String> elementsList = new ArrayList<>();
+        Document document = Jsoup.parse(html);
+
+        Elements elements = document.select(attrName);
+
+        for (Element element : elements) {
+            System.out.println("Extracted Text: " + element.text());
+            elementsList.add(element.text());
+        }
+        return elementsList;
     }
 
 }

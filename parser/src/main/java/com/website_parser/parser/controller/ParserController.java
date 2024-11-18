@@ -1,6 +1,6 @@
 package com.website_parser.parser.controller;
 
-import com.website_parser.parser.model.Website;
+import com.website_parser.parser.components.Website;
 import com.website_parser.parser.service.*;
 import com.website_parser.parser.util.AddFeaturesUtil;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +35,7 @@ public class ParserController {
 
     @PostMapping("/last-page")
     public List<String> getAllPagesBasedOnLastPage(@RequestBody String lastPage, @RequestParam String pageTag, @RequestParam String pageStart, @RequestParam String pageFinish, @RequestParam String userGuid) throws ExecutionException, InterruptedException {
-        return paginationService.getHtmlOfAllPagesBasedOnLastPage(lastPage, pageTag, pageStart, pageFinish, userGuid);
+        return paginationService.getHtmlOfAllPagesBasedOnLastPage(lastPage, pageTag, pageStart, pageFinish, userGuid, false);
     }
 
     @GetMapping("/approve")

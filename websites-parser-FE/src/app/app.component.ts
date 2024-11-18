@@ -21,7 +21,7 @@ import { ModuleWindowService } from './module-window.service';
   templateUrl: './app.html',
   styleUrl: "../styles.css",
   imports: [FormsModule, CommonModule, DevModeComponent, ReactiveFormsModule, ListComponent,
-    WebsiteContentComponent, ModuleWindowComponent, SpinnerComponent, InstructionsComponent],
+     ModuleWindowComponent, SpinnerComponent, InstructionsComponent],
   encapsulation: ViewEncapsulation.ShadowDom,
   standalone: true
 })
@@ -82,9 +82,8 @@ export class ParserComponent implements OnInit {
     }
   }
 
-
   sendDisplay() {
-    this.displayEmitter.emit(this.display); // Emit the data
+    this.displayEmitter.emit(this.display);
   }
 
   updateProgress(newProgress: string) {

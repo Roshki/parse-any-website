@@ -1,7 +1,7 @@
 <div class="container">
   <div class="row">
     <div class="col-12">
-      <div class="accordion sticky-right-middle ms-auto" id="accordionExample" style="min-height:300px">
+      <div class="accordion sticky-right-middle ms-auto" id="accordionExample">
         <!-- Accordion Items -->
         <div class="accordion-item" *ngFor="let item of listItems; let i = index" style="position: relative;">
 
@@ -11,7 +11,7 @@
             <!-- Accordion Button -->
             <button class="accordion-button" [ngClass]="{'collapsed': !accordionOpenState[i]}" type="button"
               (click)="toggleAccordion(i)" [attr.aria-expanded]="accordionOpenState[i]"
-              [attr.aria-controls]="'collapseOne' + i" style="flex: 1; overflow: hidden;">
+              [attr.aria-controls]="'collapseOne' + i" style="flex: 1; overflow: scroll">
               {{ item.key }} &nbsp; <span style="font-weight: bold;">({{ item.values.length }})</span>
             </button>
 

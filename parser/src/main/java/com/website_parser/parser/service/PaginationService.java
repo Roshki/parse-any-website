@@ -1,6 +1,6 @@
 package com.website_parser.parser.service;
 
-import com.website_parser.parser.model.Website;
+import com.website_parser.parser.components.Website;
 import com.website_parser.parser.util.UrlUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,7 @@ public class PaginationService {
     private final UserService userService;
 
 
-    public List<String> getHtmlOfAllPagesBasedOnLastPage(String lastPage, String pageTageName, String pageStart, String pageFinish, String guid) throws ExecutionException, InterruptedException {
+    public List<String> getHtmlOfAllPagesBasedOnLastPage(String lastPage, String pageTageName, String pageStart, String pageFinish, String guid, boolean scheduled) throws ExecutionException, InterruptedException {
         List<String> allPageUrls = UrlUtil.predictAllUrls(lastPage, pageTageName, pageStart, pageFinish);
         AtomicInteger successfulCount = new AtomicInteger(0);
         List<CompletableFuture<Void>> futures = new ArrayList<>();
@@ -35,7 +35,7 @@ public class PaginationService {
             WebDriver driverMulti = webDriverService.getDriverFromPool();
             int count = successfulCount.incrementAndGet();
             CompletableFuture<Void> completableFuture = CompletableFuture.supplyAsync(() -> {
-                if (!parserService.isPageCached(url)) {
+                if (scheduled || !parserService.isPageCached(url)) {
                     // Page is not in the cache, so we retrieve it via WebDriver
                     driverMulti.get(url);
                     String htmlPage = driverMulti.getPageSource();
@@ -63,7 +63,9 @@ public class PaginationService {
         CompletableFuture<Void> allOf = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
         resultFuture = allOf.thenApply(v -> {
             website.setPages(htmlPagesMap);
-            cacheService.setWebsiteCache(website.getWebsiteUrl(), website);
+            if (!scheduled) {
+                cacheService.setWebsiteCache(website.getWebsiteUrl(), website);
+            }
             log.info("All tasks completed. Total successful: {}", successfulCount.get());
             log.info("HTML list size: {}", website.getPages().entrySet().size());
             userService.processFirstInQueue();

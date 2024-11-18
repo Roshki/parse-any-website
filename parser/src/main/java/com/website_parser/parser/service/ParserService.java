@@ -1,6 +1,6 @@
 package com.website_parser.parser.service;
 
-import com.website_parser.parser.model.Website;
+import com.website_parser.parser.components.Website;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

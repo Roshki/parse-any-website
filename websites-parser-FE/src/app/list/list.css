@@ -2,7 +2,7 @@
 
 .sticky-right-middle {
   position: fixed;
-  right: 0;
+  right: 5px;
   top: 20%;
   z-index: 7777;
 }
@@ -58,9 +58,10 @@
 .accordion {
   transition: max-width 0.3s ease-in-out;
   width: 100%;
-  min-height: 10%;
   max-width: 20%;
+  min-height: 0;
   overflow-y: auto;
+  height: 50%;
 }
 
 .itemDropdowns {

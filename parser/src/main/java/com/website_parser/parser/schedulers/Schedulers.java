@@ -42,7 +42,7 @@ public class Schedulers {
     @Scheduled(cron = "0 0 0/3 * * ?")
     @Async
     public void syncData() throws ExecutionException, InterruptedException {
-        List<String> pagesList = paginationService.getHtmlOfAllPagesBasedOnLastPage("https://www.marktplaats.nl/l/auto-s/tesla/p/10", "p/", "1", "40", "1", true);
+        List<String> pagesList = paginationService.getHtmlOfAllPagesBasedOnLastPage("https://www.marktplaats.nl/l/auto-s/tesla/p/2/#f:10882", "p/", "1", "40", "1", true);
 
         for (String page : pagesList) {
             ArrayList<String> titles = HtmlContentUtil.retrieveInfoHtml(page, ".hz-Listing-title");
@@ -53,7 +53,7 @@ public class Schedulers {
             log.info("prices size {}", prices.size());
             List<String> updatedPrices = AddFeaturesUtil.getRegex(prices, "\\d{1,3}(\\.\\d{3})*(?=,-)");
             for (int i = 0; i < titles.size(); i++) {
-                if (productRepository.findByTitleAndPrice(titles.get(i), prices.get(i)).isEmpty()) {
+                if (productRepository.findByTitleAndPrice(titles.get(i), updatedPrices.get(i)).isEmpty() && titles.size() == prices.size() && titles.size() == attr.size()) {
                     Optional<User> user = userRepository.findById(1);
                     Optional<Type> type = typeRepository.findById(1);
                     productRepository.save(Product.builder()

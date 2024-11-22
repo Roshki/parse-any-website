@@ -7,26 +7,13 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+
+import static com.website_parser.parser.util.JsScriptsUtil.*;
 
 @Slf4j
 public class BannersUtil {
 
-    public static List<String> getButtonSelectors() {
-        return Arrays.asList(
-                "//button[text()= 'Dismiss']",
-                "//button[text()= 'Close']",
-                "//button[text()= 'Accept']",
-                "//button[contains(text(), 'Agree')]",
-                "//button[text()= 'Accepteren']",
-                "button[title='Accepteren']",
-                "button[class*='dismiss']",
-                ".cookie-banner button",
-                ".consent-banner button",
-                "button[aria-label='Close']"
-        );
-    }
     public static void handleBannerIfPresent(WebDriver driver) {
         if (isBannerPresent(driver)) {
             log.info("Banner is present.");
@@ -44,7 +31,7 @@ public class BannersUtil {
 
     private static boolean ifProcessedBannerButtons(WebDriver driver) {
         List<WebElement> buttons = new ArrayList<>();
-        for (String selector : getButtonSelectors()) {
+        for (String selector : getBannersButtonSelectors()) {
             if (selector.startsWith("//")) {
                 buttons.addAll(driver.findElements(By.xpath(selector)));
             } else {
@@ -69,7 +56,7 @@ public class BannersUtil {
 
     private static boolean isBannerPresent(WebDriver driver) {
         try {
-            WebElement modal = driver.findElement(By.cssSelector("*[class*='modal'], *[class*='popup'], *[class*='alert'], *[class*='message']"));
+            WebElement modal = driver.findElement(By.cssSelector(getBannerCssSelectors()));
             return modal.isDisplayed();
         } catch (NoSuchElementException e) {
             return false;
@@ -78,7 +65,7 @@ public class BannersUtil {
 
     private static void switchToBannerIframeIfPresent(WebDriver driver) {
         try {
-            WebElement iframeElement = driver.findElement(By.xpath("//div//iframe"));
+            WebElement iframeElement = driver.findElement(By.xpath(getIframePath()));
             if (iframeElement != null) {
                 driver.switchTo().frame(iframeElement);
                 log.info("Switched to banner iframe.");

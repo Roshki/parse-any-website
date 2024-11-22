@@ -25,7 +25,6 @@ import java.util.*;
 public class WebDriverConfig {
 
     private static final String userAgent = "user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36";
-    private static final String userProfile = "";
 
     @Bean
     @Profile("dev")
@@ -40,8 +39,6 @@ public class WebDriverConfig {
         options.addArguments("--disable-search-engine-choice-screen");
         //options.addArguments("--headless=new");
         options.addArguments("--enable-gpu");
-//        options.addArguments("user-data-dir=" + userProfile);
-//        options.addArguments("profile-directory=Default");
         //setProxy(options);
         options.addArguments(userAgent);
         return new ChromeDriver(options);

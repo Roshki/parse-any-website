@@ -1,6 +1,6 @@
 package com.website_parser.parser.config;
 
-import com.website_parser.parser.components.Website;
+import com.website_parser.parser.model.Website;
 import org.ehcache.PersistentCacheManager;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
 import org.ehcache.config.builders.CacheManagerBuilder;

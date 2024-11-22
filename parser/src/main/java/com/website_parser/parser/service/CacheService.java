@@ -1,6 +1,6 @@
 package com.website_parser.parser.service;
 
-import com.website_parser.parser.components.Website;
+import com.website_parser.parser.model.Website;
 import lombok.RequiredArgsConstructor;
 import org.ehcache.PersistentCacheManager;
 import org.springframework.stereotype.Service;

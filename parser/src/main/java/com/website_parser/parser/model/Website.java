@@ -1,4 +1,4 @@
-package com.website_parser.parser.components;
+package com.website_parser.parser.model;
 
 import lombok.*;
 import org.springframework.stereotype.Component;
